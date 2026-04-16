@@ -4,8 +4,9 @@
   "description": "",
   "main": "index.ts",
   "scripts": {
+    "build": "tsc -p tsconfig.build.json && tsc-alias -p tsconfig.build.json",
     "typecheck": "tsc --noEmit",
-    "scrape": "node --import tsx/esm scripts/scraper.ts"
+    "scrape": "tsx --env-file=.env scripts/scrape.ts"
   },
   "keywords": [],
   "author": "",
@@ -15,8 +16,15 @@
   "devDependencies": {
     "@playwright/test": "^1.59.1",
     "@types/node": "^25.6.0",
+    "drizzle-kit": "^0.31.10",
     "playwright": "^1.59.1",
+    "tsc-alias": "^1.8.16",
     "tsx": "^4.21.0",
     "typescript": "^6.0.2"
+  },
+  "dependencies": {
+    "@neondatabase/serverless": "^1.0.2",
+    "drizzle-orm": "^0.45.2",
+    "zod": "^4.3.6"
   }
 }

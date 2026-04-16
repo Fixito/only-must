@@ -1,5 +1,9 @@
 import { chromium, type Page } from 'playwright';
 
+import { db } from '../db/index.js';
+import { games } from '../db/schema.js';
+import { slugify } from '@/lib/slugify.js';
+
 async function scrapePage(page: Page) {
   const items = await page.$$eval(
     '[data-testid="filter-results"]:has(.c-global-image.score-badge__image)',
@@ -61,14 +65,26 @@ async function main() {
     } catch (error) {
       console.error(`Error scraping page ${pageNumber}:`, error);
     }
-
-    await new Promise((r) => setTimeout(r, 1000 + Math.random() * 1000));
   }
 
   await browser.close();
 
-  console.log('TOTAL ITEMS:', allItems.length);
-  console.log(allItems.filter((g) => g.isMust));
+  console.log('Scraping completed. Total items:', allItems.length);
+
+  await db
+    .insert(games)
+    .values(
+      allItems.map((i) => ({
+        slug: slugify(i.title),
+        title: i.title,
+        link: i.link,
+        image: i.img,
+        metaScore: i.metaScore,
+        releaseDate: i.releaseDate ? new Date(i.releaseDate) : null,
+        isMust: i.isMust,
+      })),
+    )
+    .onConflictDoNothing();
 }
 
 main().catch(console.error);
