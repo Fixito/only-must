@@ -1,11 +1,10 @@
-import express from 'express';
 import cors from 'cors';
+import express from 'express';
 import { pinoHttp } from 'pino-http';
 
 import { logger } from './config/logger.js';
 import { errorHandler } from './middlewares/error-handler.middleware.js';
 import { notFoundHandler } from './middlewares/not-found.middleware.js';
-
 import router from './routes.js';
 
 const app = express();

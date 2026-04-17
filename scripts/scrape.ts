@@ -1,9 +1,9 @@
 import { chromium, type Page } from 'playwright';
-
-import { gamesTable } from '../db/schemas/game.schema.js';
-import type { GameInsert } from '../db/schemas/game.schema.js';
-import { db } from '../db/client.js';
 import slug from 'slug';
+
+import { db } from '../db/client.js';
+import type { GameInsert } from '../db/schemas/game.schema.js';
+import { gamesTable } from '../db/schemas/game.schema.js';
 
 async function scrapePage(page: Page) {
   const items = await page.$$eval(

@@ -2,8 +2,8 @@ import { desc, eq, and, sql, asc, count } from 'drizzle-orm';
 import { Router } from 'express';
 import { StatusCodes } from 'http-status-codes';
 
-import { gamesTable } from '../../../db/schemas/game.schema.js';
 import { db } from '../../../db/client.js';
+import { gamesTable } from '../../../db/schemas/game.schema.js';
 import { gamesQuerySchema } from './game.schema.js';
 
 interface GamesFilters {
