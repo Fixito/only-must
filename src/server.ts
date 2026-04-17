@@ -4,6 +4,11 @@ import { logger } from './config/logger.js';
 
 const PORT = env.PORT || 5000;
 
-app.listen(PORT, () => {
+const server = app.listen(PORT, () => {
   logger.info({ env: env.NODE_ENV }, `Server is running on http://localhost:${PORT}/`);
+});
+
+process.on('SIGTERM', () => {
+  logger.info('SIGTERM received. Shutting down gracefully...');
+  server.close(() => process.exit(0));
 });
