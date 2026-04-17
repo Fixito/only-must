@@ -1,4 +1,4 @@
-import { desc, eq, and, sql, asc, count } from 'drizzle-orm';
+import { and, asc, count, desc, eq, getTableColumns, sql } from 'drizzle-orm';
 import { Router } from 'express';
 import { StatusCodes } from 'http-status-codes';
 
@@ -9,21 +9,27 @@ import { gamesQuerySchema } from './game.schema.js';
 interface GamesFilters {
   page?: number | undefined;
   pageSize?: number | undefined;
+  platform?: string | undefined;
+  search?: string | undefined;
   releaseYear?: number | undefined;
   releaseYearMin?: number | undefined;
   releaseYearMax?: number | undefined;
-  platform?: string | undefined;
 }
 
 const getGames = async ({
   page = 1,
   pageSize = 24,
+  platform,
+  search,
   releaseYear,
   releaseYearMin,
   releaseYearMax,
-  platform,
 }: GamesFilters = {}) => {
   const conditions = [];
+
+  if (search) {
+    conditions.push(sql`${gamesTable.title} ILIKE ${`%${search}%`}`);
+  }
 
   if (releaseYear) {
     conditions.push(sql`EXTRACT(YEAR FROM ${gamesTable.releaseDate}) = ${releaseYear}`);
@@ -54,7 +60,7 @@ const getGames = async ({
 
   const [rows, countResult] = await Promise.all([
     db
-      .select()
+      .select((({ scrapedAt, updatedAt, ...cols }) => cols)(getTableColumns(gamesTable)))
       .from(gamesTable)
       .innerJoin(sq, eq(gamesTable.id, sq.id))
       .orderBy(sql`${gamesTable.metaScore} DESC NULLS LAST`, asc(gamesTable.title)),

@@ -15,11 +15,13 @@ const pool = new pg.Pool({
 async function main() {
   const db = drizzle(pool);
 
+  console.log('⏳ Running migrations...');
+
   await migrate(db, {
     migrationsFolder: './drizzle',
   });
 
-  console.log('✅ migrations applied');
+  console.log('✅ Migrations applied');
 
   await pool.end();
 }

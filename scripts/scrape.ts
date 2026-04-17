@@ -5,7 +5,16 @@ import { db } from '../db/client.js';
 import type { GameInsert } from '../db/schemas/game.schema.js';
 import { gamesTable } from '../db/schemas/game.schema.js';
 
-async function scrapePage(page: Page) {
+interface ScrapedItem {
+  link: string;
+  img: string | null;
+  isMust: boolean;
+  title: string;
+  metaScore: number | null;
+  releaseDate: string | null;
+}
+
+async function scrapePage(page: Page): Promise<ScrapedItem[]> {
   const items = await page.$$eval(
     '[data-testid="filter-results"]:has(.c-global-image.score-badge__image)',
     (cards) =>
@@ -23,10 +32,12 @@ async function scrapePage(page: Page) {
       })),
   );
 
-  return items.map((item) => ({
-    ...item,
-    releaseDate: item.rawDate ? new Date(item.rawDate).toISOString() : null,
-  }));
+  return items.map(
+    ({ rawDate, ...item }): ScrapedItem => ({
+      ...item,
+      releaseDate: rawDate ? new Date(rawDate).toISOString() : null,
+    }),
+  );
 }
 
 async function main() {
@@ -45,8 +56,13 @@ async function main() {
 
   const TOTAL_PAGES = 590;
 
+  const start = Date.now();
+
+  console.log(`🕷️  Starting scrape — ${TOTAL_PAGES} pages to go`);
+
   const allItems = await scrapePage(page);
-  console.log(`Scraping page 1/${TOTAL_PAGES}`);
+
+  console.log(`✅ Page 1/${TOTAL_PAGES} — ${allItems.length} items`);
 
   for (let pageNumber = 2; pageNumber <= TOTAL_PAGES; pageNumber++) {
     console.log(`Scraping page ${pageNumber}/${TOTAL_PAGES}`);
@@ -60,17 +76,26 @@ async function main() {
 
       const items = await scrapePage(page);
 
-      if (!items.length || items.every((i) => !i.title)) break;
+      if (!items.length || items.every((i) => !i.title)) {
+        console.log(`⚠️  Page ${pageNumber} — no items or no must-play — stopping`);
+        break;
+      }
 
       allItems.push(...items);
+      console.log(
+        `✅ Page ${pageNumber}/${TOTAL_PAGES} — ${items.length} items (+${allItems.length} total)`,
+      );
     } catch (error) {
-      console.error(`Error scraping page ${pageNumber}:`, error);
+      console.error(`❌ Page ${pageNumber}/${TOTAL_PAGES} failed:`, error);
     }
   }
 
   await browser.close();
 
-  console.log('Scraping completed. Total items:', allItems.length);
+  console.log(
+    `\n📦 Scraping done in ${((Date.now() - start) / 1000).toFixed(1)}s — ${allItems.length} items total`,
+  );
+  console.log(`💾 Inserting into DB...`);
 
   await db
     .insert(gamesTable)
@@ -88,6 +113,8 @@ async function main() {
       ),
     )
     .onConflictDoNothing();
+
+  console.log(`✅ Insert done`);
 }
 
 main().catch(console.error);

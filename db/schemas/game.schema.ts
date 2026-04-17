@@ -1,12 +1,12 @@
 import {
-  pgTable,
-  text,
   boolean,
-  timestamp,
-  uuid,
-  smallint,
-  uniqueIndex,
   date,
+  pgTable,
+  smallint,
+  text,
+  timestamp,
+  uniqueIndex,
+  uuid,
 } from 'drizzle-orm/pg-core';
 
 export const gamesTable = pgTable(
@@ -29,5 +29,4 @@ export const gamesTable = pgTable(
   (t) => [uniqueIndex('games_slug_platform_idx').on(t.slug, t.platform)],
 );
 
-export type gameRow = typeof gamesTable.$inferSelect;
 export type GameInsert = typeof gamesTable.$inferInsert;
