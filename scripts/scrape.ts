@@ -1,8 +1,9 @@
 import { chromium, type Page } from 'playwright';
 
-import { db } from '../db/index.js';
-import { games } from '../db/schema.js';
-import { slugify } from '@/lib/slugify.js';
+import { gamesTable } from '../db/schemas/game.schema.js';
+import type { GameInsert } from '../db/schemas/game.schema.js';
+import { db } from '../db/client.js';
+import slug from 'slug';
 
 async function scrapePage(page: Page) {
   const items = await page.$$eval(
@@ -72,17 +73,19 @@ async function main() {
   console.log('Scraping completed. Total items:', allItems.length);
 
   await db
-    .insert(games)
+    .insert(gamesTable)
     .values(
-      allItems.map((i) => ({
-        slug: slugify(i.title),
-        title: i.title,
-        link: i.link,
-        image: i.img,
-        metaScore: i.metaScore,
-        releaseDate: i.releaseDate ? new Date(i.releaseDate) : null,
-        isMust: i.isMust,
-      })),
+      allItems.map(
+        (i): GameInsert => ({
+          slug: slug(i.title),
+          title: i.title,
+          link: i.link,
+          image: i.img,
+          metaScore: i.metaScore,
+          releaseDate: i.releaseDate ? new Date(i.releaseDate).toLocaleDateString('en-CA') : null,
+          isMust: i.isMust,
+        }),
+      ),
     )
     .onConflictDoNothing();
 }
