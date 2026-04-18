@@ -18,4 +18,4 @@ function createGamesRouter() {
   return router;
 }
 
-export const gamesRouter = createGamesRouter();
+export const gamesRouter: Router = createGamesRouter();

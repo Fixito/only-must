@@ -27,7 +27,8 @@ export function errorHandler(err: Error, req: Request, res: Response, _next: Nex
     });
   }
 
-  const statusCode = err instanceof AppError ? err.statusCode : StatusCodes.INTERNAL_SERVER_ERROR;
+  const statusCode: StatusCodes =
+    err instanceof AppError ? err.statusCode : StatusCodes.INTERNAL_SERVER_ERROR;
 
   const detail =
     statusCode === StatusCodes.INTERNAL_SERVER_ERROR && env.NODE_ENV !== 'development'

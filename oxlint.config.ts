@@ -1,39 +1,22 @@
-import security from 'eslint-plugin-security';
 import { defineConfig } from 'oxlint';
 
 export default defineConfig({
   plugins: ['typescript', 'unicorn', 'oxc'],
-  jsPlugins: ['eslint-plugin-security'],
   categories: {
     correctness: 'error',
     suspicious: 'warn',
   },
-  rules: {
-    ...security.configs.recommended.rules,
-    'security/detect-object-injection': 'off',
-    'import/no-cycle': 'error',
-    'no-console': ['warn', { allow: ['error', 'warn'] }],
-    'no-undef': 'off',
-    'no-unused-vars': 'off',
-    'oxc/no-async-endpoint-handlers': 'off',
-    'typescript/no-explicit-any': 'error',
-    'typescript/no-namespace': 'off',
-    'typescript/no-require-imports': 'off',
-    'typescript/no-unused-vars': 'off',
-  },
   env: {
     builtin: true,
-    node: true,
   },
+  rules: {
+    'no-console': 'warn',
+    'typescript/no-explicit-any': 'error',
+    'typescript/consistent-type-imports': 'error',
+  },
+  ignorePatterns: ['**/dist/**', '**/node_modules/**', '**/*.gen.ts', '**/drizzle/**'],
   options: {
     reportUnusedDisableDirectives: 'error',
+    typeAware: true,
   },
-  overrides: [
-    {
-      files: ['db/migrate.ts', 'scripts/scrape.ts'],
-      rules: {
-        'no-console': 'off',
-      },
-    },
-  ],
 });

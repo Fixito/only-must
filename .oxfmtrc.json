@@ -1,6 +1,6 @@
 {
   "$schema": "./node_modules/oxfmt/configuration_schema.json",
-  "ignorePatterns": ["drizzle"],
+  "ignorePatterns": ["**/dist/**", "**/node_modules/**", "**/*.gen.ts", "**/drizzle/**"],
   "arrowParens": "always",
   "endOfLine": "lf",
   "printWidth": 100,
@@ -9,5 +9,13 @@
   "tabWidth": 2,
   "trailingComma": "all",
   "useTabs": false,
-  "sortImports": true
+  "sortImports": true,
+  "overrides": [
+    {
+      "files": ["apps/web/**/*.{ts,tsx}"],
+      "options": {
+        "jsxSingleQuote": false
+      }
+    }
+  ]
 }

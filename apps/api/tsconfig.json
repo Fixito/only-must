@@ -1,0 +1,25 @@
+{
+  "extends": "../../tsconfig.base.json",
+  // Visit https://aka.ms/tsconfig to read more about this file
+  "compilerOptions": {
+    // Environment Settings
+    // See also https://aka.ms/tsconfig/module
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
+    "target": "ESNext",
+    "lib": ["ESNext"],
+    "types": ["node"],
+
+    // tsc -b type-checking only; production JS build uses tsconfig.build.json
+    "emitDeclarationOnly": true,
+    "outDir": "./dist",
+
+    "paths": {
+      "@/*": ["./src/*"],
+      "@only-must/shared": ["../../packages/shared/src/index.ts"]
+    }
+  },
+  "include": ["src", "scripts/**/*", "playwright.config.ts", "drizzle.config.ts", "db"],
+  "exclude": ["node_modules", "dist"],
+  "references": [{ "path": "../../packages/shared" }]
+}
