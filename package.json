@@ -11,14 +11,17 @@
     "build": "pnpm -r build",
     "dev:api": "pnpm -F api dev",
     "dev:web": "pnpm -F web dev",
+    "dev": "concurrently -n TS,API,WEB -c blue,green,magenta \"pnpm typecheck:watch\" \"pnpm dev:api\" \"pnpm dev:web\"",
     "lint": "oxlint apps packages",
     "lint:fix": "oxlint --fix apps packages",
     "format": "oxfmt",
     "format:check": "oxfmt --check",
     "typecheck": "tsc -b",
+    "typecheck:watch": "tsc -b --watch",
     "prepare": "husky"
   },
   "devDependencies": {
+    "concurrently": "^9.2.1",
     "husky": "^9.1.7",
     "lint-staged": "^16.4.0",
     "oxfmt": "^0.45.0",
