@@ -4,7 +4,11 @@
     "rootDir": ".",
     "outDir": "./dist",
     "allowImportingTsExtensions": false,
-    "emitDeclarationOnly": false
+    "emitDeclarationOnly": false,
+    "paths": {
+      "@/*": ["./src/*"],
+      "@only-must/shared": ["../../packages/shared/dist/index.d.ts"]
+    }
   },
   "include": ["src", "db"]
 }

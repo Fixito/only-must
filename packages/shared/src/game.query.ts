@@ -1,6 +1,6 @@
 import { z } from 'zod';
 
-export const gamesQuerySchema = z.object({
+export const GamesQuerySchema = z.object({
   page: z.coerce.number().int().positive().optional(),
   platform: z.string().optional(),
   search: z.string().optional(),
@@ -9,3 +9,6 @@ export const gamesQuerySchema = z.object({
   releaseYearMin: z.coerce.number().int().optional(),
   releaseYearMax: z.coerce.number().int().optional(),
 });
+
+export type GamesQuery = z.infer<typeof GamesQuerySchema>;
+export const __forceEmitQuery = 1;

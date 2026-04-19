@@ -4,9 +4,11 @@ import baseConfig from '../../oxlint.config.ts';
 
 export default defineConfig({
   extends: [baseConfig],
+  jsPlugins: ['@stylistic/eslint-plugin', '@tanstack/eslint-plugin-query'],
   plugins: ['import', 'typescript'],
   env: {
-    builtin: true,
+    es2024: true,
+    browser: true,
   },
   ignorePatterns: [
     '**/.nx/**',
@@ -32,6 +34,14 @@ export default defineConfig({
     {
       files: ['**/*.{js,ts,tsx}'],
       rules: {
+        '@tanstack/query/exhaustive-deps': 'error',
+        '@tanstack/query/no-rest-destructuring': 'warn',
+        '@tanstack/query/stable-query-client': 'error',
+        '@tanstack/query/no-unstable-deps': 'warn',
+        '@tanstack/query/infinite-query-property-order': 'warn',
+        '@tanstack/query/no-void-query-fn': 'error',
+        '@tanstack/query/mutation-property-order': 'warn',
+        '@tanstack/query/prefer-query-options': 'error',
         'for-direction': 'error',
         'no-async-promise-executor': 'error',
         'no-case-declarations': 'error',
@@ -120,11 +130,6 @@ export default defineConfig({
         'typescript/prefer-for-of': 'warn',
         'typescript/require-await': 'warn',
         'typescript/triple-slash-reference': 'error',
-      },
-      jsPlugins: ['@stylistic/eslint-plugin'],
-      env: {
-        es2024: true,
-        browser: true,
       },
     },
   ],
