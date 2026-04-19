@@ -2,8 +2,9 @@ import { TanStackDevtools } from '@tanstack/react-devtools';
 import { HeadContent, Scripts, createRootRoute } from '@tanstack/react-router';
 import { TanStackRouterDevtoolsPanel } from '@tanstack/react-router-devtools';
 
-import Footer from '../components/Footer';
-import Header from '../components/Header';
+import Footer from '@/components/footer.tsx';
+import Header from '@/components/header.tsx';
+import { NotFound } from '@/components/not-found.tsx';
 
 import appCss from '../styles.css?url';
 
@@ -31,6 +32,7 @@ export const Route = createRootRoute({
     ],
   }),
   shellComponent: RootDocument,
+  notFoundComponent: () => <NotFound />,
 });
 
 function RootDocument({ children }: { children: React.ReactNode }) {
@@ -40,9 +42,9 @@ function RootDocument({ children }: { children: React.ReactNode }) {
         <script dangerouslySetInnerHTML={{ __html: THEME_INIT_SCRIPT }} />
         <HeadContent />
       </head>
-      <body className="font-sans wrap-anywhere antialiased selection:bg-[rgba(79,184,178,0.24)]">
+      <body>
         <Header />
-        {children}
+        <main>{children}</main>
         <Footer />
         <TanStackDevtools
           config={{

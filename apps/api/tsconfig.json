@@ -9,6 +9,7 @@
     "target": "ESNext",
     "lib": ["ESNext"],
     "types": ["node"],
+    "composite": true,
 
     // tsc -b type-checking only; production JS build uses tsconfig.build.json
     "emitDeclarationOnly": true,

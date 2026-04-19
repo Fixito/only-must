@@ -1,2 +1,3 @@
-// oxlint-disable-next-line no-console
-console.log('Hello from the shared package!');
+export * from './game.query.js';
+export * from './game.response.js';
+export * from './game.schema.js';

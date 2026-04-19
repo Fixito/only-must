@@ -4,6 +4,10 @@
     "outDir": "./dist",
     "rootDir": "./src",
 
+    "composite": true,
+    "declaration": true,
+    "declarationDir": "./dist",
+
     "target": "ES2022",
     "module": "NodeNext",
     "moduleResolution": "NodeNext"
