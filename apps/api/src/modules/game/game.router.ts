@@ -10,9 +10,11 @@ function createGamesRouter() {
   router.get('/', async (req, res) => {
     const filters = GamesQuerySchema.parse(req.query);
 
-    const { rows, total } = await gameService.getGames(filters);
+    const { rows, total, totalPages, page, hasNext, hasPrev } = await gameService.getGames(filters);
 
-    return res.status(StatusCodes.OK).json({ data: rows, total });
+    return res
+      .status(StatusCodes.OK)
+      .json({ data: rows, meta: { page, total, totalPages, hasNext, hasPrev } });
   });
 
   return router;

@@ -10,6 +10,7 @@
   "trailingComma": "all",
   "useTabs": false,
   "sortImports": true,
+  "sortTailwindcss": true,
   "overrides": [
     {
       "files": ["apps/web/**/*.{ts,tsx}"],

@@ -21,10 +21,11 @@ export const Route = createRootRoute({
         content: 'width=device-width, initial-scale=1',
       },
       {
-        title: 'TanStack Start Starter',
+        title: 'OnlyMust',
       },
     ],
     links: [
+      { rel: 'icon', type: 'image/svg+xml', href: '/must-play.svg' },
       {
         rel: 'stylesheet',
         href: appCss,
@@ -42,7 +43,7 @@ function RootDocument({ children }: { children: React.ReactNode }) {
         <script dangerouslySetInnerHTML={{ __html: THEME_INIT_SCRIPT }} />
         <HeadContent />
       </head>
-      <body>
+      <body className="bg-background text-foreground grid min-h-screen grid-rows-[auto_1fr_auto]">
         <Header />
         <main>{children}</main>
         <Footer />
