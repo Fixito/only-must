@@ -1,4 +1,4 @@
-import { useSuspenseQuery } from '@tanstack/react-query';
+import { GamesQuerySchema } from '@only-must/shared';
 import { createFileRoute } from '@tanstack/react-router';
 
 import Error from '@/components/error.tsx';
@@ -6,13 +6,15 @@ import { gamesQueryOptions } from '@/features/games/use-games.ts';
 import { queryClient } from '@/router.tsx';
 
 export const Route = createFileRoute('/')({
-  loader: () => queryClient.ensureQueryData(gamesQueryOptions()),
+  validateSearch: (search) => GamesQuerySchema.parse(search),
+  loaderDeps: ({ search }) => search,
+  loader: ({ deps }) => queryClient.ensureQueryData(gamesQueryOptions(deps)),
   component: App,
   errorComponent: Error,
 });
 
 function App() {
-  const { data } = useSuspenseQuery(gamesQueryOptions());
+  const data = Route.useLoaderData();
 
   return (
     <div className="grid grid-cols-3 gap-4">
