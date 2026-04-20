@@ -1,5 +1,8 @@
-export function getPaginationItems(page: number, totalPages: number) {
-  const delta = 1; // Number of page links to show on each side of the current page
+export function getPaginationItems(
+  page: number,
+  totalPages: number,
+  delta: number = 1,
+): Array<number | 'ellipsis'> {
   const range: Array<number> = [];
 
   for (let i = Math.max(2, page - delta); i <= Math.min(totalPages - 1, page + delta); i++) {

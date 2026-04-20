@@ -59,14 +59,10 @@ function App() {
           {data.map((game, index) => (
             <Card
               key={game.id}
-              className="group relative isolate grid grid-cols-[7rem_auto] p-0 shadow-sm transition-shadow hover:shadow-lg"
+              className="group has-focus-visible:border-ring has-focus-visible:ring-ring/30 relative isolate grid auto-rows-[10rem] grid-cols-[7rem_auto] p-0 shadow-sm transition-shadow outline-none hover:shadow-lg has-focus-visible:ring-3"
             >
               <div className="relative shrink-0">
-                <img
-                  src={game.image || undefined}
-                  alt={game.title || 'Game image'}
-                  className="h-full w-full object-cover"
-                />
+                <img src={game.image} alt={game.title} className="h-full w-full object-cover" />
                 <img
                   src="must-play.svg"
                   alt="must-play"
@@ -74,28 +70,27 @@ function App() {
                 />
               </div>
 
-              <CardContent className="px-0 py-4">
+              <CardContent className="py-4 ps-0">
                 <CardHeader className="px-0">
                   <CardTitle className="group-hover:text-muted-foreground flex gap-1 text-base font-semibold transition-colors">
                     <span>{index + 1}.</span>{' '}
-                    <h3>
-                      <Link to=".">
+                    <h3 className="line-clamp-1">
+                      <Link to="." className="focus-visible:outline-none">
                         {game.title}
-                        {/* <span aria-hidden="true" className="absolute inset-0"></span> */}
+                        <span aria-hidden="true" className="absolute inset-0"></span>
                       </Link>
                     </h3>
                   </CardTitle>
 
                   <CardDescription>
-                    <time dateTime={game.releaseDate ?? undefined}>
-                      {game.releaseDate ? formatdate(game.releaseDate) : ''}
+                    <time dateTime={game.releaseDate} className="text-xs">
+                      {formatdate(game.releaseDate)}
                     </time>
                   </CardDescription>
                 </CardHeader>
 
-                <CardDescription className="mbs-1 text-sm">
-                  Lorem ipsum dolor sit amet, consectetur adipisicing elit. Blanditiis praesentium
-                  enim magni itaque perspiciatis. Eligendi!
+                <CardDescription className="mbs-1 line-clamp-2 text-sm text-ellipsis">
+                  {game.description}
                 </CardDescription>
 
                 <CardFooter className="mbs-1 gap-1 px-0">
@@ -110,53 +105,55 @@ function App() {
           ))}
         </div>
 
-        <div className="mbs-8">
-          <Pagination>
-            <PaginationContent>
-              {hasPrev && (
-                <PaginationItem>
-                  <PaginationPrevious
-                    to="."
-                    search={(prev) => ({
-                      ...prev,
-                      page: (prev.page ?? 1) - 1,
-                    })}
-                  />
-                </PaginationItem>
-              )}
-
-              {getPaginationItems(page, totalPages).map((item, i) =>
-                item === 'ellipsis' ? (
-                  <PaginationItem key={`ellipsis-${i}`}>
-                    <PaginationEllipsis />
-                  </PaginationItem>
-                ) : (
-                  <PaginationItem key={item}>
-                    <PaginationLink
+        {data.length && (
+          <div className="mbs-8">
+            <Pagination>
+              <PaginationContent>
+                {hasPrev && (
+                  <PaginationItem>
+                    <PaginationPrevious
                       to="."
-                      search={(prev) => ({ ...prev, page: item })}
-                      isActive={page === item}
-                    >
-                      {item}
-                    </PaginationLink>
+                      search={(prev) => ({
+                        ...prev,
+                        page: (prev.page ?? 1) - 1,
+                      })}
+                    />
                   </PaginationItem>
-                ),
-              )}
+                )}
 
-              {hasNext && (
-                <PaginationItem>
-                  <PaginationNext
-                    to="."
-                    search={(prev) => ({
-                      ...prev,
-                      page: (prev.page ?? 1) + 1,
-                    })}
-                  />
-                </PaginationItem>
-              )}
-            </PaginationContent>
-          </Pagination>
-        </div>
+                {getPaginationItems(page, totalPages).map((item, i) =>
+                  item === 'ellipsis' ? (
+                    <PaginationItem key={`ellipsis-${i}`}>
+                      <PaginationEllipsis />
+                    </PaginationItem>
+                  ) : (
+                    <PaginationItem key={item}>
+                      <PaginationLink
+                        to="."
+                        search={(prev) => ({ ...prev, page: item })}
+                        isActive={page === item}
+                      >
+                        {item}
+                      </PaginationLink>
+                    </PaginationItem>
+                  ),
+                )}
+
+                {hasNext && (
+                  <PaginationItem>
+                    <PaginationNext
+                      to="."
+                      search={(prev) => ({
+                        ...prev,
+                        page: (prev.page ?? 1) + 1,
+                      })}
+                    />
+                  </PaginationItem>
+                )}
+              </PaginationContent>
+            </Pagination>
+          </div>
+        )}
       </div>
     </>
   );

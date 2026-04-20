@@ -24,7 +24,7 @@ export const findGames = async ({ where, page, pageSize }: FindGamesParams) => {
     .select((({ scrapedAt, updatedAt, ...cols }) => cols)(getTableColumns(gamesTable)))
     .from(gamesTable)
     .innerJoin(sq, eq(gamesTable.id, sq.id))
-    .orderBy(sql`${gamesTable.metaScore} DESC NULLS LAST`, asc(gamesTable.title));
+    .orderBy(sql`${gamesTable.metaScore} DESC NULLS LAST`, asc(gamesTable.releaseDate));
 };
 
 export const countGames = async ({ where }: { where?: SQLType | undefined }) => {
