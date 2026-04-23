@@ -3,7 +3,4 @@ export interface NavigationItem {
   href: string;
 }
 
-export const navigation: Array<NavigationItem> = [
-  { name: 'Games', href: '/' },
-  { name: 'Movies', href: '/movies' },
-];
+export const navigation: Array<NavigationItem> = [{ name: 'Games', href: '/' }];

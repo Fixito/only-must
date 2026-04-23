@@ -59,7 +59,7 @@ function App() {
           {data.map((game, index) => (
             <Card
               key={game.id}
-              className="group has-focus-visible:border-ring has-focus-visible:ring-ring relative isolate grid auto-rows-[10rem] grid-cols-[7rem_auto] p-0 shadow-sm transition-shadow outline-none hover:shadow-lg has-focus-visible:ring-3"
+              className="group has-focus-visible:border-ring has-focus-visible:ring-ring relative isolate grid grid-cols-[7rem_auto] gap-4 p-0 shadow-sm transition-shadow outline-none hover:shadow-lg has-focus-visible:ring-3"
             >
               <div className="relative shrink-0">
                 <img src={game.image} alt={game.title} className="h-full w-full object-cover" />
@@ -74,11 +74,11 @@ function App() {
               <CardContent className="py-4 ps-0">
                 <CardHeader className="px-0">
                   <CardTitle className="group-hover:text-muted-foreground flex gap-1 text-base font-semibold transition-colors">
-                    <span>{index + 1}.</span>{' '}
+                    <span>{index + 1}.</span>
                     <h2 className="line-clamp-1">
                       <Link to="." className="focus-visible:outline-none">
                         {game.title}
-                        <span aria-hidden="true" className="absolute inset-0"></span>
+                        {/* <span aria-hidden="true" className="absolute inset-0"></span> */}
                       </Link>
                     </h2>
                   </CardTitle>
@@ -90,16 +90,16 @@ function App() {
                   </CardDescription>
                 </CardHeader>
 
-                <CardDescription className="mbs-1 line-clamp-2 text-sm text-ellipsis">
+                <CardDescription className="mbs-3 line-clamp-2 text-sm text-ellipsis">
                   {game.description}
                 </CardDescription>
 
-                <CardFooter className="mbs-1 gap-1 px-0">
-                  <span className="inline-flex aspect-square items-center justify-center bg-green-900 px-1 text-xs font-semibold text-white">
+                <CardFooter className="mbs-3 gap-2 px-0">
+                  <span className="inline-flex aspect-square items-center justify-center bg-green-900 px-1 text-sm font-semibold text-white">
                     {game.metaScore}
                   </span>
 
-                  <span className="text-muted-foreground font-light">Metascore</span>
+                  <span className="text-muted-foreground text-sm">Metascore</span>
                 </CardFooter>
               </CardContent>
             </Card>

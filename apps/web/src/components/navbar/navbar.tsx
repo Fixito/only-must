@@ -36,7 +36,7 @@ export default function Navbar() {
         <div className="flex items-center gap-6 lg:items-stretch lg:justify-start">
           <Link
             to="/"
-            className="text-primary focus-visible:ring-ring w-auto shrink-0 self-center text-2xl font-semibold outline-none focus-visible:ring-2"
+            className="text-primary-foreground focus-visible:ring-ring w-auto shrink-0 self-center text-2xl font-semibold outline-none focus-visible:ring-2"
           >
             OnlyMust
           </Link>
