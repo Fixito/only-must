@@ -1,5 +1,6 @@
 import { GamesQuerySchema } from '@only-must/shared';
 import { createFileRoute, Link } from '@tanstack/react-router';
+import { useEffect } from 'react';
 
 import Error from '@/components/error.tsx';
 import {
@@ -20,6 +21,7 @@ import {
   PaginationPrevious,
 } from '@/components/ui/pagination';
 import { gamesQueryOptions } from '@/features/games/use-games.ts';
+import { prefetchGamesPage } from '@/features/prefetch-games.ts';
 import { formatdate } from '@/lib/date.ts';
 import { getPaginationItems } from '@/lib/pagination';
 import { queryClient } from '@/router.tsx';
@@ -37,6 +39,13 @@ function App() {
     data,
     meta: { page, total, totalPages, hasNext, hasPrev },
   } = Route.useLoaderData();
+  const search = Route.useSearch();
+
+  useEffect(() => {
+    if (hasNext) {
+      void prefetchGamesPage(search, page + 1);
+    }
+  }, [page]);
 
   return (
     <>
