@@ -4,7 +4,7 @@ import { HeadContent, Scripts, createRootRoute } from '@tanstack/react-router';
 import { TanStackRouterDevtoolsPanel } from '@tanstack/react-router-devtools';
 
 import Footer from '@/components/footer.tsx';
-import Header from '@/components/header.tsx';
+import Navbar from '@/components/navbar/navbar.tsx';
 import { NotFound } from '@/components/not-found.tsx';
 
 import appCss from '../styles.css?url';
@@ -44,8 +44,8 @@ function RootDocument({ children }: { children: React.ReactNode }) {
         <script dangerouslySetInnerHTML={{ __html: THEME_INIT_SCRIPT }} />
         <HeadContent />
       </head>
-      <body className="bg-background text-foreground grid min-h-screen grid-rows-[auto_1fr_auto]">
-        <Header />
+      <body className="text-foreground bg-background grid min-h-screen grid-rows-[auto_1fr_auto] antialiased">
+        <Navbar />
         <main>{children}</main>
         <Footer />
         <ReactQueryDevtools initialIsOpen={false} buttonPosition="bottom-left" />

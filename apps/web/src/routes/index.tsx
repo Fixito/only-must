@@ -59,13 +59,14 @@ function App() {
           {data.map((game, index) => (
             <Card
               key={game.id}
-              className="group has-focus-visible:border-ring has-focus-visible:ring-ring/30 relative isolate grid auto-rows-[10rem] grid-cols-[7rem_auto] p-0 shadow-sm transition-shadow outline-none hover:shadow-lg has-focus-visible:ring-3"
+              className="group has-focus-visible:border-ring has-focus-visible:ring-ring relative isolate grid auto-rows-[10rem] grid-cols-[7rem_auto] p-0 shadow-sm transition-shadow outline-none hover:shadow-lg has-focus-visible:ring-3"
             >
               <div className="relative shrink-0">
                 <img src={game.image} alt={game.title} className="h-full w-full object-cover" />
                 <img
                   src="must-play.svg"
                   alt="must-play"
+                  loading="lazy"
                   className="absolute inset-be-0 left-1/2 z-10 aspect-square w-12 -translate-x-1/2 object-cover"
                 />
               </div>
@@ -74,12 +75,12 @@ function App() {
                 <CardHeader className="px-0">
                   <CardTitle className="group-hover:text-muted-foreground flex gap-1 text-base font-semibold transition-colors">
                     <span>{index + 1}.</span>{' '}
-                    <h3 className="line-clamp-1">
+                    <h2 className="line-clamp-1">
                       <Link to="." className="focus-visible:outline-none">
                         {game.title}
                         <span aria-hidden="true" className="absolute inset-0"></span>
                       </Link>
-                    </h3>
+                    </h2>
                   </CardTitle>
 
                   <CardDescription>
@@ -105,7 +106,7 @@ function App() {
           ))}
         </div>
 
-        {data.length && (
+        {data.length > 0 && (
           <div className="mbs-8">
             <Pagination>
               <PaginationContent>

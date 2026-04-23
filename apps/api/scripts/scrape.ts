@@ -21,8 +21,7 @@ async function scrapePage(page: Page): Promise<ScrapedItem[]> {
     (cards) =>
       cards.map((card) => ({
         link: card.querySelector('a[href]')?.getAttribute('href') ?? '',
-        img:
-          card.querySelector('img[data-nuxt-img]')?.srcset.split(', ').at(-1)?.split(' ')[0] ?? '',
+        img: card.querySelector('img[data-nuxt-img]')?.src ?? '',
         isMust: card.querySelector('[data-testid="score-badge"]') !== null,
         title:
           card
