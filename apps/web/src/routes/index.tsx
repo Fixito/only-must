@@ -203,12 +203,12 @@ function App() {
                   <CardHeader className="px-0">
                     <CardTitle className="group-hover:text-muted-foreground flex gap-1 text-base font-semibold transition-colors">
                       <span>{index + 1}.</span>
-                      <p className="line-clamp-1">
+                      <h3 className="line-clamp-1">
                         <Link to="." className="focus-visible:outline-none">
                           {game.title}
                           <span aria-hidden="true" className="absolute inset-0"></span>
                         </Link>
-                      </p>
+                      </h3>
                     </CardTitle>
 
                     <CardDescription>
@@ -222,12 +222,14 @@ function App() {
                     {game.description}
                   </CardDescription>
 
-                  <CardFooter className="mbs-3 gap-2 px-0">
-                    <span className="inline-flex aspect-square items-center justify-center bg-green-900 px-1 text-sm font-semibold text-white">
-                      {game.metaScore}
-                    </span>
-                    <span className="text-muted-foreground text-sm">Metascore</span>
-                  </CardFooter>
+                  {game.metaScore !== null && (
+                    <CardFooter className="mbs-3 gap-2 px-0">
+                      <span className="inline-flex aspect-square items-center justify-center bg-green-900 px-1 text-sm font-semibold text-white">
+                        {game.metaScore}
+                      </span>
+                      <span className="text-muted-foreground text-sm">Metascore</span>
+                    </CardFooter>
+                  )}
                 </CardContent>
               </Card>
             ))}

@@ -40,7 +40,7 @@ async function scrapePage(page: Page): Promise<ScrapedItem[]> {
       releaseDate: (() => {
         if (!rawDate) return '';
         const d = new Date(rawDate);
-        return Number.isNaN(d.getTime()) ? '' : d.toISOString();
+        return Number.isNaN(d.getTime()) ? '' : d.toISOString().slice(0, 10);
       })(),
     }),
   );
@@ -106,18 +106,20 @@ async function main() {
   await db
     .insert(gamesTable)
     .values(
-      allItems.map(
-        (i): GameInsert => ({
-          slug: slug(i.title),
-          title: i.title,
-          description: i.description,
-          link: i.link,
-          image: i.img,
-          metaScore: i.metaScore,
-          releaseDate: i.releaseDate ? new Date(i.releaseDate).toLocaleDateString('en-CA') : null,
-          isMust: i.isMust,
-        }),
-      ),
+      allItems
+        .filter((i) => i.img !== '') // Skip items with empty images
+        .map(
+          (i): GameInsert => ({
+            slug: slug(i.title),
+            title: i.title,
+            description: i.description,
+            link: i.link,
+            image: i.img,
+            metaScore: i.metaScore,
+            releaseDate: i.releaseDate || null,
+            isMust: i.isMust,
+          }),
+        ),
     )
     .onConflictDoNothing();
 

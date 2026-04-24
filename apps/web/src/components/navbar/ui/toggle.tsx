@@ -17,7 +17,9 @@ export function NavbarToggle({ isMobileMenuOpen, onClick, ref }: NavbarTogglePro
       onClick={onClick}
     >
       <span className="absolute -inset-0.5" />
-      <span className="sr-only">Ouvrir le menu principal</span>
+      <span className="sr-only">
+        {isMobileMenuOpen ? 'Close main menu' : 'Open main menu'}
+      </span>
       {isMobileMenuOpen ? (
         <X aria-hidden="true" className="size-6" />
       ) : (

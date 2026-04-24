@@ -7,7 +7,7 @@ import { NavbarMobileMenu } from './ui/mobile-menu.tsx';
 import { SearchForm } from './ui/search-form.tsx';
 import { NavbarToggle } from './ui/toggle.tsx';
 
-// TODO: Implement dark mode toogle
+// TODO: Implement dark mode toggle
 
 export default function Navbar() {
   const { search } = useSearch({ from: '/' });
