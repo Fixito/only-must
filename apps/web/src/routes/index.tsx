@@ -1,6 +1,6 @@
 import { GamesQuerySchema } from '@only-must/shared';
 import { createFileRoute, Link } from '@tanstack/react-router';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 
 import Error from '@/components/error.tsx';
 import {
@@ -11,6 +11,8 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card.tsx';
+import { Input } from '@/components/ui/input.tsx';
+import { Label } from '@/components/ui/label.tsx';
 import {
   Pagination,
   PaginationContent,
@@ -20,14 +22,29 @@ import {
   PaginationNext,
   PaginationPrevious,
 } from '@/components/ui/pagination';
+import { Slider } from '@/components/ui/slider.tsx';
 import { gamesQueryOptions } from '@/features/games/use-games.ts';
 import { prefetchGamesPage } from '@/features/prefetch-games.ts';
 import { formatdate } from '@/lib/date.ts';
 import { getPaginationItems } from '@/lib/pagination';
 import { queryClient } from '@/router.tsx';
 
+const currentYear = new Date().getFullYear();
+const minYear = 1991;
+
+function clampRange(
+  [min, max]: [number, number],
+  minLimit: number,
+  maxLimit: number,
+): [number, number] {
+  const clampedMin = Math.max(minLimit, Math.min(min, maxLimit));
+  const clampedMax = Math.max(minLimit, Math.min(max, maxLimit));
+
+  return [Math.min(clampedMin, clampedMax), Math.max(clampedMin, clampedMax)];
+}
+
 export const Route = createFileRoute('/')({
-  validateSearch: (search) => GamesQuerySchema.parse(search),
+  validateSearch: GamesQuerySchema,
   loaderDeps: ({ search }) => search,
   loader: ({ deps }) => queryClient.ensureQueryData(gamesQueryOptions(deps)),
   component: App,
@@ -40,12 +57,43 @@ function App() {
     meta: { page, total, totalPages, hasNext, hasPrev },
   } = Route.useLoaderData();
   const search = Route.useSearch();
+  const navigate = Route.useNavigate();
+  const [value, setValue] = useState<[number, number]>(
+    clampRange(
+      [search.releaseYearMin ?? minYear, search.releaseYearMax ?? currentYear],
+      minYear,
+      currentYear,
+    ),
+  );
+
+  const commit = (next: [number, number]) => {
+    const safe = clampRange(next, minYear, currentYear);
+
+    void navigate({
+      search: (prev) => ({
+        ...prev,
+        releaseYearMin: safe[0],
+        releaseYearMax: safe[1],
+        page: 1,
+      }),
+    });
+  };
 
   useEffect(() => {
     if (hasNext) {
       void prefetchGamesPage(search, page + 1);
     }
   }, [page]);
+
+  useEffect(() => {
+    setValue(
+      clampRange(
+        [search.releaseYearMin ?? minYear, search.releaseYearMax ?? currentYear],
+        minYear,
+        currentYear,
+      ),
+    );
+  }, [search.releaseYearMin, search.releaseYearMax]);
 
   return (
     <>
@@ -59,111 +107,185 @@ function App() {
         </p>
       </div>
 
-      <div className="container">
-        <div>
-          <p className="text-muted-foreground font-light">{total} results</p>
-        </div>
+      <div className="container gap-6 md:grid-cols-[16rem_1fr] lg:grid">
+        <aside>
+          <header>
+            <h2 className="text-foreground text-sm font-medium">Filters</h2>
+          </header>
 
-        <div className="mbs-6 grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-          {data.map((game, index) => (
-            <Card
-              key={game.id}
-              className="group has-focus-visible:border-ring has-focus-visible:ring-ring relative isolate grid grid-cols-[7rem_auto] gap-4 p-0 shadow-sm transition-shadow outline-none hover:shadow-lg has-focus-visible:ring-3"
-            >
-              <div className="relative shrink-0">
-                <img src={game.image} alt={game.title} className="h-full w-full object-cover" />
-                <img
-                  src="must-play.svg"
-                  alt="must-play"
-                  loading="lazy"
-                  className="absolute inset-be-0 left-1/2 z-10 aspect-square w-12 -translate-x-1/2 object-cover"
-                />
-              </div>
+          <div className="mbs-3">
+            <div className="mbs-3">
+              <fieldset>
+                <legend className="text-muted-foreground mbe-4 text-xs font-medium tracking-widest uppercase">
+                  Release Year
+                </legend>
 
-              <CardContent className="py-4 ps-0">
-                <CardHeader className="px-0">
-                  <CardTitle className="group-hover:text-muted-foreground flex gap-1 text-base font-semibold transition-colors">
-                    <span>{index + 1}.</span>
-                    <h2 className="line-clamp-1">
-                      <Link to="." className="focus-visible:outline-none">
-                        {game.title}
-                        {/* <span aria-hidden="true" className="absolute inset-0"></span> */}
-                      </Link>
-                    </h2>
-                  </CardTitle>
-
-                  <CardDescription>
-                    <time dateTime={game.releaseDate} className="text-xs">
-                      {formatdate(game.releaseDate)}
-                    </time>
-                  </CardDescription>
-                </CardHeader>
-
-                <CardDescription className="mbs-3 line-clamp-2 text-sm text-ellipsis">
-                  {game.description}
-                </CardDescription>
-
-                <CardFooter className="mbs-3 gap-2 px-0">
-                  <span className="inline-flex aspect-square items-center justify-center bg-green-900 px-1 text-sm font-semibold text-white">
-                    {game.metaScore}
-                  </span>
-
-                  <span className="text-muted-foreground text-sm">Metascore</span>
-                </CardFooter>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
-
-        {data.length > 0 && (
-          <div className="mbs-8">
-            <Pagination>
-              <PaginationContent>
-                {hasPrev && (
-                  <PaginationItem>
-                    <PaginationPrevious
-                      to="."
-                      search={(prev) => ({
-                        ...prev,
-                        page: (prev.page ?? 1) - 1,
-                      })}
+                <div className="mbs-3 w-full max-w-sm space-y-4">
+                  {/* Slider */}
+                  <Label htmlFor="release-year-range">
+                    <span className="sr-only">Release year range</span>
+                    <Slider
+                      name="release-year-range"
+                      id="release-year-range"
+                      min={minYear}
+                      max={currentYear}
+                      step={1}
+                      value={value}
+                      onValueChange={(val) => {
+                        if (Array.isArray(val) && val.length === 2) {
+                          setValue(clampRange([val[0], val[1]], minYear, currentYear));
+                        }
+                      }}
+                      onValueCommitted={(val) => {
+                        if (Array.isArray(val) && val.length === 2) {
+                          commit(clampRange([val[0], val[1]], minYear, currentYear));
+                        }
+                      }}
                     />
-                  </PaginationItem>
-                )}
+                  </Label>
 
-                {getPaginationItems(page, totalPages).map((item, i) =>
-                  item === 'ellipsis' ? (
-                    <PaginationItem key={`ellipsis-${i}`}>
-                      <PaginationEllipsis />
-                    </PaginationItem>
-                  ) : (
-                    <PaginationItem key={item}>
-                      <PaginationLink
-                        to="."
-                        search={(prev) => ({ ...prev, page: item })}
-                        isActive={page === item}
-                      >
-                        {item}
-                      </PaginationLink>
-                    </PaginationItem>
-                  ),
-                )}
-
-                {hasNext && (
-                  <PaginationItem>
-                    <PaginationNext
-                      to="."
-                      search={(prev) => ({
-                        ...prev,
-                        page: (prev.page ?? 1) + 1,
-                      })}
+                  {/* Inputs */}
+                  <div className="mbs-6 flex items-center justify-between gap-2">
+                    {/* Min */}
+                    <label htmlFor="release-year-min" className="sr-only">
+                      Release year min
+                    </label>
+                    <Input
+                      type="number"
+                      id="release-year-min"
+                      value={value[0]}
+                      tabIndex={-1}
+                      readOnly
+                      className="pointer-events-none field-sizing-content w-auto"
                     />
-                  </PaginationItem>
-                )}
-              </PaginationContent>
-            </Pagination>
+
+                    {/* Max */}
+                    <label htmlFor="release-year-max" className="sr-only">
+                      Release year max
+                    </label>
+                    <Input
+                      type="number"
+                      id="release-year-max"
+                      value={value[1]}
+                      tabIndex={-1}
+                      readOnly
+                      className="pointer-events-none field-sizing-content w-auto"
+                    />
+                  </div>
+                </div>
+              </fieldset>
+            </div>
           </div>
-        )}
+        </aside>
+
+        <section className="mbs-6">
+          <div>
+            <p className="text-muted-foreground font-light">{total} results</p>
+          </div>
+
+          <div className="mbs-6 grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+            {data.map((game, index) => (
+              <Card
+                key={game.id}
+                className="group has-focus-visible:border-ring has-focus-visible:ring-ring relative isolate grid grid-cols-[7rem_auto] gap-4 p-0 shadow-sm transition-shadow outline-none hover:shadow-lg has-focus-visible:ring-3"
+              >
+                <div className="relative shrink-0">
+                  <img src={game.image} alt={game.title} className="h-full w-full object-cover" />
+                  <img
+                    src="must-play.svg"
+                    alt="must-play"
+                    loading="lazy"
+                    className="absolute inset-be-0 left-1/2 z-10 aspect-square w-12 -translate-x-1/2 object-cover"
+                  />
+                </div>
+
+                <CardContent className="py-4 ps-0">
+                  <CardHeader className="px-0">
+                    <CardTitle className="group-hover:text-muted-foreground flex gap-1 text-base font-semibold transition-colors">
+                      <span>{index + 1}.</span>
+                      <h3 className="line-clamp-1">
+                        <Link to="." className="focus-visible:outline-none">
+                          {game.title}
+                          {/* <span aria-hidden="true" className="absolute inset-0"></span> */}
+                        </Link>
+                      </h3>
+                    </CardTitle>
+
+                    <CardDescription>
+                      <time dateTime={game.releaseDate} className="text-xs">
+                        {formatdate(game.releaseDate)}
+                      </time>
+                    </CardDescription>
+                  </CardHeader>
+
+                  <CardDescription className="mbs-3 line-clamp-2 text-sm text-ellipsis">
+                    {game.description}
+                  </CardDescription>
+
+                  <CardFooter className="mbs-3 gap-2 px-0">
+                    <span className="inline-flex aspect-square items-center justify-center bg-green-900 px-1 text-sm font-semibold text-white">
+                      {game.metaScore}
+                    </span>
+                    <span className="text-muted-foreground text-sm">Metascore</span>
+                  </CardFooter>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+
+          {data.length > 0 && (
+            <div className="mbs-8">
+              <Pagination>
+                <PaginationContent>
+                  {hasPrev && (
+                    <PaginationItem>
+                      <PaginationPrevious
+                        to="."
+                        search={(prev) => ({
+                          ...prev,
+                          page: (prev.page ?? 1) - 1,
+                        })}
+                        preload="intent"
+                      />
+                    </PaginationItem>
+                  )}
+
+                  {getPaginationItems(page, totalPages).map((item, i) =>
+                    item === 'ellipsis' ? (
+                      <PaginationItem key={`ellipsis-${i}`}>
+                        <PaginationEllipsis />
+                      </PaginationItem>
+                    ) : (
+                      <PaginationItem key={item}>
+                        <PaginationLink
+                          to="."
+                          search={(prev) => ({ ...prev, page: item })}
+                          isActive={page === item}
+                          preload="intent"
+                        >
+                          {item}
+                        </PaginationLink>
+                      </PaginationItem>
+                    ),
+                  )}
+
+                  {hasNext && (
+                    <PaginationItem>
+                      <PaginationNext
+                        to="."
+                        search={(prev) => ({
+                          ...prev,
+                          page: (prev.page ?? 1) + 1,
+                        })}
+                        preload="intent"
+                      />
+                    </PaginationItem>
+                  )}
+                </PaginationContent>
+              </Pagination>
+            </div>
+          )}
+        </section>
       </div>
     </>
   );
