@@ -7,11 +7,12 @@ import { gamesTable } from '../db/schemas/game.schema.js';
 
 interface ScrapedItem {
   link: string;
-  img: string | null;
+  img: string;
   isMust: boolean;
   title: string;
-  metaScore: number | null;
-  releaseDate: string | null;
+  description: string;
+  metaScore: number;
+  releaseDate: string;
 }
 
 async function scrapePage(page: Page): Promise<ScrapedItem[]> {
@@ -20,22 +21,23 @@ async function scrapePage(page: Page): Promise<ScrapedItem[]> {
     (cards) =>
       cards.map((card) => ({
         link: card.querySelector('a[href]')?.getAttribute('href') ?? '',
-        img: card.querySelector('img')?.getAttribute('src') ?? null,
+        img: card.querySelector('img[data-nuxt-img]')?.src ?? '',
         isMust: card.querySelector('[data-testid="score-badge"]') !== null,
         title:
           card
-            .querySelector('h3[data-testid="product-title"] span:nth-of-type(2)')
+            .querySelector('[data-testid="product-title"] span:nth-of-type(2)')
             ?.textContent?.trim() ?? '',
-        rawDate: card.querySelector('[data-title] + div span')?.textContent?.trim() ?? null,
-        metaScore:
-          Number(card.querySelector('.c-siteReviewScore')?.textContent?.trim() || '') || null,
+        description: card.querySelector('.line-clamp-2 span')?.textContent?.trim() ?? '',
+        rawDate:
+          card.querySelector('.line-clamp-1.uppercase span:first-child')?.textContent?.trim() ?? '',
+        metaScore: Number(card.querySelector('.c-siteReviewScore')?.textContent?.trim() || '') || 0,
       })),
   );
 
   return items.map(
     ({ rawDate, ...item }): ScrapedItem => ({
       ...item,
-      releaseDate: rawDate ? new Date(rawDate).toISOString() : null,
+      releaseDate: rawDate ? new Date(rawDate).toISOString() : '',
     }),
   );
 }
@@ -104,6 +106,7 @@ async function main() {
         (i): GameInsert => ({
           slug: slug(i.title),
           title: i.title,
+          description: i.description,
           link: i.link,
           image: i.img,
           metaScore: i.metaScore,

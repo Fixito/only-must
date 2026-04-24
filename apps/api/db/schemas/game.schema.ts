@@ -14,6 +14,7 @@ export const gamesTable = pgTable(
   {
     id: uuid().primaryKey().defaultRandom(),
     title: text().notNull(),
+    description: text().notNull(),
     slug: text().notNull().unique(),
     link: text().notNull(),
     image: text(),

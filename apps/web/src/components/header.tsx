@@ -1,7 +1,9 @@
 export default function Header() {
   return (
     <header>
-      <span>OnlyMust</span>
+      <div className="container flex min-h-16 items-center">
+        <span className="text-primary text-2xl font-semibold">OnlyMust</span>
+      </div>
     </header>
   );
 }

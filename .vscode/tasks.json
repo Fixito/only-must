@@ -2,12 +2,18 @@
   "version": "2.0.0",
   "tasks": [
     {
-      "label": "dev",
+      "label": "pnpm: dev",
       "type": "shell",
       "command": "pnpm dev",
-      "group": "build",
+      "group": { "kind": "build", "isDefault": true },
+      "presentation": {
+        "group": "dev",
+        "panel": "dedicated",
+        "reveal": "always",
+        "showReuseMessage": false
+      },
       "isBackground": true,
-      "problemMatcher": []
+      "runOptions": { "instanceLimit": 1 }
     }
   ]
 }

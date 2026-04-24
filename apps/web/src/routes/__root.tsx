@@ -1,9 +1,10 @@
 import { TanStackDevtools } from '@tanstack/react-devtools';
+import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 import { HeadContent, Scripts, createRootRoute } from '@tanstack/react-router';
 import { TanStackRouterDevtoolsPanel } from '@tanstack/react-router-devtools';
 
 import Footer from '@/components/footer.tsx';
-import Header from '@/components/header.tsx';
+import Navbar from '@/components/navbar/navbar.tsx';
 import { NotFound } from '@/components/not-found.tsx';
 
 import appCss from '../styles.css?url';
@@ -21,10 +22,11 @@ export const Route = createRootRoute({
         content: 'width=device-width, initial-scale=1',
       },
       {
-        title: 'TanStack Start Starter',
+        title: 'OnlyMust',
       },
     ],
     links: [
+      { rel: 'icon', type: 'image/svg+xml', href: '/must-play.svg' },
       {
         rel: 'stylesheet',
         href: appCss,
@@ -42,10 +44,11 @@ function RootDocument({ children }: { children: React.ReactNode }) {
         <script dangerouslySetInnerHTML={{ __html: THEME_INIT_SCRIPT }} />
         <HeadContent />
       </head>
-      <body>
-        <Header />
+      <body className="text-foreground bg-background grid min-h-screen grid-rows-[auto_1fr_auto] antialiased">
+        <Navbar />
         <main>{children}</main>
         <Footer />
+        <ReactQueryDevtools initialIsOpen={false} buttonPosition="bottom-left" />
         <TanStackDevtools
           config={{
             position: 'bottom-right',

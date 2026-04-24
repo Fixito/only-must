@@ -51,5 +51,7 @@ export const getGames = async ({
     gameRepository.countGames({ where }),
   ]);
 
-  return { rows, total };
+  const totalPages = Math.ceil(total / pageSize);
+
+  return { rows, total, totalPages, page, hasNext: page < totalPages, hasPrev: page > 1 };
 };
