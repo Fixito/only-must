@@ -37,7 +37,15 @@ async function scrapePage(page: Page): Promise<ScrapedItem[]> {
   return items.map(
     ({ rawDate, ...item }): ScrapedItem => ({
       ...item,
-      releaseDate: rawDate ? new Date(rawDate).toISOString() : '',
+      releaseDate: (() => {
+        if (!rawDate) return '';
+        const d = new Date(rawDate);
+        if (Number.isNaN(d.getTime())) return '';
+        const y = d.getFullYear();
+        const m = String(d.getMonth() + 1).padStart(2, '0');
+        const day = String(d.getDate()).padStart(2, '0');
+        return `${y}-${m}-${day}`;
+      })(),
     }),
   );
 }
@@ -110,7 +118,7 @@ async function main() {
           link: i.link,
           image: i.img,
           metaScore: i.metaScore,
-          releaseDate: i.releaseDate ? new Date(i.releaseDate).toLocaleDateString('en-CA') : null,
+          releaseDate: i.releaseDate || null,
           isMust: i.isMust,
         }),
       ),

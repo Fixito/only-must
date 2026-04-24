@@ -5,7 +5,7 @@ import baseConfig from '../../oxlint.config.ts';
 export default defineConfig({
   extends: [baseConfig],
   jsPlugins: ['@stylistic/eslint-plugin', '@tanstack/eslint-plugin-query'],
-  plugins: ['import', 'typescript'],
+  plugins: ['import', 'typescript', 'react', 'jsx-a11y'],
   env: {
     es2024: true,
     browser: true,
@@ -22,14 +22,10 @@ export default defineConfig({
     react: {
       linkComponents: [{ name: 'Link', attributes: ['to'] }],
     },
-    'jsx-a11y': {
-      components: {
-        Link: 'a',
-        Button: 'button',
-      },
-    },
   },
-  rules: {},
+  rules: {
+    'react/react-in-jsx-scope': 'off',
+  },
   overrides: [
     {
       files: ['**/*.{js,ts,tsx}'],
