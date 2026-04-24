@@ -77,7 +77,6 @@ function NavbarMobileMenuItem({
 }) {
   return (
     <Link
-      key={item.name}
       to={item.href}
       className="text-navbar-foreground hover:bg-navbar-accent hover:text-navbar-accent-foreground mobile-menu-item-animate data-[status=active]:bg-navbar-primary data-[status=active]:text-navbar-primary-foreground focus-visible:ring-ring focus-visible:border-ring block rounded-md px-3 py-2 text-base font-medium outline-none focus-visible:ring-2"
       style={{

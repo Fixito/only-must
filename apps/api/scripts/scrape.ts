@@ -106,20 +106,18 @@ async function main() {
   await db
     .insert(gamesTable)
     .values(
-      allItems
-        .filter((i) => i.img !== '') // Skip items with empty images
-        .map(
-          (i): GameInsert => ({
-            slug: slug(i.title),
-            title: i.title,
-            description: i.description,
-            link: i.link,
-            image: i.img,
-            metaScore: i.metaScore,
-            releaseDate: i.releaseDate || null,
-            isMust: i.isMust,
-          }),
-        ),
+      allItems.map(
+        (i): GameInsert => ({
+          slug: slug(i.title),
+          title: i.title,
+          description: i.description,
+          link: i.link,
+          image: i.img,
+          metaScore: i.metaScore,
+          releaseDate: i.releaseDate || null,
+          isMust: i.isMust,
+        }),
+      ),
     )
     .onConflictDoNothing();
 

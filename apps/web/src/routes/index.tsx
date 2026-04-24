@@ -212,8 +212,8 @@ function App() {
                     </CardTitle>
 
                     <CardDescription>
-                      <time dateTime={game.releaseDate ?? undefined} className="text-xs">
-                        {game.releaseDate ? formatdate(game.releaseDate) : ''}
+                      <time dateTime={game.releaseDate} className="text-xs">
+                        {formatdate(game.releaseDate)}
                       </time>
                     </CardDescription>
                   </CardHeader>
@@ -222,14 +222,12 @@ function App() {
                     {game.description}
                   </CardDescription>
 
-                  {game.metaScore !== null && (
-                    <CardFooter className="mbs-3 gap-2 px-0">
-                      <span className="inline-flex aspect-square items-center justify-center bg-green-900 px-1 text-sm font-semibold text-white">
-                        {game.metaScore}
-                      </span>
-                      <span className="text-muted-foreground text-sm">Metascore</span>
-                    </CardFooter>
-                  )}
+                  <CardFooter className="mbs-3 gap-2 px-0">
+                    <span className="inline-flex aspect-square items-center justify-center bg-green-900 px-1 text-sm font-semibold text-white">
+                      {game.metaScore}
+                    </span>
+                    <span className="text-muted-foreground text-sm">Metascore</span>
+                  </CardFooter>
                 </CardContent>
               </Card>
             ))}

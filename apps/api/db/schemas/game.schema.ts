@@ -18,7 +18,7 @@ export const gamesTable = pgTable(
     slug: text().notNull().unique(),
     link: text().notNull(),
     image: text().notNull(),
-    metaScore: smallint(),
+    metaScore: smallint().notNull(),
     platform: text(),
     releaseDate: date('relase_date'),
     isMust: boolean().notNull().default(false),

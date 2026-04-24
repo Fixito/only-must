@@ -1,6 +1,7 @@
 import { z } from 'zod';
 
 const currentYear = new Date().getFullYear();
+const earliestYear = 1991;
 
 export const GamesQuerySchema = z
   .object({
@@ -9,20 +10,8 @@ export const GamesQuerySchema = z
     search: z.string().optional(),
     pageSize: z.coerce.number().int().positive().max(100).optional(),
     releaseYear: z.coerce.number().int().optional(),
-    releaseYearMin: z.coerce
-      .number()
-      .refine((n) => n <= new Date().getFullYear())
-      .int()
-      .min(0)
-      .max(currentYear)
-      .optional(),
-    releaseYearMax: z.coerce
-      .number()
-      .refine((n) => n <= new Date().getFullYear())
-      .int()
-      .min(0)
-      .max(currentYear)
-      .optional(),
+    releaseYearMin: z.coerce.number().int().min(earliestYear).max(currentYear).optional(),
+    releaseYearMax: z.coerce.number().int().min(earliestYear).max(currentYear).optional(),
   })
   .refine(
     (data) =>
