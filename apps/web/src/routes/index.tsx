@@ -83,7 +83,7 @@ function App() {
     if (hasNext) {
       void prefetchGamesPage(search, page + 1);
     }
-  }, [page]);
+  }, [page, search, hasNext]);
 
   useEffect(() => {
     setValue(
@@ -192,7 +192,7 @@ function App() {
                 <div className="relative shrink-0">
                   <img src={game.image} alt={game.title} className="h-full w-full object-cover" />
                   <img
-                    src="must-play.svg"
+                    src="/must-play.svg"
                     alt="must-play"
                     loading="lazy"
                     className="absolute inset-be-0 left-1/2 z-10 aspect-square w-12 -translate-x-1/2 object-cover"
@@ -203,12 +203,12 @@ function App() {
                   <CardHeader className="px-0">
                     <CardTitle className="group-hover:text-muted-foreground flex gap-1 text-base font-semibold transition-colors">
                       <span>{index + 1}.</span>
-                      <h3 className="line-clamp-1">
+                      <p className="line-clamp-1">
                         <Link to="." className="focus-visible:outline-none">
                           {game.title}
-                          {/* <span aria-hidden="true" className="absolute inset-0"></span> */}
+                          <span aria-hidden="true" className="absolute inset-0"></span>
                         </Link>
-                      </h3>
+                      </p>
                     </CardTitle>
 
                     <CardDescription>

@@ -7,14 +7,13 @@ import { NavbarMobileMenu } from './ui/mobile-menu.tsx';
 import { SearchForm } from './ui/search-form.tsx';
 import { NavbarToggle } from './ui/toggle.tsx';
 
-// TODO: Implemente dark mode toogle
+// TODO: Implement dark mode toogle
 
 export default function Navbar() {
   const { search } = useSearch({ from: '/' });
-  const [IsMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const buttonRef = useRef<HTMLButtonElement>(null);
-
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [searchInput, setSearchInput] = useState(search || '');
+  const buttonRef = useRef<HTMLButtonElement>(null);
   const navigate = useNavigate();
 
   const handleToggleMenu = () => {
@@ -56,7 +55,7 @@ export default function Navbar() {
           <div className="flex items-center gap-x-2">
             {/* <NavbarActions /> */}
             <NavbarToggle
-              IsMobileMenuOpen={IsMobileMenuOpen}
+              isMobileMenuOpen={isMobileMenuOpen}
               onClick={handleToggleMenu}
               ref={buttonRef}
             />
@@ -66,7 +65,7 @@ export default function Navbar() {
 
       <NavbarMobileMenu
         navigation={navigation}
-        IsMobileMenuOpen={IsMobileMenuOpen}
+        isMobileMenuOpen={isMobileMenuOpen}
         onClose={() => setIsMobileMenuOpen(false)}
         buttonRef={buttonRef}
       />

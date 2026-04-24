@@ -37,7 +37,11 @@ async function scrapePage(page: Page): Promise<ScrapedItem[]> {
   return items.map(
     ({ rawDate, ...item }): ScrapedItem => ({
       ...item,
-      releaseDate: rawDate ? new Date(rawDate).toISOString() : '',
+      releaseDate: (() => {
+        if (!rawDate) return '';
+        const d = new Date(rawDate);
+        return Number.isNaN(d.getTime()) ? '' : d.toISOString();
+      })(),
     }),
   );
 }

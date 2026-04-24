@@ -9,14 +9,29 @@ export const GamesQuerySchema = z
     search: z.string().optional(),
     pageSize: z.coerce.number().int().positive().max(100).optional(),
     releaseYear: z.coerce.number().int().optional(),
-    releaseYearMin: z.coerce.number().min(0).optional(),
-    releaseYearMax: z.coerce.number().max(currentYear).optional(),
+    releaseYearMin: z.coerce
+      .number()
+      .refine((n) => n <= new Date().getFullYear())
+      .int()
+      .min(0)
+      .max(currentYear)
+      .optional(),
+    releaseYearMax: z.coerce
+      .number()
+      .refine((n) => n <= new Date().getFullYear())
+      .int()
+      .min(0)
+      .max(currentYear)
+      .optional(),
   })
   .refine(
     (data) =>
-      !data.releaseYearMin || !data.releaseYearMax || data.releaseYearMin <= data.releaseYearMax,
+      data.releaseYearMin === undefined ||
+      data.releaseYearMax === undefined ||
+      data.releaseYearMin <= data.releaseYearMax,
     {
       message: 'Invalid year range',
+      path: ['releaseYearMin'],
     },
   );
 
