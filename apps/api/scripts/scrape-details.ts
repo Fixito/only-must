@@ -123,10 +123,15 @@ async function main() {
         }
 
         if (gameDetails.genres.length > 0) {
-          const genreSlugs = gameDetails.genres.map((g) => ({
-            name: g,
-            id: slug(g),
-          }));
+          // Dedupe genres by slug id to avoid duplicate insert failures
+          const genreMap = new Map<string, { name: string; id: string }>();
+          gameDetails.genres.forEach((g) => {
+            const genreSlug = slug(g);
+            if (!genreMap.has(genreSlug)) {
+              genreMap.set(genreSlug, { name: g, id: genreSlug });
+            }
+          });
+          const genreSlugs = Array.from(genreMap.values());
 
           await tx
             .insert(genresTable)
@@ -147,10 +152,15 @@ async function main() {
         }
 
         if (gameDetails.platforms.length > 0) {
-          const platformSlugs = gameDetails.platforms.map((p) => ({
-            name: p,
-            id: slug(p),
-          }));
+          // Dedupe platforms by slug id to avoid duplicate insert failures
+          const platformMap = new Map<string, { name: string; id: string }>();
+          gameDetails.platforms.forEach((p) => {
+            const platformSlug = slug(p);
+            if (!platformMap.has(platformSlug)) {
+              platformMap.set(platformSlug, { name: p, id: platformSlug });
+            }
+          });
+          const platformSlugs = Array.from(platformMap.values());
 
           await tx
             .insert(platformsTable)
@@ -173,7 +183,9 @@ async function main() {
         await tx
           .update(gamesTable)
           .set({
-            releaseDate: gameDetails.releaseDate ? gameDetails.releaseDate.toISOString() : null,
+            releaseDate: gameDetails.releaseDate
+              ? gameDetails.releaseDate.toISOString().substring(0, 10)
+              : null,
             isDetailsScraped: true,
           })
           .where(eq(gamesTable.id, game.id));

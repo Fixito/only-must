@@ -24,10 +24,10 @@
       "breakpoints": true
     },
     {
-      "idx": 5,
+      "idx": 3,
       "version": "7",
       "when": 1777100792717,
-      "tag": "0005_mute_dragon_man",
+      "tag": "0003_mute_dragon_man",
       "breakpoints": true
     }
   ]

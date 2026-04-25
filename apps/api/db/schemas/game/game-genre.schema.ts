@@ -8,7 +8,7 @@ export const gameGenresTable = pgTable(
   {
     gameId: uuid('game_id')
       .notNull()
-      .references(() => gamesTable.id),
+      .references(() => gamesTable.id, { onDelete: 'cascade' }),
     genreId: text('genre_id')
       .notNull()
       .references(() => genresTable.id),
