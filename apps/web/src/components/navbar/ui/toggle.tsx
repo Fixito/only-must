@@ -6,6 +6,14 @@ interface NavbarToggleProps {
   ref?: React.Ref<HTMLButtonElement>;
 }
 
+/**
+ * Render a responsive navbar toggle button that shows a menu or close icon based on mobile menu state.
+ *
+ * @param isMobileMenuOpen - Whether the mobile menu is currently open; controls the icon and accessible label.
+ * @param onClick - Click handler invoked when the toggle button is activated.
+ * @param ref - Optional forwarded ref for the underlying button element.
+ * @returns The button element used to toggle mobile navigation, including an accessible label and the appropriate icon.
+ */
 export function NavbarToggle({ isMobileMenuOpen, onClick, ref }: NavbarToggleProps) {
   return (
     <button

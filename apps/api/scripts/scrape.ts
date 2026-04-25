@@ -14,6 +14,14 @@ interface ScrapedItem {
   metaScore: number;
 }
 
+/**
+ * Extracts an array of scraped game items from the current page's browse results.
+ *
+ * Each returned item contains `link`, `img`, `isMust`, `title`, `description`, and `metaScore`.
+ * Missing textual or attribute values are normalized to empty strings; `metaScore` is converted to a number and defaults to `0` when missing or invalid.
+ *
+ * @returns An array of `ScrapedItem` objects representing the result cards found on the page.
+ */
 async function scrapePage(page: Page): Promise<ScrapedItem[]> {
   return page.$$eval(
     '[data-testid="filter-results"]:has(.c-global-image.score-badge__image)',
@@ -35,6 +43,13 @@ async function scrapePage(page: Page): Promise<ScrapedItem[]> {
   );
 }
 
+/**
+ * Insert an array of scraped game records into the database games table, ignoring conflicts.
+ *
+ * Each `ScrapedItem` is mapped to a `GameInsert` object (the `slug` is generated from the item's `title`) and inserted; any rows that would violate constraints are skipped via `ON CONFLICT DO NOTHING`.
+ *
+ * @param items - Array of scraped records to insert into the games table
+ */
 async function insertItems(items: ScrapedItem[]) {
   await db
     .insert(gamesTable)
@@ -54,6 +69,11 @@ async function insertItems(items: ScrapedItem[]) {
     .onConflictDoNothing();
 }
 
+/**
+ * Orchestrates a Playwright scraping loop that walks Metacritic browse pages, extracts game records, inserts them into the database, and logs progress.
+ *
+ * Launches a Chromium browser and page, navigates pages sequentially until a page yields no usable items, calls the scraper to extract items, persists each page's items via the inserter, reports per-page progress and errors, and closes the browser when finished.
+ */
 async function main() {
   const browser = await chromium.launch({ headless: false });
   const context = await browser.newContext({

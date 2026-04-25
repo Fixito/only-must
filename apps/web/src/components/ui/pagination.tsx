@@ -6,6 +6,14 @@ import * as React from 'react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 
+/**
+ * Renders a centered navigation container intended to hold pagination controls.
+ *
+ * Forwards any extra nav props to the underlying element and merges the provided
+ * `className` with the component's layout classes.
+ *
+ * @returns The nav element configured for pagination (`aria-label="pagination"`, `data-slot="pagination"`) with forwarded props.
+ */
 function Pagination({ className, ...props }: React.ComponentProps<'nav'>) {
   return (
     <nav

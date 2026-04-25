@@ -21,6 +21,16 @@ interface GameDetails {
   genres: string[];
 }
 
+/**
+ * Extracts platforms, initial release date, developer, and genres from a Metacritic game detail page.
+ *
+ * Navigates to the Metacritic URL and parses the game's details section to collect platform names,
+ * the initial release date (if available), the developer name, and genre names.
+ *
+ * @param page - The Playwright Page used for navigation and DOM evaluation
+ * @param url - The Metacritic game path (appended to https://www.metacritic.com)
+ * @returns An object containing `platforms` (string[]), `releaseDate` (Date | null), `developer` (string), and `genres` (string[])
+ */
 async function scrapeGameDetail(page: Page, url: string): Promise<GameDetails> {
   await page.goto(`https://www.metacritic.com${url}`, {
     waitUntil: 'domcontentloaded',
@@ -78,6 +88,11 @@ async function scrapeGameDetail(page: Page, url: string): Promise<GameDetails> {
   return details;
 }
 
+/**
+ * Orchestrates scraping Metacritic game detail pages for all games not yet scraped and persists extracted data to the database.
+ *
+ * Iterates over games where `isDetailsScraped` is false, navigates to each game's Metacritic page, extracts platforms, initial release date, developer, and genres, and within a single transaction inserts or links developers, genres, and platforms (using conflict-safe inserts) and updates the game's release date and `isDetailsScraped` flag. Per-game errors are logged and do not stop the overall run; the browser page is reset after a failed scrape and the loop continues. The function launches a Chromium browser for the session and closes it when finished.
+ */
 async function main() {
   const gamesToScrape = await db
     .select()
