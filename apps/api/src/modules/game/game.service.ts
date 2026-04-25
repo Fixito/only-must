@@ -1,6 +1,7 @@
-import { and, eq, sql } from 'drizzle-orm';
+import { and, sql } from 'drizzle-orm';
 
-import { gamesTable } from '../../../db/schemas/game.schema.js';
+import { gamesTable } from '../../../db/schemas/game/game.schema.js';
+import { gamePlatformsTable, platformsTable } from '../../../db/schemas/index.js';
 import * as gameRepository from './game.repository.js';
 
 export interface GamesFilters {
@@ -41,7 +42,16 @@ export const getGames = async ({
   }
 
   if (platform) {
-    conditions.push(eq(gamesTable.platform, platform));
+    conditions.push(sql`
+    EXISTS (
+      SELECT 1
+      FROM ${gamePlatformsTable}
+      INNER JOIN ${platformsTable}
+        ON ${platformsTable.id} = ${gamePlatformsTable.platformId}
+      WHERE ${gamePlatformsTable.gameId} = ${gamesTable.id}
+      AND ${platformsTable.id} = ${platform}
+    )
+  `);
   }
 
   const where = conditions.length ? and(...conditions) : undefined;

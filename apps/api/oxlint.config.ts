@@ -23,7 +23,7 @@ export default defineConfig({
   },
   overrides: [
     {
-      files: ['db/migrate.ts', 'scripts/scrape.ts'],
+      files: ['db/migrate.ts', 'scripts/**/*'],
       rules: {
         'no-console': 'off',
       },
