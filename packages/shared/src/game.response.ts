@@ -1,6 +1,6 @@
 import { z } from 'zod';
 
-import { GameSchema } from './game.schema.js';
+import { GameSchema, GameWithRelationsSchema } from './game.schema.js';
 
 export const GetGamesResponseSchema = z.object({
   data: z.array(GameSchema),
@@ -13,4 +13,9 @@ export const GetGamesResponseSchema = z.object({
   }),
 });
 
+export const GameWithRelationsResponseSchema = z.object({
+  data: GameWithRelationsSchema,
+});
+
 export type GetGamesResponse = z.infer<typeof GetGamesResponseSchema>;
+export type GameWithRelationsResponse = z.infer<typeof GameWithRelationsResponseSchema>;

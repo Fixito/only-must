@@ -3,6 +3,14 @@ import { asc, count, eq, getTableColumns, sql } from 'drizzle-orm';
 
 import { db } from '../../../db/client.js';
 import { gamesTable } from '../../../db/schemas/game/game.schema.js';
+import {
+  developersTable,
+  gameDevelopersTable,
+  gameGenresTable,
+  gamePlatformsTable,
+  genresTable,
+  platformsTable,
+} from '../../../db/schemas/index.js';
 
 interface FindGamesParams {
   where?: SQLType | undefined;
@@ -32,4 +40,48 @@ export const findGames = async ({ where, page, pageSize }: FindGamesParams) => {
 export const countGames = async ({ where }: { where?: SQLType | undefined }) => {
   const result = await db.select({ total: count() }).from(gamesTable).where(where);
   return result[0]?.total ?? 0;
+};
+
+export const findGameBySlug = async (slug: string) => {
+  const game = await db.query.gamesTable.findFirst({
+    where: eq(gamesTable.slug, slug),
+  });
+
+  if (!game) return null;
+
+  const [platforms, genres, developers] = await Promise.all([
+    db
+      .select({
+        id: platformsTable.id,
+        name: platformsTable.name,
+      })
+      .from(gamePlatformsTable)
+      .innerJoin(platformsTable, eq(platformsTable.id, gamePlatformsTable.platformId))
+      .where(eq(gamePlatformsTable.gameId, game.id)),
+
+    db
+      .select({
+        id: genresTable.id,
+        name: genresTable.name,
+      })
+      .from(gameGenresTable)
+      .innerJoin(genresTable, eq(genresTable.id, gameGenresTable.genreId))
+      .where(eq(gameGenresTable.gameId, game.id)),
+
+    db
+      .select({
+        id: developersTable.id,
+        name: developersTable.name,
+      })
+      .from(gameDevelopersTable)
+      .innerJoin(developersTable, eq(developersTable.id, gameDevelopersTable.developerId))
+      .where(eq(gameDevelopersTable.gameId, game.id)),
+  ]);
+
+  return {
+    ...game,
+    platforms,
+    genres,
+    developers,
+  };
 };

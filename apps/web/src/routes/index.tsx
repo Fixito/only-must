@@ -204,7 +204,11 @@ function App() {
                     <CardTitle className="group-hover:text-muted-foreground flex gap-1 text-base font-semibold transition-colors">
                       <span>{index + 1}.</span>
                       <h3 className="line-clamp-1">
-                        <Link to="." className="focus-visible:outline-none">
+                        <Link
+                          to="/games/$slug"
+                          params={{ slug: game.slug }}
+                          className="focus-visible:outline-none"
+                        >
                           {game.title}
                           <span aria-hidden="true" className="absolute inset-0"></span>
                         </Link>
@@ -212,8 +216,8 @@ function App() {
                     </CardTitle>
 
                     <CardDescription>
-                      <time dateTime={game.releaseDate} className="text-xs">
-                        {formatdate(game.releaseDate)}
+                      <time dateTime={game.releaseDate ?? undefined} className="text-xs">
+                        {game.releaseDate ? formatdate(game.releaseDate) : null}
                       </time>
                     </CardDescription>
                   </CardHeader>
