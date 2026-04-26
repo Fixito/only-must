@@ -62,12 +62,14 @@ function RouteComponent() {
           <h2 className="font-semibold tracking-widest uppercase">Metascore</h2>
 
           <div className="mbs-4 flex gap-4">
-            <img
-              src="/must-play.svg"
-              alt="must-play"
-              loading="lazy"
-              className="aspect-square w-16 object-cover"
-            />
+            {isMust && (
+              <img
+                src="/must-play.svg"
+                alt="Must Play"
+                loading="lazy"
+                className="aspect-square w-16 object-cover"
+              />
+            )}
 
             <span className="inline-flex aspect-square w-16 items-center justify-center rounded-md bg-green-900 px-1 text-3xl font-semibold text-white">
               {metaScore}
