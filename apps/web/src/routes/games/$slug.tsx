@@ -38,8 +38,13 @@ function RouteComponent() {
 
           <div className="bg-muted text-muted-foreground p-4">
             <p>
-              <strong className="text-foreground font-semibold">Developer:</strong>{' '}
-              {developers[0]?.name ?? 'Unknown'}
+            <p>
+              <strong className="text-foreground font-semibold">
+                {developers.length > 1 ? 'Developers:' : 'Developer:'}
+              </strong>{' '}
+              {developers.length > 0
+                ? formatter.format(developers.map((d) => d.name))
+                : 'Unknown'}
             </p>
           </div>
 
