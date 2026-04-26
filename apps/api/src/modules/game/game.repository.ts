@@ -2,7 +2,7 @@ import type { SQL as SQLType } from 'drizzle-orm';
 import { asc, count, eq, getTableColumns, sql } from 'drizzle-orm';
 
 import { db } from '../../../db/client.js';
-import { gamesTable } from '../../../db/schemas/game.schema.js';
+import { gamesTable } from '../../../db/schemas/game/game.schema.js';
 
 interface FindGamesParams {
   where?: SQLType | undefined;
@@ -21,7 +21,9 @@ export const findGames = async ({ where, page, pageSize }: FindGamesParams) => {
     .as('subquery');
 
   return db
-    .select((({ scrapedAt, updatedAt, ...cols }) => cols)(getTableColumns(gamesTable)))
+    .select(
+      (({ scrapedAt, updatedAt, isDetailsScraped, ...cols }) => cols)(getTableColumns(gamesTable)),
+    )
     .from(gamesTable)
     .innerJoin(sq, eq(gamesTable.id, sq.id))
     .orderBy(sql`${gamesTable.metaScore} DESC NULLS LAST`, asc(gamesTable.releaseDate));

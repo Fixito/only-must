@@ -233,7 +233,7 @@ function App() {
             ))}
           </div>
 
-          {data.length > 0 && (
+          {data.length > 1 && (
             <div className="mbs-8">
               <Pagination>
                 <PaginationContent>
