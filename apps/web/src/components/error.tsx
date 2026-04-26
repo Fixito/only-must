@@ -13,7 +13,9 @@ export default function Error({ error }: { error: Error }) {
 
   return (
     <div>
-      <p>Something went wrong: {error.message}</p>
+      <p>
+        Something went wrong: <pre>{error.message}</pre>
+      </p>
 
       <button
         onClick={() => {
