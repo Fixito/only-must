@@ -1,5 +1,5 @@
 {
-  "id": "a13f7299-568b-4e15-aa23-fe62d776277e",
+  "id": "7cefee2c-9cdc-45ed-98d6-22467ef5fc18",
   "prevId": "7f03b382-2cde-4d7f-af8c-e413dc5c6982",
   "version": "7",
   "dialect": "postgresql",
@@ -66,7 +66,7 @@
           "columnsTo": [
             "id"
           ],
-          "onDelete": "no action",
+          "onDelete": "cascade",
           "onUpdate": "no action"
         },
         "game_developers_developer_id_developers_id_fk": {
@@ -126,7 +126,7 @@
           "columnsTo": [
             "id"
           ],
-          "onDelete": "no action",
+          "onDelete": "cascade",
           "onUpdate": "no action"
         },
         "game_genres_genre_id_genres_id_fk": {
