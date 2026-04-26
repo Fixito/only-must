@@ -30,8 +30,6 @@ export default function Navbar() {
   };
 
   useEffect(() => {
-    if (searchInput !== (search || '')) {
-  useEffect(() => {
     setSearchInput((current) => {
       const next = search || '';
       return current === next ? current : next;
