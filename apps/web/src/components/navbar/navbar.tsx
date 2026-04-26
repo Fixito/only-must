@@ -30,8 +30,10 @@ export default function Navbar() {
   };
 
   useEffect(() => {
-    setSearchInput(search || '');
-  }, [search]);
+    if (searchInput !== (search || '')) {
+      setSearchInput(search || '');
+    }
+  }, [search, searchInput]);
 
   return (
     <nav className="bg-navbar after:bg-navbar-border relative after:pointer-events-none after:absolute after:inset-x-0 after:bottom-0 after:h-px">

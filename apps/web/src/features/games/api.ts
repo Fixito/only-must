@@ -9,9 +9,7 @@ export async function getGames(params?: GamesQuery) {
 }
 
 export async function getGameBySlug(slug: string) {
-  const res = await axios.get(`http://localhost:5000/api/v1/games/${slug}`);
-  // oxlint-disable-next-line no-console
-  console.log('🚀 ~ getGameBySlug ~ res:', res.data);
+  const res = await axios.get(`http://localhost:5000/api/v1/games/${encodeURIComponent(slug)}`);
   const parsed = GameWithRelationsResponseSchema.parse(res.data);
 
   return parsed;
