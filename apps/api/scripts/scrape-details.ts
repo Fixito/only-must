@@ -123,14 +123,16 @@ async function main() {
         }
 
         if (gameDetails.genres.length > 0) {
-          // Dedupe genres by slug id to avoid duplicate insert failures
           const genreMap = new Map<string, { name: string; id: string }>();
+
           gameDetails.genres.forEach((g) => {
             const genreSlug = slug(g);
+
             if (!genreMap.has(genreSlug)) {
               genreMap.set(genreSlug, { name: g, id: genreSlug });
             }
           });
+
           const genreSlugs = Array.from(genreMap.values());
 
           await tx
@@ -152,14 +154,16 @@ async function main() {
         }
 
         if (gameDetails.platforms.length > 0) {
-          // Dedupe platforms by slug id to avoid duplicate insert failures
           const platformMap = new Map<string, { name: string; id: string }>();
+
           gameDetails.platforms.forEach((p) => {
             const platformSlug = slug(p);
+
             if (!platformMap.has(platformSlug)) {
               platformMap.set(platformSlug, { name: p, id: platformSlug });
             }
           });
+
           const platformSlugs = Array.from(platformMap.values());
 
           await tx

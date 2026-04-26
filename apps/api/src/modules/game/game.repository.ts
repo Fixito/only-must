@@ -3,7 +3,6 @@ import { asc, count, eq, getTableColumns, sql } from 'drizzle-orm';
 
 import { db } from '../../../db/client.js';
 import { gamesTable } from '../../../db/schemas/game/game.schema.js';
-import { gamePlatformsTable, platformsTable } from '../../../db/schemas/index.js';
 
 interface FindGamesParams {
   where?: SQLType | undefined;
@@ -15,8 +14,6 @@ export const findGames = async ({ where, page, pageSize }: FindGamesParams) => {
   const sq = db
     .select({ id: gamesTable.id })
     .from(gamesTable)
-    .innerJoin(gamePlatformsTable, eq(gamesTable.id, gamePlatformsTable.gameId))
-    .innerJoin(platformsTable, eq(gamePlatformsTable.platformId, platformsTable.id))
     .where(where)
     .orderBy(sql`${gamesTable.metaScore} DESC NULLS LAST`)
     .limit(pageSize)

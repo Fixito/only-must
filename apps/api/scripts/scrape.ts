@@ -4,6 +4,7 @@ import slug from 'slug';
 import { db } from '../db/client.js';
 import type { GameInsert } from '../db/schemas/game/game.schema.js';
 import { gamesTable } from '../db/schemas/game/game.schema.js';
+import { withRetry } from './utils.js';
 
 interface ScrapedItem {
   link: string;
@@ -13,6 +14,8 @@ interface ScrapedItem {
   description: string;
   metaScore: number;
 }
+
+const MAX_PAGE = 590;
 
 async function scrapePage(page: Page): Promise<ScrapedItem[]> {
   return page.$$eval(
@@ -68,17 +71,18 @@ async function main() {
 
   console.log(`🕷️  Starting scrape...`);
 
-  while (true) {
+  while (pageNumber <= MAX_PAGE) {
     console.log(`🕷️  Scraping page ${pageNumber}...`);
 
     try {
-      await page.goto(`https://www.metacritic.com/browse/game/?page=${pageNumber}`, {
-        waitUntil: 'domcontentloaded',
-        timeout: 60_000,
+      const items = await withRetry(async () => {
+        await page.goto(`https://www.metacritic.com/browse/game/?page=${pageNumber}`, {
+          waitUntil: 'domcontentloaded',
+          timeout: 60_000,
+        });
+        await page.waitForSelector('[data-testid="filter-results"]', { timeout: 15_000 });
+        return scrapePage(page);
       });
-      await page.waitForSelector('[data-testid="filter-results"]', { timeout: 15_000 });
-
-      const items = await scrapePage(page);
 
       if (!items.length || items.every((i) => !i.title)) {
         console.log(`⚠️  Page ${pageNumber} — no items — stopping`);
@@ -92,7 +96,7 @@ async function main() {
 
       pageNumber++;
     } catch (error) {
-      console.error(`❌ Page ${pageNumber} failed:`, error);
+      console.error(`❌ Page ${pageNumber} failed after retries:`, error);
       pageNumber++;
     }
   }
