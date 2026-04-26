@@ -12,7 +12,7 @@ export const Route = createFileRoute('/games/$slug')({
 
 function RouteComponent() {
   const {
-    data: { title, platforms, releaseDate, description, genres, developers, metaScore },
+    data: { title, platforms, releaseDate, description, genres, developers, metaScore, isMust },
   } = Route.useLoaderData();
 
   const formatter = new Intl.ListFormat('en', { type: 'conjunction' });
@@ -41,9 +41,7 @@ function RouteComponent() {
               <strong className="text-foreground font-semibold">
                 {developers.length > 1 ? 'Developers:' : 'Developer:'}
               </strong>{' '}
-              {developers.length > 0
-                ? formatter.format(developers.map((d) => d.name))
-                : 'Unknown'}
+              {developers.length > 0 ? formatter.format(developers.map((d) => d.name)) : 'Unknown'}
             </p>
           </div>
 
