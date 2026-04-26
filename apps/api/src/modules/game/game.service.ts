@@ -1,3 +1,5 @@
+import { GameSchema, GameWithRelationsSchema } from '@only-must/shared';
+import type { SQL } from 'drizzle-orm';
 import { and, sql } from 'drizzle-orm';
 
 import { gamesTable } from '../../../db/schemas/game/game.schema.js';
@@ -23,21 +25,28 @@ export const getGames = async ({
   releaseYearMin,
   releaseYearMax,
 }: GamesFilters = {}) => {
-  const conditions = [];
+  const conditions: SQL[] = [];
 
   if (search) {
     conditions.push(sql`${gamesTable.title} ILIKE ${`%${search}%`}`);
   }
 
-  if (releaseYear) {
-    conditions.push(sql`EXTRACT(YEAR FROM ${gamesTable.releaseDate}) = ${releaseYear}`);
+  if (releaseYear != null) {
+    conditions.push(sql`
+      ${gamesTable.releaseDate} IS NOT NULL
+      AND EXTRACT(YEAR FROM ${gamesTable.releaseDate}) = ${releaseYear}
+    `);
   } else {
     if (releaseYearMin) {
-      conditions.push(sql`EXTRACT(YEAR FROM ${gamesTable.releaseDate}) >= ${releaseYearMin}`);
+      conditions.push(sql`
+      ${gamesTable.releaseDate} IS NOT NULL
+      AND EXTRACT(YEAR FROM ${gamesTable.releaseDate}) >= ${releaseYearMin}`);
     }
 
     if (releaseYearMax) {
-      conditions.push(sql`EXTRACT(YEAR FROM ${gamesTable.releaseDate}) <= ${releaseYearMax}`);
+      conditions.push(sql`
+      ${gamesTable.releaseDate} IS NOT NULL
+      AND EXTRACT(YEAR FROM ${gamesTable.releaseDate}) <= ${releaseYearMax}`);
     }
   }
 
@@ -61,7 +70,22 @@ export const getGames = async ({
     gameRepository.countGames({ where }),
   ]);
 
-  const totalPages = Math.ceil(total / pageSize);
+  const parsedRows = rows.map((row) => GameSchema.parse(row));
 
-  return { rows, total, totalPages, page, hasNext: page < totalPages, hasPrev: page > 1 };
+  const totalPages = Math.max(1, Math.ceil(total / pageSize));
+
+  return {
+    rows: parsedRows,
+    total,
+    totalPages,
+    page,
+    hasNext: page < totalPages,
+    hasPrev: page > 1,
+  };
+};
+
+export const getGameBySlug = async (slug: string) => {
+  const game = await gameRepository.findGameBySlug(slug);
+  if (!game) return null;
+  return GameWithRelationsSchema.parse(game);
 };

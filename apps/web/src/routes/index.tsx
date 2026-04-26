@@ -212,8 +212,8 @@ function App() {
                     </CardTitle>
 
                     <CardDescription>
-                      <time dateTime={game.releaseDate} className="text-xs">
-                        {formatdate(game.releaseDate)}
+                      <time dateTime={game.releaseDate ?? undefined} className="text-xs">
+                        {game.releaseDate ? formatdate(game.releaseDate) : null}
                       </time>
                     </CardDescription>
                   </CardHeader>
