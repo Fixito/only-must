@@ -5,7 +5,6 @@ export const GameSchema = z.object({
   title: z.string(),
   description: z.string(),
   slug: z.string(),
-  link: z.string(),
   image: z.string(),
   metaScore: z.number(),
   isMust: z.boolean(),
