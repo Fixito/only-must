@@ -31,10 +31,12 @@ export default function Navbar() {
 
   useEffect(() => {
     if (searchInput !== (search || '')) {
-      setSearchInput(search || '');
-    }
-  }, [search, searchInput]);
-
+  useEffect(() => {
+    setSearchInput((current) => {
+      const next = search || '';
+      return current === next ? current : next;
+    });
+  }, [search]);
   return (
     <nav className="bg-navbar after:bg-navbar-border relative after:pointer-events-none after:absolute after:inset-x-0 after:bottom-0 after:h-px">
       <div className="relative container flex h-16 items-center justify-between gap-x-6">
