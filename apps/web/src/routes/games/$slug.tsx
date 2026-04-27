@@ -1,7 +1,7 @@
 import { createFileRoute } from '@tanstack/react-router';
 
 import { Badge } from '@/components/ui/badge.tsx';
-import { gameQueryOptions } from '@/features/games/use-games.ts';
+import { gameQueryOptions } from '@/features/games/queries/game.query';
 import { formatdate } from '@/lib/date.ts';
 import { queryClient } from '@/router.tsx';
 
