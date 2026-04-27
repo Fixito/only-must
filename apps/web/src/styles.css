@@ -82,7 +82,7 @@
   --popover: light-dark(oklch(1 0 0), oklch(0.205 0 0));
   --popover-foreground: light-dark(oklch(0.145 0 0), oklch(0.985 0 0));
   --primary: light-dark(oklch(0.205 0 0), oklch(0.985 0 0));
-  --primary-foreground: light-dark(var(--zinc-50), oklch(0.205 0 0));
+  --primary-foreground: var(--zinc-50);
   --secondary: light-dark(oklch(0.97 0 0), oklch(0.269 0 0));
   --secondary-foreground: light-dark(var(--zinc-800), var(--zinc-300));
   --muted: light-dark(var(--zinc-50), oklch(from var(--zinc-50) l c h / 0.1));

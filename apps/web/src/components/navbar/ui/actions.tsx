@@ -1,16 +1,33 @@
 import { useRouteContext, useRouter } from '@tanstack/react-router';
 import { Monitor, Moon, Sun } from 'lucide-react';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 
 import { setThemeServFn } from '@/lib/theme.ts';
 
 export function NavbarActions() {
-  const themes = ['light', 'dark', 'system'] as const;
   const { theme } = useRouteContext({ from: '__root__' });
   const router = useRouter();
-  const currentIndex = themes.findIndex((t) => t === theme);
-  const nextTheme =
-    themes[(currentIndex === -1 ? 0 : currentIndex + 1) % themes.length] ?? 'system';
+
+  // SSR-friendly: always render an icon using the loader theme for SSR, then sync with system preference on mount if needed
+  const [effectiveTheme, setEffectiveTheme] = useState<'light' | 'dark' | 'system'>(theme);
+
+  useEffect(() => {
+    if (theme === 'system') {
+      setEffectiveTheme(
+        window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light',
+      );
+    } else {
+      setEffectiveTheme(theme === 'dark' ? 'dark' : 'light');
+    }
+  }, [theme]);
+
+  let nextTheme: 'light' | 'dark';
+  if (effectiveTheme === 'system') {
+    // On SSR, propose dark par défaut (ou light, selon préférence)
+    nextTheme = 'dark';
+  } else {
+    nextTheme = effectiveTheme === 'dark' ? 'light' : 'dark';
+  }
 
   const toggleTheme = () => {
     setThemeServFn({ data: nextTheme })
@@ -33,7 +50,6 @@ export function NavbarActions() {
       });
   };
 
-  // Sync theme value to DOM on mount and when theme changes
   useEffect(() => {
     const html = document.documentElement;
     html.classList.remove('dark', 'auto');
@@ -57,13 +73,19 @@ export function NavbarActions() {
       onClick={toggleTheme}
     >
       <span className="absolute -inset-1.5" />
-      <span className="sr-only">Toggle dark mode</span>
-      {nextTheme === 'dark' ? (
-        <Sun aria-hidden="true" className="size-6" />
-      ) : nextTheme === 'light' ? (
-        <Moon aria-hidden="true" className="size-6" />
-      ) : (
+      <span className="sr-only">
+        {effectiveTheme === 'dark'
+          ? 'Switch to light mode'
+          : effectiveTheme === 'light'
+            ? 'Switch to dark mode'
+            : 'Switch theme'}
+      </span>
+      {effectiveTheme === 'system' ? (
         <Monitor aria-hidden="true" className="size-6" />
+      ) : nextTheme === 'light' ? (
+        <Sun aria-hidden="true" className="size-6" />
+      ) : (
+        <Moon aria-hidden="true" className="size-6" />
       )}
     </button>
   );
