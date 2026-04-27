@@ -1,12 +1,40 @@
-import { useEffect } from 'react';
 import { useRouteContext, useRouter } from '@tanstack/react-router';
 import { Monitor, Moon, Sun } from 'lucide-react';
+import { useEffect, useState } from 'react';
 
 import { setThemeServFn } from '@/lib/theme.ts';
 
 export function NavbarActions() {
   const { theme } = useRouteContext({ from: '__root__' });
   const router = useRouter();
+  const [nextTheme, setNextTheme] = useState('system');
+
+  const toggleTheme = () => {
+    const themes = ['light', 'dark', 'system'] as const;
+    const currentIndex = themes.findIndex((t) => t === theme);
+    const updatedTheme =
+      themes[(currentIndex === -1 ? 0 : currentIndex + 1) % themes.length] ?? 'system';
+    setNextTheme(updatedTheme);
+
+    setThemeServFn({ data: updatedTheme })
+      .then(() => router.invalidate())
+      .catch((_error) => {
+        // Revert DOM to match current theme on error
+        const html = document.documentElement;
+        html.classList.remove('dark', 'auto');
+        html.style.colorScheme = '';
+
+        if (theme === 'dark') {
+          html.classList.add('dark');
+          html.style.colorScheme = 'dark';
+        } else if (theme === 'light') {
+          html.style.colorScheme = 'light';
+        } else {
+          html.classList.add('auto');
+          html.style.colorScheme = 'light dark';
+        }
+      });
+  };
 
   // Sync theme value to DOM on mount and when theme changes
   useEffect(() => {
@@ -25,33 +53,6 @@ export function NavbarActions() {
     }
   }, [theme]);
 
-  const toggleTheme = () => {
-    const themes = ['light', 'dark', 'system'] as const;
-    const currentIndex = themes.findIndex((t) => t === theme);
-    const nextTheme =
-      themes[(currentIndex === -1 ? 0 : currentIndex + 1) % themes.length] ?? 'system';
-
-    setThemeServFn({ data: nextTheme })
-      .then(() => router.invalidate())
-      .catch((error) => {
-        console.error('Failed to save theme preference:', error);
-        // Revert DOM to match current theme on error
-        const html = document.documentElement;
-        html.classList.remove('dark', 'auto');
-        html.style.colorScheme = '';
-
-        if (theme === 'dark') {
-          html.classList.add('dark');
-          html.style.colorScheme = 'dark';
-        } else if (theme === 'light') {
-          html.style.colorScheme = 'light';
-        } else {
-          html.classList.add('auto');
-          html.style.colorScheme = 'light dark';
-        }
-      });
-  };
-
   return (
     <button
       type="button"
@@ -60,9 +61,9 @@ export function NavbarActions() {
     >
       <span className="absolute -inset-1.5" />
       <span className="sr-only">Toggle dark mode</span>
-      {theme === 'dark' ? (
+      {nextTheme === 'dark' ? (
         <Sun aria-hidden="true" className="size-6" />
-      ) : theme === 'light' ? (
+      ) : nextTheme === 'light' ? (
         <Moon aria-hidden="true" className="size-6" />
       ) : (
         <Monitor aria-hidden="true" className="size-6" />

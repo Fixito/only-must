@@ -82,7 +82,7 @@
   --popover: light-dark(oklch(1 0 0), oklch(0.205 0 0));
   --popover-foreground: light-dark(oklch(0.145 0 0), oklch(0.985 0 0));
   --primary: light-dark(oklch(0.205 0 0), oklch(0.985 0 0));
-  --primary-foreground: var(--zinc-50);
+  --primary-foreground: light-dark(var(--zinc-50), oklch(0.205 0 0));
   --secondary: oklch(0.97 0 0);
   --secondary-foreground: light-dark(var(--zinc-800), var(--zinc-300));
   --muted: light-dark(var(--zinc-50), oklch(from var(--zinc-50) l c h / 0.1));
@@ -124,13 +124,9 @@
 .dark {
   color-scheme: dark;
 
-  --card-foreground: oklch(0.985 0 0);
   --popover: oklch(0.205 0 0);
   --popover-foreground: oklch(0.985 0 0);
-  --primary: oklch(0.985 0 0);
   --secondary: oklch(0.269 0 0);
-  --accent: oklch(0.269 0 0);
-  --accent-foreground: oklch(0.985 0 0);
   --destructive: oklch(0.704 0.191 22.216);
   --chart-1: oklch(0.87 0 0);
   --chart-2: oklch(0.556 0 0);
