@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { useRouteContext, useRouter } from '@tanstack/react-router';
 import { Monitor, Moon, Sun } from 'lucide-react';
 
@@ -7,27 +8,48 @@ export function NavbarActions() {
   const { theme } = useRouteContext({ from: '__root__' });
   const router = useRouter();
 
+  // Sync theme value to DOM on mount and when theme changes
+  useEffect(() => {
+    const html = document.documentElement;
+    html.classList.remove('dark', 'auto');
+    html.style.colorScheme = '';
+
+    if (theme === 'dark') {
+      html.classList.add('dark');
+      html.style.colorScheme = 'dark';
+    } else if (theme === 'light') {
+      html.style.colorScheme = 'light';
+    } else {
+      html.classList.add('auto');
+      html.style.colorScheme = 'light dark';
+    }
+  }, [theme]);
+
   const toggleTheme = () => {
     const themes = ['light', 'dark', 'system'] as const;
     const currentIndex = themes.findIndex((t) => t === theme);
     const nextTheme =
       themes[(currentIndex === -1 ? 0 : currentIndex + 1) % themes.length] ?? 'system';
 
-    const html = document.documentElement;
-    html.classList.remove('dark', 'auto');
-    html.style.colorScheme = '';
+    setThemeServFn({ data: nextTheme })
+      .then(() => router.invalidate())
+      .catch((error) => {
+        console.error('Failed to save theme preference:', error);
+        // Revert DOM to match current theme on error
+        const html = document.documentElement;
+        html.classList.remove('dark', 'auto');
+        html.style.colorScheme = '';
 
-    if (nextTheme === 'dark') {
-      html.classList.add('dark');
-      html.style.colorScheme = 'dark';
-    } else if (nextTheme === 'light') {
-      html.style.colorScheme = 'light';
-    } else {
-      html.classList.add('auto');
-      html.style.colorScheme = 'light dark';
-    }
-
-    void setThemeServFn({ data: nextTheme }).then(() => router.invalidate());
+        if (theme === 'dark') {
+          html.classList.add('dark');
+          html.style.colorScheme = 'dark';
+        } else if (theme === 'light') {
+          html.style.colorScheme = 'light';
+        } else {
+          html.classList.add('auto');
+          html.style.colorScheme = 'light dark';
+        }
+      });
   };
 
   return (

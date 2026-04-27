@@ -10,7 +10,7 @@ import { getThemeServFn } from '@/lib/theme.ts';
 
 import appCss from '../styles.css?url';
 
-const THEME_INIT_SCRIPT = `(function(){try{var stored=window.localStorage.getItem('theme');var mode=(stored==='light'||stored==='dark'||stored==='auto')?stored:'auto';var prefersDark=window.matchMedia('(prefers-color-scheme: dark)').matches;var resolved=mode==='auto'?(prefersDark?'dark':'light'):mode;var root=document.documentElement;root.classList.remove('light','dark');root.classList.add(resolved);if(mode==='auto'){root.removeAttribute('data-theme')}else{root.setAttribute('data-theme',mode)}root.style.colorScheme=resolved;}catch(e){}})();`;
+const THEME_INIT_SCRIPT = `(function(){try{var cookies=document.cookie.split(';');var themeCookie=null;for(var i=0;i<cookies.length;i++){var c=cookies[i].trim();if(c.indexOf('app-theme=')===0){themeCookie=c.substring('app-theme='.length);break;}}var mode=(themeCookie==='light'||themeCookie==='dark'||themeCookie==='system')?themeCookie:'system';var root=document.documentElement;root.classList.remove('dark','auto');root.style.colorScheme='';if(mode==='dark'){root.classList.add('dark');root.style.colorScheme='dark';}else if(mode==='light'){root.style.colorScheme='light';}else{root.classList.add('auto');root.style.colorScheme='light dark';}}catch(e){}})();`;
 
 export const Route = createRootRoute({
   beforeLoad: async () => ({ theme: await getThemeServFn() }),

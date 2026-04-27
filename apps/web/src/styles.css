@@ -11,11 +11,10 @@
   &:is(.dark *) {
     @slot;
   }
-}
-
-@media (prefers-color-scheme: dark) {
-  &:is(.auto *) {
-    @slot;
+  @media (prefers-color-scheme: dark) {
+    &:is(.auto *) {
+      @slot;
+    }
   }
 }
 
@@ -79,17 +78,17 @@
   --background: light-dark(var(--zinc-50), oklch(from var(--zinc-800) l c h / 0.5));
   --foreground: light-dark(var(--zinc-950), var(--zinc-50));
   --card: light-dark(var(--white), var(--zinc-950));
-  --card-foreground: oklch(0.145 0 0);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.145 0 0);
-  --primary: oklch(0.205 0 0);
+  --card-foreground: light-dark(oklch(0.145 0 0), oklch(0.985 0 0));
+  --popover: light-dark(oklch(1 0 0), oklch(0.205 0 0));
+  --popover-foreground: light-dark(oklch(0.145 0 0), oklch(0.985 0 0));
+  --primary: light-dark(oklch(0.205 0 0), oklch(0.985 0 0));
   --primary-foreground: var(--zinc-50);
   --secondary: oklch(0.97 0 0);
   --secondary-foreground: light-dark(var(--zinc-800), var(--zinc-300));
   --muted: light-dark(var(--zinc-50), oklch(from var(--zinc-50) l c h / 0.1));
   --muted-foreground: light-dark(var(--zinc-700), var(--zinc-300));
-  --accent: oklch(0.97 0 0);
-  --accent-foreground: oklch(0.205 0 0);
+  --accent: light-dark(oklch(0.97 0 0), oklch(0.269 0 0));
+  --accent-foreground: light-dark(oklch(0.205 0 0), oklch(0.985 0 0));
   --destructive: oklch(0.577 0.245 27.325);
   --border: light-dark(var(--zinc-300), oklch(from var(--zinc-50) l c h / 0.1));
   --input: light-dark(var(--zinc-300), oklch(from var(--zinc-50) l c h / 0.1));
@@ -125,10 +124,13 @@
 .dark {
   color-scheme: dark;
 
+  --card-foreground: oklch(0.985 0 0);
   --popover: oklch(0.205 0 0);
   --popover-foreground: oklch(0.985 0 0);
+  --primary: oklch(0.985 0 0);
   --secondary: oklch(0.269 0 0);
   --accent: oklch(0.269 0 0);
+  --accent-foreground: oklch(0.985 0 0);
   --destructive: oklch(0.704 0.191 22.216);
   --chart-1: oklch(0.87 0 0);
   --chart-2: oklch(0.556 0 0);
