@@ -1,16 +1,9 @@
 import { GamesQuerySchema } from '@only-must/shared';
-import { createFileRoute, Link } from '@tanstack/react-router';
+import { createFileRoute } from '@tanstack/react-router';
 import { useEffect, useState } from 'react';
 
 import Error from '@/components/error.tsx';
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card.tsx';
+import GameCard from '@/components/game-card.tsx';
 import { Input } from '@/components/ui/input.tsx';
 import { Label } from '@/components/ui/label.tsx';
 import {
@@ -24,7 +17,6 @@ import {
 } from '@/components/ui/pagination';
 import { Slider } from '@/components/ui/slider.tsx';
 import { gamesQueryOptions } from '@/features/games/queries/games.query.ts';
-import { formatdate } from '@/lib/date.ts';
 import { getPaginationItems } from '@/lib/pagination';
 import { queryClient } from '@/router.tsx';
 
@@ -189,56 +181,7 @@ function App() {
 
           <div className="mbs-6 grid gap-4 md:grid-cols-2 lg:grid-cols-3">
             {data.map((game, index) => (
-              <Card
-                key={game.id}
-                className="bg-card text-card-foreground group has-focus-visible:border-ring has-focus-visible:ring-ring relative isolate grid grid-cols-[7rem_auto] gap-4 p-0 shadow-sm transition-shadow outline-none hover:shadow-lg has-focus-visible:ring-3"
-              >
-                <div className="relative shrink-0">
-                  <img src={game.image} alt={game.title} className="h-full w-full object-cover" />
-                  <img
-                    src="/must-play.svg"
-                    alt="must-play"
-                    loading="lazy"
-                    className="absolute inset-be-0 left-1/2 z-10 aspect-square w-12 -translate-x-1/2 object-cover"
-                  />
-                </div>
-
-                <CardContent className="py-4 ps-0">
-                  <CardHeader className="px-0">
-                    <CardTitle className="group-hover:text-muted-foreground text-foreground flex gap-1 text-base font-semibold transition-colors">
-                      <span>{index + 1}.</span>
-                      <h3 className="line-clamp-1">
-                        <Link
-                          to="/games/$slug"
-                          params={{ slug: game.slug }}
-                          className="focus-visible:outline-none"
-                          preload="intent"
-                        >
-                          {game.title}
-                          <span aria-hidden="true" className="absolute inset-0"></span>
-                        </Link>
-                      </h3>
-                    </CardTitle>
-
-                    <CardDescription>
-                      <time dateTime={game.releaseDate ?? undefined} className="text-xs">
-                        {game.releaseDate ? formatdate(game.releaseDate) : null}
-                      </time>
-                    </CardDescription>
-                  </CardHeader>
-
-                  <CardDescription className="mbs-3 line-clamp-2 text-sm text-ellipsis">
-                    {game.description}
-                  </CardDescription>
-
-                  <CardFooter className="mbs-3 gap-2 px-0">
-                    <span className="inline-flex aspect-square items-center justify-center bg-green-900 px-1 text-sm font-semibold text-white">
-                      {game.metaScore}
-                    </span>
-                    <span className="text-muted-foreground text-sm">Metascore</span>
-                  </CardFooter>
-                </CardContent>
-              </Card>
+              <GameCard key={game.id} game={game} index={index} />
             ))}
           </div>
 
