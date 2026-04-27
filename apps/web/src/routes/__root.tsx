@@ -6,12 +6,26 @@ import { TanStackRouterDevtoolsPanel } from '@tanstack/react-router-devtools';
 import Footer from '@/components/footer.tsx';
 import Navbar from '@/components/navbar/navbar.tsx';
 import { NotFound } from '@/components/not-found.tsx';
+import { getThemeServFn } from '@/lib/theme.ts';
 
 import appCss from '../styles.css?url';
 
-const THEME_INIT_SCRIPT = `(function(){try{var stored=window.localStorage.getItem('theme');var mode=(stored==='light'||stored==='dark'||stored==='auto')?stored:'auto';var prefersDark=window.matchMedia('(prefers-color-scheme: dark)').matches;var resolved=mode==='auto'?(prefersDark?'dark':'light'):mode;var root=document.documentElement;root.classList.remove('light','dark');root.classList.add(resolved);if(mode==='auto'){root.removeAttribute('data-theme')}else{root.setAttribute('data-theme',mode)}root.style.colorScheme=resolved;}catch(e){}})();`;
+const THEME_INIT_SCRIPT = `(function () {
+  try {
+    const cookie = document.cookie.split(';').find(c => c.trim().startsWith('theme='));
+    const mode = cookie ? cookie.split('=')[1].trim() : 'auto';
+    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    const resolved = mode === 'auto' ? (prefersDark ? 'dark' : 'light') : mode;
+    const root = document.documentElement;
+    root.classList.remove('light', 'dark', 'auto');
+    root.classList.add(resolved);
+    if (mode !== 'auto') root.setAttribute('data-theme', mode);
+    root.style.colorScheme = resolved;
+  } catch {}
+})();`;
 
 export const Route = createRootRoute({
+  beforeLoad: async () => await getThemeServFn(),
   head: () => ({
     meta: [
       {
