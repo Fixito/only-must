@@ -10,10 +10,22 @@ import { getThemeServFn } from '@/lib/theme.ts';
 
 import appCss from '../styles.css?url';
 
-const THEME_INIT_SCRIPT = `(function(){try{var cookies=document.cookie.split(';');var themeCookie=null;for(var i=0;i<cookies.length;i++){var c=cookies[i].trim();if(c.indexOf('app-theme=')===0){themeCookie=c.substring('app-theme='.length);break;}}var mode=(themeCookie==='light'||themeCookie==='dark'||themeCookie==='system')?themeCookie:'system';var root=document.documentElement;root.classList.remove('dark','auto');root.style.colorScheme='';if(mode==='dark'){root.classList.add('dark');root.style.colorScheme='dark';}else if(mode==='light'){root.style.colorScheme='light';}else{root.classList.add('auto');root.style.colorScheme='light dark';}}catch(e){}})();`;
+const THEME_INIT_SCRIPT = `(function () {
+  try {
+    const cookie = document.cookie.split(';').find(c => c.trim().startsWith('theme='));
+    const mode = cookie ? cookie.split('=')[1].trim() : 'auto';
+    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    const resolved = mode === 'auto' ? (prefersDark ? 'dark' : 'light') : mode;
+    const root = document.documentElement;
+    root.classList.remove('light', 'dark', 'auto');
+    root.classList.add(resolved);
+    if (mode !== 'auto') root.setAttribute('data-theme', mode);
+    root.style.colorScheme = resolved;
+  } catch {}
+})();`;
 
 export const Route = createRootRoute({
-  beforeLoad: async () => ({ theme: await getThemeServFn() }),
+  beforeLoad: async () => await getThemeServFn(),
   head: () => ({
     meta: [
       {
