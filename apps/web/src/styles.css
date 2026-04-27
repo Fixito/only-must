@@ -7,7 +7,17 @@
 
 @plugin '@tailwindcss/typography';
 
-@custom-variant dark (&:is(.dark *));
+@custom-variant dark {
+  &:is(.dark *) {
+    @slot;
+  }
+}
+
+@media (prefers-color-scheme: dark) {
+  &:is(.auto *) {
+    @slot;
+  }
+}
 
 @theme inline {
   --font-heading: var(--font-sans);
@@ -64,9 +74,11 @@
 }
 
 :root {
+  color-scheme: light;
+
   --background: light-dark(var(--zinc-50), oklch(from var(--zinc-800) l c h / 0.5));
   --foreground: light-dark(var(--zinc-950), var(--zinc-50));
-  --card: oklch(1 0 0);
+  --card: light-dark(var(--white), var(--zinc-950));
   --card-foreground: oklch(0.145 0 0);
   --popover: oklch(1 0 0);
   --popover-foreground: oklch(0.145 0 0);
@@ -111,8 +123,8 @@
 }
 
 .dark {
-  --card: oklch(0.205 0 0);
-  --card-foreground: oklch(0.985 0 0);
+  color-scheme: dark;
+
   --popover: oklch(0.205 0 0);
   --popover-foreground: oklch(0.985 0 0);
   --secondary: oklch(0.269 0 0);

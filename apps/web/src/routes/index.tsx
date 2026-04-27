@@ -187,7 +187,7 @@ function App() {
             {data.map((game, index) => (
               <Card
                 key={game.id}
-                className="group has-focus-visible:border-ring has-focus-visible:ring-ring relative isolate grid grid-cols-[7rem_auto] gap-4 p-0 shadow-sm transition-shadow outline-none hover:shadow-lg has-focus-visible:ring-3"
+                className="bg-card text-card-foreground group has-focus-visible:border-ring has-focus-visible:ring-ring relative isolate grid grid-cols-[7rem_auto] gap-4 p-0 shadow-sm transition-shadow outline-none hover:shadow-lg has-focus-visible:ring-3"
               >
                 <div className="relative shrink-0">
                   <img src={game.image} alt={game.title} className="h-full w-full object-cover" />
@@ -201,7 +201,7 @@ function App() {
 
                 <CardContent className="py-4 ps-0">
                   <CardHeader className="px-0">
-                    <CardTitle className="group-hover:text-muted-foreground flex gap-1 text-base font-semibold transition-colors">
+                    <CardTitle className="group-hover:text-muted-foreground text-foreground flex gap-1 text-base font-semibold transition-colors">
                       <span>{index + 1}.</span>
                       <h3 className="line-clamp-1">
                         <Link

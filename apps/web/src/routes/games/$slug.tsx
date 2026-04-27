@@ -24,7 +24,7 @@ function RouteComponent() {
         <h1 className="text-4xl font-semibold">{title}</h1>
 
         <div className="mbs-4 w-max space-y-4">
-          <div className="bg-muted text-muted-foreground p-4">
+          <div className="bg-card text-muted-foreground p-4">
             <p>
               <strong className="text-foreground font-semibold">Platforms:</strong>{' '}
               {formattedPlatforms}
@@ -36,7 +36,7 @@ function RouteComponent() {
             </p>
           </div>
 
-          <div className="bg-muted text-muted-foreground p-4">
+          <div className="bg-card text-muted-foreground p-4">
             <p>
               <strong className="text-foreground font-semibold">
                 {developers.length > 1 ? 'Developers:' : 'Developer:'}
@@ -45,7 +45,7 @@ function RouteComponent() {
             </p>
           </div>
 
-          <div className="bg-muted text-muted-foreground flex flex-wrap items-center gap-2 p-4">
+          <div className="bg-card text-muted-foreground flex flex-wrap items-center gap-2 p-4">
             <strong className="text-foreground font-semibold">Genres:</strong>
             {genres.map((g) => (
               <Badge key={g.id} className="text-xs">

@@ -1,13 +1,13 @@
 import { Link, useNavigate, useSearch } from '@tanstack/react-router';
 import { useEffect, useRef, useState } from 'react';
 
+import { NavbarActions } from '@/components/navbar/ui/actions.tsx';
+
 import { navigation } from './data.ts';
 import { NavbarLinks } from './ui/links.tsx';
 import { NavbarMobileMenu } from './ui/mobile-menu.tsx';
 import { SearchForm } from './ui/search-form.tsx';
 import { NavbarToggle } from './ui/toggle.tsx';
-
-// TODO: Implement dark mode toggle
 
 export default function Navbar() {
   const { search } = useSearch({ strict: false });
@@ -59,7 +59,7 @@ export default function Navbar() {
           />
 
           <div className="flex items-center gap-x-2">
-            {/* <NavbarActions /> */}
+            <NavbarActions />
             <NavbarToggle
               isMobileMenuOpen={isMobileMenuOpen}
               onClick={handleToggleMenu}
