@@ -1,28 +1,16 @@
 import { createServerFn } from '@tanstack/react-start';
-import { getCookie, setCookie } from '@tanstack/react-start/server';
-import * as z from 'zod';
+import { getCookie } from '@tanstack/react-start/server';
 
-const storageKey = 'app-theme';
+const storageKey = 'theme';
 
-const validThemes = ['light', 'dark', 'system'] as const;
-type Theme = (typeof validThemes)[number];
+export const getThemeServFn = createServerFn().handler(() => getCookie(storageKey) ?? 'auto');
 
-function isValidTheme(value: unknown): value is Theme {
-  return typeof value === 'string' && (validThemes as ReadonlyArray<string>).includes(value);
-}
-
-export const getThemeServFn = createServerFn().handler(() => {
-  const cookieValue = getCookie(storageKey);
-
-  if (isValidTheme(cookieValue)) {
-    return cookieValue;
-  }
-
-  return 'system';
-});
-
-const setThemeValidator = z.enum(['light', 'dark', 'system']);
-
-export const setThemeServFn = createServerFn()
-  .inputValidator(setThemeValidator)
-  .handler(({ data }) => setCookie(storageKey, data));
+export const toggleTheme = () => {
+  const root = document.documentElement;
+  const isDark = root.classList.contains('dark');
+  const next = isDark ? 'light' : 'dark';
+  root.classList.remove('light', 'dark');
+  root.classList.add(next);
+  root.style.colorScheme = next;
+  document.cookie = `theme=${next};path=/;max-age=31536000;SameSite=Lax`;
+};
