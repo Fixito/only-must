@@ -1,21 +1,8 @@
 import type { GamesQuery } from '@only-must/shared';
-import { queryOptions, useQuery } from '@tanstack/react-query';
+import { useQuery } from '@tanstack/react-query';
 
-import { getGameBySlug, getGames } from './api';
-
-export function gamesQueryOptions(params?: GamesQuery) {
-  return queryOptions({
-    queryKey: ['games', params],
-    queryFn: () => getGames(params),
-  });
-}
-
-export function gameQueryOptions(slug: string) {
-  return queryOptions({
-    queryKey: ['game', slug],
-    queryFn: () => getGameBySlug(slug),
-  });
-}
+import { gameQueryOptions } from '@/features/games/api/game.query.ts';
+import { gamesQueryOptions } from '@/features/games/queries/games.query.ts';
 
 export function useGames(params?: GamesQuery) {
   return useQuery(gamesQueryOptions(params));

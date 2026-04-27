@@ -23,8 +23,8 @@ import {
   PaginationPrevious,
 } from '@/components/ui/pagination';
 import { Slider } from '@/components/ui/slider.tsx';
-import { gamesQueryOptions } from '@/features/games/use-games.ts';
-import { prefetchGamesPage } from '@/features/prefetch-games.ts';
+import { gameQueryOptions } from '@/features/games/api/game.query.ts';
+import { gamesQueryOptions } from '@/features/games/queries/games.query.ts';
 import { formatdate } from '@/lib/date.ts';
 import { getPaginationItems } from '@/lib/pagination';
 import { queryClient } from '@/router.tsx';
@@ -81,7 +81,12 @@ function App() {
 
   useEffect(() => {
     if (hasNext) {
-      void prefetchGamesPage(search, page + 1);
+      void queryClient.prefetchQuery(
+        gamesQueryOptions({
+          ...search,
+          page: page + 1,
+        }),
+      );
     }
   }, [page, search, hasNext]);
 
@@ -208,6 +213,10 @@ function App() {
                           to="/games/$slug"
                           params={{ slug: game.slug }}
                           className="focus-visible:outline-none"
+                          preload="intent"
+                          onMouseEnter={() =>
+                            queryClient.prefetchQuery(gameQueryOptions(game.slug))
+                          }
                         >
                           {game.title}
                           <span aria-hidden="true" className="absolute inset-0"></span>
