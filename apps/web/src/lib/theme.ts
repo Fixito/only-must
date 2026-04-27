@@ -5,14 +5,19 @@ import * as z from 'zod';
 const storageKey = 'app-theme';
 
 const validThemes = ['light', 'dark', 'system'] as const;
+type Theme = (typeof validThemes)[number];
+
+function isValidTheme(value: unknown): value is Theme {
+  return typeof value === 'string' && (validThemes as ReadonlyArray<string>).includes(value);
+}
 
 export const getThemeServFn = createServerFn().handler(() => {
   const cookieValue = getCookie(storageKey);
-  // Validate cookie value against allowed themes
-  if (cookieValue && validThemes.includes(cookieValue as typeof validThemes[number])) {
-    return cookieValue as typeof validThemes[number];
+
+  if (isValidTheme(cookieValue)) {
+    return cookieValue;
   }
-  // Return safe default if cookie is missing or invalid
+
   return 'system';
 });
 

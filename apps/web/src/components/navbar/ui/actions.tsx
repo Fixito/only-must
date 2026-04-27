@@ -1,22 +1,19 @@
 import { useRouteContext, useRouter } from '@tanstack/react-router';
 import { Monitor, Moon, Sun } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 
 import { setThemeServFn } from '@/lib/theme.ts';
 
 export function NavbarActions() {
+  const themes = ['light', 'dark', 'system'] as const;
   const { theme } = useRouteContext({ from: '__root__' });
   const router = useRouter();
-  const [nextTheme, setNextTheme] = useState('system');
+  const currentIndex = themes.findIndex((t) => t === theme);
+  const nextTheme =
+    themes[(currentIndex === -1 ? 0 : currentIndex + 1) % themes.length] ?? 'system';
 
   const toggleTheme = () => {
-    const themes = ['light', 'dark', 'system'] as const;
-    const currentIndex = themes.findIndex((t) => t === theme);
-    const updatedTheme =
-      themes[(currentIndex === -1 ? 0 : currentIndex + 1) % themes.length] ?? 'system';
-    setNextTheme(updatedTheme);
-
-    setThemeServFn({ data: updatedTheme })
+    setThemeServFn({ data: nextTheme })
       .then(() => router.invalidate())
       .catch((_error) => {
         // Revert DOM to match current theme on error
