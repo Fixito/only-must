@@ -3,13 +3,14 @@ import type { SQL } from 'drizzle-orm';
 import { and, sql } from 'drizzle-orm';
 
 import { gamesTable } from '../../../db/schemas/game/game.schema.js';
-import { gamePlatformsTable, platformsTable } from '../../../db/schemas/index.js';
+import { gameGenresTable, gamePlatformsTable } from '../../../db/schemas/index.js';
 import * as gameRepository from './game.repository.js';
 
 export interface GamesFilters {
   page?: number | undefined;
   pageSize?: number | undefined;
-  platform?: string | undefined;
+  platforms?: string[] | undefined;
+  genres?: string[] | undefined;
   search?: string | undefined;
   releaseYear?: number | undefined;
   releaseYearMin?: number | undefined;
@@ -19,7 +20,8 @@ export interface GamesFilters {
 export const getGames = async ({
   page = 1,
   pageSize = 24,
-  platform,
+  platforms,
+  genres,
   search,
   releaseYear,
   releaseYearMin,
@@ -50,17 +52,26 @@ export const getGames = async ({
     }
   }
 
-  if (platform) {
+  if (platforms?.length) {
     conditions.push(sql`
-    EXISTS (
-      SELECT 1
-      FROM ${gamePlatformsTable}
-      INNER JOIN ${platformsTable}
-        ON ${platformsTable.id} = ${gamePlatformsTable.platformId}
-      WHERE ${gamePlatformsTable.gameId} = ${gamesTable.id}
-      AND ${platformsTable.id} = ${platform}
-    )
-  `);
+		EXISTS (
+			SELECT 1
+			FROM ${gamePlatformsTable}
+			WHERE ${gamePlatformsTable.gameId} = ${gamesTable.id}
+			AND ${gamePlatformsTable.platformId} IN ${platforms}
+		)
+	`);
+  }
+
+  if (genres?.length) {
+    conditions.push(sql`
+		EXISTS (
+			SELECT 1
+			FROM ${gameGenresTable}
+			WHERE ${gameGenresTable.gameId} = ${gamesTable.id}
+			AND ${gameGenresTable.genreId} IN ${genres}
+		)
+	`);
   }
 
   const where = conditions.length ? and(...conditions) : undefined;

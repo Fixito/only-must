@@ -3,14 +3,26 @@ import { z } from 'zod';
 const currentYear = new Date().getFullYear();
 const earliestYear = 1991;
 
+const arrayParam = z
+  .union([z.string(), z.array(z.string())])
+  .optional()
+  .transform((val) => {
+    if (!val) return undefined;
+    return Array.isArray(val) ? val : [val];
+  });
+
 export const GamesQuerySchema = z
   .object({
     page: z.coerce.number().int().positive().optional(),
-    platform: z.string().optional(),
+
     search: z.string().optional(),
+
     releaseYear: z.coerce.number().int().optional(),
     releaseYearMin: z.coerce.number().int().min(earliestYear).max(currentYear).optional(),
     releaseYearMax: z.coerce.number().int().min(earliestYear).max(currentYear).optional(),
+
+    platforms: arrayParam,
+    genres: arrayParam,
   })
   .refine(
     (data) =>
