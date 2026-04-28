@@ -18,7 +18,13 @@ export function FilterMulti({ label, options, value = [], param }: FilterMultiPr
       search: (prev) => {
         const current = prev[param] ?? [];
 
-        const next = current.includes(id) ? current.filter((v) => v !== id) : [...current, id];
+        const currentSet = new Set(current);
+        if (currentSet.has(id)) {
+          currentSet.delete(id);
+        } else {
+          currentSet.add(id);
+        }
+        const next = Array.from(currentSet).sort();
 
         return {
           ...prev,

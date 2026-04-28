@@ -1,6 +1,6 @@
 import { GameSchema, GameWithRelationsSchema } from '@only-must/shared';
 import type { SQL } from 'drizzle-orm';
-import { and, sql } from 'drizzle-orm';
+import { and, inArray, sql } from 'drizzle-orm';
 
 import { gamesTable } from '../../../db/schemas/game/game.schema.js';
 import { gameGenresTable, gamePlatformsTable } from '../../../db/schemas/index.js';
@@ -58,7 +58,7 @@ export const getGames = async ({
 			SELECT 1
 			FROM ${gamePlatformsTable}
 			WHERE ${gamePlatformsTable.gameId} = ${gamesTable.id}
-			AND ${gamePlatformsTable.platformId} IN ${platforms}
+			AND ${inArray(gamePlatformsTable.platformId, platforms)}
 		)
 	`);
   }
@@ -69,7 +69,7 @@ export const getGames = async ({
 			SELECT 1
 			FROM ${gameGenresTable}
 			WHERE ${gameGenresTable.gameId} = ${gamesTable.id}
-			AND ${gameGenresTable.genreId} IN ${genres}
+			AND ${inArray(gameGenresTable.genreId, genres)}
 		)
 	`);
   }
