@@ -1,5 +1,5 @@
 export const endpoints = {
   games: '/games',
-  game: (slug: string) => `/games/${slug}`,
+  game: (slug: string) => `/games/${encodeURIComponent(slug)}`,
   platforms: '/platforms',
 } as const;
