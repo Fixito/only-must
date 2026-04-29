@@ -9,7 +9,7 @@ const arrayParam = z
   .transform((val) => {
     if (!val) return undefined;
     const arr = Array.isArray(val) ? val : [val];
-    const cleaned = arr.filter(Boolean);
+    const cleaned = arr.map((item) => item.trim()).filter((item) => item !== '');
     return cleaned.length ? cleaned : undefined;
   });
 
@@ -20,9 +20,9 @@ export const GamesQuerySchema = z
     search: z
       .string()
       .optional()
-      .transform((val) => (val?.trim() ? val : undefined)),
+      .transform((val) => (val?.trim() ? val.trim() : undefined)),
 
-    releaseYear: z.coerce.number().int().optional(),
+    releaseYear: z.coerce.number().int().min(earliestYear).max(currentYear).optional(),
     releaseYearMin: z.coerce.number().int().min(earliestYear).max(currentYear).optional(),
     releaseYearMax: z.coerce.number().int().min(earliestYear).max(currentYear).optional(),
 
