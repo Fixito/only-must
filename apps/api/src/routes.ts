@@ -1,9 +1,11 @@
 import { Router } from 'express';
 
-import { gamesRouter } from './modules/game/game.router.js';
+import { gameRouter } from '@/modules/game/game.router.js';
+import { platformRouter } from '@/modules/platform/platform.router.js';
 
 const router: Router = Router();
 
-router.use('/games', gamesRouter);
+router.use('/games', gameRouter);
+router.use('/platforms', platformRouter);
 
 export default router;

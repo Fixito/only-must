@@ -8,7 +8,7 @@ import * as gameService from './game.service.js';
 
 const router = Router();
 
-function createGamesRouter() {
+function createGameRouter() {
   router.get('/', async (req, res) => {
     const filters = GamesQuerySchema.parse(req.query);
 
@@ -33,4 +33,4 @@ function createGamesRouter() {
   return router;
 }
 
-export const gamesRouter: Router = createGamesRouter();
+export const gameRouter: Router = createGameRouter();

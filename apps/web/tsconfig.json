@@ -4,10 +4,10 @@
   "include": ["src", "vite.config.ts"],
 
   "compilerOptions": {
-    "target": "ES2022",
+    "target": "es2025",
     "jsx": "react-jsx",
     "module": "ESNext",
-    "lib": ["ES2022", "DOM", "DOM.Iterable"],
+    "lib": ["es2025", "DOM", "DOM.Iterable"],
     "types": ["vite/client"],
 
     "paths": {

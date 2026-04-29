@@ -1,30 +1,32 @@
 import { GameSchema, GameWithRelationsSchema } from '@only-must/shared';
 import type { SQL } from 'drizzle-orm';
-import { and, sql } from 'drizzle-orm';
+import { and, inArray, sql } from 'drizzle-orm';
 
 import { gamesTable } from '../../../db/schemas/game/game.schema.js';
-import { gamePlatformsTable, platformsTable } from '../../../db/schemas/index.js';
+import { gameGenresTable, gamePlatformsTable } from '../../../db/schemas/index.js';
 import * as gameRepository from './game.repository.js';
 
 export interface GamesFilters {
   page?: number | undefined;
   pageSize?: number | undefined;
-  platform?: string | undefined;
+  platforms?: string[] | undefined;
+  genres?: string[] | undefined;
   search?: string | undefined;
   releaseYear?: number | undefined;
   releaseYearMin?: number | undefined;
   releaseYearMax?: number | undefined;
 }
 
-export const getGames = async ({
+export async function getGames({
   page = 1,
   pageSize = 24,
-  platform,
+  platforms,
+  genres,
   search,
   releaseYear,
   releaseYearMin,
   releaseYearMax,
-}: GamesFilters = {}) => {
+}: GamesFilters = {}) {
   const conditions: SQL[] = [];
 
   if (search) {
@@ -50,17 +52,26 @@ export const getGames = async ({
     }
   }
 
-  if (platform) {
+  if (platforms?.length) {
     conditions.push(sql`
-    EXISTS (
-      SELECT 1
-      FROM ${gamePlatformsTable}
-      INNER JOIN ${platformsTable}
-        ON ${platformsTable.id} = ${gamePlatformsTable.platformId}
-      WHERE ${gamePlatformsTable.gameId} = ${gamesTable.id}
-      AND ${platformsTable.id} = ${platform}
-    )
-  `);
+		EXISTS (
+			SELECT 1
+			FROM ${gamePlatformsTable}
+			WHERE ${gamePlatformsTable.gameId} = ${gamesTable.id}
+			AND ${inArray(gamePlatformsTable.platformId, platforms)}
+		)
+	`);
+  }
+
+  if (genres?.length) {
+    conditions.push(sql`
+		EXISTS (
+			SELECT 1
+			FROM ${gameGenresTable}
+			WHERE ${gameGenresTable.gameId} = ${gamesTable.id}
+			AND ${inArray(gameGenresTable.genreId, genres)}
+		)
+	`);
   }
 
   const where = conditions.length ? and(...conditions) : undefined;
@@ -82,10 +93,10 @@ export const getGames = async ({
     hasNext: page < totalPages,
     hasPrev: page > 1,
   };
-};
+}
 
-export const getGameBySlug = async (slug: string) => {
+export async function getGameBySlug(slug: string) {
   const game = await gameRepository.findGameBySlug(slug);
   if (!game) return null;
   return GameWithRelationsSchema.parse(game);
-};
+}

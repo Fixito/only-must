@@ -28,6 +28,8 @@ app.use(
   }),
 );
 
+app.set('query parser', 'extended');
+
 app.get('/', (_req, res) => {
   res.json({ message: 'Welcome to the Only Must API!' });
 });

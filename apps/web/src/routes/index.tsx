@@ -1,9 +1,16 @@
 import { GamesQuerySchema } from '@only-must/shared';
+import { useQuery } from '@tanstack/react-query';
 import { createFileRoute } from '@tanstack/react-router';
+import { ChevronDownIcon } from 'lucide-react';
 import { useEffect, useState } from 'react';
 
 import Error from '@/components/error.tsx';
 import GameCard from '@/components/game-card.tsx';
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from '@/components/ui/collapsible.tsx';
 import { Input } from '@/components/ui/input.tsx';
 import { Label } from '@/components/ui/label.tsx';
 import {
@@ -16,12 +23,14 @@ import {
   PaginationPrevious,
 } from '@/components/ui/pagination';
 import { Slider } from '@/components/ui/slider.tsx';
+import { FilterMulti } from '@/features/games/components/filter-multi.tsx';
 import { gamesQueryOptions } from '@/features/games/queries/games.query.ts';
+import { platformsQueryOptions } from '@/features/games/queries/platforms.query.ts';
 import { getPaginationItems } from '@/lib/pagination';
 import { queryClient } from '@/router.tsx';
 
 const currentYear = new Date().getFullYear();
-const minYear = 1991;
+const minYear = 1995;
 
 function clampRange(
   [min, max]: [number, number],
@@ -37,7 +46,10 @@ function clampRange(
 export const Route = createFileRoute('/')({
   validateSearch: GamesQuerySchema,
   loaderDeps: ({ search }) => search,
-  loader: ({ deps }) => queryClient.ensureQueryData(gamesQueryOptions(deps)),
+  loader: async ({ deps }) => {
+    await queryClient.prefetchQuery(platformsQueryOptions());
+    return await queryClient.ensureQueryData(gamesQueryOptions(deps));
+  },
   component: App,
   errorComponent: Error,
 });
@@ -47,6 +59,8 @@ function App() {
     data,
     meta: { page, total, totalPages, hasNext, hasPrev },
   } = Route.useLoaderData();
+  const { data: platforms } = useQuery(platformsQueryOptions());
+
   const search = Route.useSearch();
   const navigate = Route.useNavigate();
   const [value, setValue] = useState<[number, number]>(
@@ -105,76 +119,93 @@ function App() {
 
       <div className="container gap-6 md:grid-cols-[16rem_1fr] lg:grid">
         <aside>
-          <header>
-            <h2 className="text-foreground text-sm font-medium">Filters</h2>
-          </header>
+          <Collapsible>
+            <CollapsibleTrigger className="group hover:text-accent-foreground w-full">
+              <header className="flex items-center justify-between py-4">
+                <h2 className="text-muted-foreground text-sm font-medium">Filters</h2>
+                <ChevronDownIcon className="group-data-panel-open:rotate-180" />
+              </header>
+            </CollapsibleTrigger>
 
-          <div className="mbs-3">
-            <div className="mbs-3">
-              <fieldset>
-                <legend className="text-muted-foreground mbe-4 text-xs font-medium tracking-widest uppercase">
-                  Release Year
-                </legend>
+            <CollapsibleContent>
+              <div className="border-t">
+                <div className="pbs-4">
+                  <fieldset>
+                    <legend className="text-foreground mbe-2 text-xs font-medium tracking-widest uppercase">
+                      Release Year
+                    </legend>
 
-                <div className="mbs-3 w-full max-w-sm space-y-4">
-                  {/* Slider */}
-                  <Label htmlFor="release-year-range">
-                    <span className="sr-only">Release year range</span>
-                    <Slider
-                      name="release-year-range"
-                      id="release-year-range"
-                      min={minYear}
-                      max={currentYear}
-                      step={1}
-                      value={value}
-                      onValueChange={(val) => {
-                        if (Array.isArray(val) && val.length === 2) {
-                          setValue(clampRange([val[0], val[1]], minYear, currentYear));
-                        }
-                      }}
-                      onValueCommitted={(val) => {
-                        if (Array.isArray(val) && val.length === 2) {
-                          commit(clampRange([val[0], val[1]], minYear, currentYear));
-                        }
-                      }}
-                    />
-                  </Label>
+                    <div className="mbs-2 w-full max-w-sm space-y-4">
+                      {/* Slider */}
+                      <Label htmlFor="release-year-range">
+                        <span className="sr-only">Release year range</span>
 
-                  {/* Inputs */}
-                  <div className="mbs-6 flex items-center justify-between gap-2">
-                    {/* Min */}
-                    <label htmlFor="release-year-min" className="sr-only">
-                      Release year min
-                    </label>
-                    <Input
-                      type="number"
-                      id="release-year-min"
-                      value={value[0]}
-                      tabIndex={-1}
-                      readOnly
-                      className="pointer-events-none field-sizing-content w-auto"
-                    />
+                        <Slider
+                          name="release-year-range"
+                          id="release-year-range"
+                          min={minYear}
+                          max={currentYear}
+                          step={1}
+                          value={value}
+                          onValueChange={(val) => {
+                            if (Array.isArray(val) && val.length === 2) {
+                              setValue(clampRange([val[0], val[1]], minYear, currentYear));
+                            }
+                          }}
+                          onValueCommitted={(val) => {
+                            if (Array.isArray(val) && val.length === 2) {
+                              commit(clampRange([val[0], val[1]], minYear, currentYear));
+                            }
+                          }}
+                        />
+                      </Label>
 
-                    {/* Max */}
-                    <label htmlFor="release-year-max" className="sr-only">
-                      Release year max
-                    </label>
-                    <Input
-                      type="number"
-                      id="release-year-max"
-                      value={value[1]}
-                      tabIndex={-1}
-                      readOnly
-                      className="pointer-events-none field-sizing-content w-auto"
-                    />
-                  </div>
+                      {/* Inputs */}
+                      <div className="mbs-4 flex items-center justify-between gap-2">
+                        {/* Min */}
+                        <label htmlFor="release-year-min" className="sr-only">
+                          Release year min
+                        </label>
+
+                        <Input
+                          type="number"
+                          id="release-year-min"
+                          value={value[0]}
+                          tabIndex={-1}
+                          readOnly
+                          className="pointer-events-none field-sizing-content w-auto"
+                        />
+
+                        {/* Max */}
+                        <label htmlFor="release-year-max" className="sr-only">
+                          Release year max
+                        </label>
+
+                        <Input
+                          type="number"
+                          id="release-year-max"
+                          value={value[1]}
+                          tabIndex={-1}
+                          readOnly
+                          className="pointer-events-none field-sizing-content w-auto"
+                        />
+                      </div>
+                    </div>
+                  </fieldset>
                 </div>
-              </fieldset>
-            </div>
-          </div>
+
+                <FilterMulti
+                  label="Platforms"
+                  param="platforms"
+                  options={Array.isArray(platforms) ? platforms : (platforms?.data ?? [])}
+                  value={search.platforms}
+                />
+              </div>
+            </CollapsibleContent>
+          </Collapsible>
         </aside>
 
-        <section className="mbs-6">
+        <section className="pbs-4">
           <div>
             <p className="text-muted-foreground font-light">{total} results</p>
           </div>
