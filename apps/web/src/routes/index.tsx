@@ -1,4 +1,5 @@
 import { GamesQuerySchema } from '@only-must/shared';
+import { useQuery } from '@tanstack/react-query';
 import { createFileRoute } from '@tanstack/react-router';
 import { useEffect, useState } from 'react';
 
@@ -18,6 +19,7 @@ import {
 import { Slider } from '@/components/ui/slider.tsx';
 import { FilterMulti } from '@/features/games/components/filter-multi.tsx';
 import { gamesQueryOptions } from '@/features/games/queries/games.query.ts';
+import { platformsQueryOptions } from '@/features/games/queries/platforms.query.ts';
 import { getPaginationItems } from '@/lib/pagination';
 import { queryClient } from '@/router.tsx';
 
@@ -38,21 +40,23 @@ function clampRange(
 export const Route = createFileRoute('/')({
   validateSearch: GamesQuerySchema,
   loaderDeps: ({ search }) => search,
-  loader: ({ deps }) => queryClient.ensureQueryData(gamesQueryOptions(deps)),
+  loader: async ({ deps }) => {
+    await queryClient.prefetchQuery(platformsQueryOptions());
+    return await queryClient.ensureQueryData(gamesQueryOptions(deps));
+  },
   component: App,
   errorComponent: Error,
 });
-
-const platforms = [
-  { id: 'pc', name: 'PC' },
-  { id: 'playstation-5', name: 'PS5' },
-];
 
 function App() {
   const {
     data,
     meta: { page, total, totalPages, hasNext, hasPrev },
   } = Route.useLoaderData();
+  const { data: platforms } = useQuery(platformsQueryOptions());
+  // oxlint-disable-next-line no-console
+  console.log('🚀 → App → platforms:', platforms);
+
   const search = Route.useSearch();
   const navigate = Route.useNavigate();
   const [value, setValue] = useState<[number, number]>(
@@ -147,7 +151,7 @@ function App() {
                   </Label>
 
                   {/* Inputs */}
-                  <div className="mbs-6 flex items-center justify-between gap-2">
+                  <div className="mbs-4 flex items-center justify-between gap-2">
                     {/* Min */}
                     <label htmlFor="release-year-min" className="sr-only">
                       Release year min
@@ -178,12 +182,12 @@ function App() {
               </fieldset>
             </div>
 
-            <div className="mbs-3">
+            <div className="mbs-6">
               <FilterMulti
                 label="Platforms"
                 param="platforms"
-                options={platforms}
-                value={search.platforms ?? []}
+                options={Array.isArray(platforms) ? platforms : (platforms?.data ?? [])}
+                value={search.platforms}
               />
             </div>
           </div>

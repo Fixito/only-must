@@ -8,14 +8,19 @@ const arrayParam = z
   .optional()
   .transform((val) => {
     if (!val) return undefined;
-    return Array.isArray(val) ? val : [val];
+    const arr = Array.isArray(val) ? val : [val];
+    const cleaned = arr.filter(Boolean);
+    return cleaned.length ? cleaned : undefined;
   });
 
 export const GamesQuerySchema = z
   .object({
-    page: z.coerce.number().int().positive().optional(),
+    page: z.coerce.number().int().positive().default(1),
 
-    search: z.string().optional(),
+    search: z
+      .string()
+      .optional()
+      .transform((val) => (val?.trim() ? val : undefined)),
 
     releaseYear: z.coerce.number().int().optional(),
     releaseYearMin: z.coerce.number().int().min(earliestYear).max(currentYear).optional(),
@@ -25,14 +30,24 @@ export const GamesQuerySchema = z
     genres: arrayParam,
   })
   .refine(
-    (data) =>
-      data.releaseYearMin === undefined ||
-      data.releaseYearMax === undefined ||
-      data.releaseYearMin <= data.releaseYearMax,
+    (data) => {
+      if (data.releaseYear !== undefined) return true;
+
+      if (data.releaseYearMin && data.releaseYearMax) {
+        return data.releaseYearMin <= data.releaseYearMax;
+      }
+
+      return true;
+    },
     {
       message: 'Invalid year range',
       path: ['releaseYearMin'],
     },
-  );
+  )
+  .transform((data) => ({
+    ...data,
+    platforms: data.platforms ?? [],
+    genres: data.genres ?? [],
+  }));
 
 export type GamesQuery = z.infer<typeof GamesQuerySchema>;

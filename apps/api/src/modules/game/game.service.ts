@@ -17,7 +17,7 @@ export interface GamesFilters {
   releaseYearMax?: number | undefined;
 }
 
-export const getGames = async ({
+export async function getGames({
   page = 1,
   pageSize = 24,
   platforms,
@@ -26,7 +26,7 @@ export const getGames = async ({
   releaseYear,
   releaseYearMin,
   releaseYearMax,
-}: GamesFilters = {}) => {
+}: GamesFilters = {}) {
   const conditions: SQL[] = [];
 
   if (search) {
@@ -93,10 +93,10 @@ export const getGames = async ({
     hasNext: page < totalPages,
     hasPrev: page > 1,
   };
-};
+}
 
-export const getGameBySlug = async (slug: string) => {
+export async function getGameBySlug(slug: string) {
   const game = await gameRepository.findGameBySlug(slug);
   if (!game) return null;
   return GameWithRelationsSchema.parse(game);
-};
+}

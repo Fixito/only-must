@@ -18,7 +18,7 @@ interface FindGamesParams {
   pageSize: number;
 }
 
-export const findGames = async ({ where, page, pageSize }: FindGamesParams) => {
+export async function findGames({ where, page, pageSize }: FindGamesParams) {
   const sq = db
     .select({ id: gamesTable.id })
     .from(gamesTable)
@@ -35,14 +35,14 @@ export const findGames = async ({ where, page, pageSize }: FindGamesParams) => {
     .from(gamesTable)
     .innerJoin(sq, eq(gamesTable.id, sq.id))
     .orderBy(sql`${gamesTable.metaScore} DESC NULLS LAST`, asc(gamesTable.releaseDate));
-};
+}
 
-export const countGames = async ({ where }: { where?: SQLType | undefined }) => {
+export async function countGames({ where }: { where?: SQLType | undefined }) {
   const result = await db.select({ total: count() }).from(gamesTable).where(where);
   return result[0]?.total ?? 0;
-};
+}
 
-export const findGameBySlug = async (slug: string) => {
+export async function findGameBySlug(slug: string) {
   const game = await db.query.gamesTable.findFirst({
     where: eq(gamesTable.slug, slug),
   });
@@ -84,4 +84,4 @@ export const findGameBySlug = async (slug: string) => {
     genres,
     developers,
   };
-};
+}

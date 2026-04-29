@@ -16,20 +16,15 @@ export function getRouter() {
     defaultPreload: 'intent',
     defaultPreloadStaleTime: 0,
     defaultNotFoundComponent: () => <NotFound />,
-    // parseSearch: (search) =>
-    //   queryString.parse(search.startsWith('?') ? search.slice(1) : search, {
-    //     arrayFormat: 'none',
-    //   }),
+    parseSearch: (search) => queryString.parse(search.startsWith('?') ? search.slice(1) : search),
     stringifySearch: (search) => {
       const str = queryString.stringify(search as Record<string, unknown>, {
-        arrayFormat: 'none',
         skipNull: true,
         skipEmptyString: true,
       });
 
       return str ? `?${str}` : '';
     },
-    parseSearch: (search) => queryString.parse(search),
   });
 
   setupRouterSsrQueryIntegration({

@@ -1,5 +1,3 @@
-// features/games/components/filter-multi.tsx
-
 import { useNavigate } from '@tanstack/react-router';
 
 interface FilterMultiProps {
@@ -16,15 +14,16 @@ export function FilterMulti({ label, options, value = [], param }: FilterMultiPr
     void navigate({
       from: '/',
       search: (prev) => {
-        const current = prev[param] ?? [];
+        const current = prev[param];
 
         const currentSet = new Set(current);
+
         if (currentSet.has(id)) {
           currentSet.delete(id);
         } else {
           currentSet.add(id);
         }
-        const next = Array.from(currentSet).sort();
+        const next = Array.from(currentSet).toSorted();
 
         return {
           ...prev,
@@ -37,11 +36,11 @@ export function FilterMulti({ label, options, value = [], param }: FilterMultiPr
 
   return (
     <fieldset>
-      <legend className="text-muted-foreground mbe-4 text-xs font-medium tracking-widest uppercase">
+      <legend className="text-muted-foreground text-xs font-medium tracking-widest uppercase">
         {label}
       </legend>
 
-      <div className="mbs-3 space-y-1">
+      <div className="mbs-4 space-y-1">
         {options.map((opt) => {
           const checked = value.includes(opt.id);
 
