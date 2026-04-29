@@ -35,23 +35,23 @@ export function FilterMulti({ label, options, value = [], param }: FilterMultiPr
   };
 
   return (
-    <fieldset>
-      <legend className="text-muted-foreground text-xs font-medium tracking-widest uppercase">
-        {label}
-      </legend>
-
-      <div className="mbs-4 space-y-1">
-        {options.map((opt) => {
-          const checked = value.includes(opt.id);
-
-          return (
-            <label key={opt.id} className="flex items-center gap-2">
-              <input type="checkbox" checked={checked} onChange={() => toggle(opt.id)} />
-              <span>{opt.name}</span>
-            </label>
-          );
-        })}
-      </div>
-    </fieldset>
+    <div className="mbs-4 border-t pbs-4">
+      <fieldset>
+        <legend className="text-foreground text-xs font-medium tracking-widest uppercase">
+          {label}
+        </legend>
+        <div className="mbs-4 space-y-1">
+          {options.map((opt) => {
+            const checked = value.includes(opt.id);
+            return (
+              <label key={opt.id} className="flex items-center gap-2">
+                <input type="checkbox" checked={checked} onChange={() => toggle(opt.id)} />
+                <span>{opt.name}</span>
+              </label>
+            );
+          })}
+        </div>
+      </fieldset>
+    </div>
   );
 }

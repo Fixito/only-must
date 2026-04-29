@@ -1,7 +1,7 @@
 import { z } from 'zod';
 
 const currentYear = new Date().getFullYear();
-const earliestYear = 1991;
+const earliestYear = 1995;
 
 const arrayParam = z
   .union([z.string(), z.array(z.string())])
