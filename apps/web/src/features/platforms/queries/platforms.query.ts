@@ -1,6 +1,6 @@
 import { queryOptions } from '@tanstack/react-query';
 
-import { getPlatforms } from '@/features/games/api/platforms.api.ts';
+import { getPlatforms } from '@/features/platforms/api/platforms.api';
 
 export function platformsQueryOptions() {
   return queryOptions({

@@ -25,7 +25,7 @@ import {
 import { Slider } from '@/components/ui/slider.tsx';
 import { FilterMulti } from '@/features/games/components/filter-multi.tsx';
 import { gamesQueryOptions } from '@/features/games/queries/games.query.ts';
-import { platformsQueryOptions } from '@/features/games/queries/platforms.query.ts';
+import { platformsQueryOptions } from '@/features/platforms/queries/platforms.query';
 import { getPaginationItems } from '@/lib/pagination';
 import { queryClient } from '@/router.tsx';
 
