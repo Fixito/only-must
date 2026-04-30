@@ -6,16 +6,22 @@ import type { GameInsert } from '../db/schemas/game/game.schema.js';
 import { gamesTable } from '../db/schemas/game/game.schema.js';
 import { withRetry } from './utils.js';
 
+const SOURCES = [
+  (page: number) => `https://www.metacritic.com/browse/game/?page=${page}`,
+  (page: number) =>
+    `https://www.metacritic.com/browse/game/all/all/current-year/metascore/?platform=mobile&platform=nintendo-switch&platform=nintendo-switch-2&platform=pc&platform=ps5&platform=xbox-series-x&page=${page}`,
+];
+
+const MAX_PAGE = 590;
+
 interface ScrapedItem {
   link: string;
   img: string;
-  isMust: boolean;
+  heroImg: string;
   title: string;
   description: string;
   metaScore: number;
 }
-
-const MAX_PAGE = 590;
 
 async function scrapePage(page: Page): Promise<ScrapedItem[]> {
   return page.$$eval(
@@ -27,7 +33,16 @@ async function scrapePage(page: Page): Promise<ScrapedItem[]> {
           const imgEl = card.querySelector('img[data-nuxt-img]');
           return imgEl instanceof HTMLImageElement ? imgEl.src : '';
         })(),
-        isMust: card.querySelector('[data-testid="score-badge"]') !== null,
+        heroImg: (() => {
+          const imgEl = card.querySelector('img[data-nuxt-img]');
+          if (!(imgEl instanceof HTMLImageElement)) return '';
+          const srcset2x = imgEl.srcset
+            .split(',')
+            .find((s: string) => s.trim().endsWith('2x'))
+            ?.trim()
+            .split(' ')[0];
+          return srcset2x || imgEl.src;
+        })(),
         title:
           card
             .querySelector('[data-testid="product-title"] span:nth-of-type(2)')
@@ -50,36 +65,23 @@ async function insertItems(items: ScrapedItem[]) {
           link: i.link,
           image: i.img,
           metaScore: i.metaScore,
-          isMust: i.isMust,
+          heroImage: i.heroImg,
         }),
       ),
     )
     .onConflictDoNothing();
 }
 
-async function main() {
-  const browser = await chromium.launch({ headless: false });
-  const context = await browser.newContext({
-    userAgent:
-      'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/120 Safari/537.36',
-  });
-  const page = await context.newPage();
-
-  const start = Date.now();
-  let totalItems = 0;
+async function scrapeSource(page: Page, getUrl: (page: number) => string) {
   let pageNumber = 1;
-
-  console.log(`🕷️  Starting scrape...`);
+  let total = 0;
 
   while (pageNumber <= MAX_PAGE) {
-    console.log(`🕷️  Scraping page ${pageNumber}...`);
+    console.log(`🕷️  Scraping page ${pageNumber} — ${getUrl(pageNumber)}`);
 
     try {
       const items = await withRetry(async () => {
-        await page.goto(`https://www.metacritic.com/browse/game/?page=${pageNumber}`, {
-          waitUntil: 'domcontentloaded',
-          timeout: 60_000,
-        });
+        await page.goto(getUrl(pageNumber), { waitUntil: 'domcontentloaded', timeout: 60_000 });
         await page.waitForSelector('[data-testid="filter-results"]', { timeout: 15_000 });
         return scrapePage(page);
       });
@@ -90,15 +92,37 @@ async function main() {
       }
 
       await insertItems(items);
-      totalItems += items.length;
-
-      console.log(`✅ Page ${pageNumber} — ${items.length} items inserted (+${totalItems} total)`);
-
+      total += items.length;
+      console.log(`✅ Page ${pageNumber} — ${items.length} items inserted`);
       pageNumber++;
     } catch (error) {
-      console.error(`❌ Page ${pageNumber} failed after retries:`, error);
+      console.error(`❌ Page ${pageNumber} failed:`, error);
       pageNumber++;
     }
+  }
+
+  return total;
+}
+
+async function main() {
+  const headless =
+    process.env['HEADLESS'] === 'false'
+      ? false
+      : process.env['CI'] !== undefined || process.env['HEADLESS'] === 'true';
+  const browser = await chromium.launch({ headless });
+  const context = await browser.newContext({
+    userAgent:
+      'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/120 Safari/537.36',
+  });
+  const page = await context.newPage();
+
+  const start = Date.now();
+  let totalItems = 0;
+
+  console.log(`🕷️  Starting scrape...`);
+
+  for (const getUrl of SOURCES) {
+    totalItems += await scrapeSource(page, getUrl);
   }
 
   await browser.close();
