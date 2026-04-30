@@ -14,9 +14,11 @@ import {
 } from '../db/schemas/index.js';
 import { sleep, withRetry } from './utils.js';
 
+const CONCURRENCY = 5;
+
 interface GameDetails {
   platforms: string[];
-  releaseDate: Date | null;
+  releaseDate: string | null;
   developer: string;
   genres: string[];
 }
@@ -57,11 +59,13 @@ async function scrapeGameDetail(page: Page, url: string): Promise<GameDetails> {
 
       if (label.includes('Initial Release Date')) {
         const value = item.querySelector('.c-product-details__section__value')?.textContent?.trim();
-        if (value) result.releaseDate = new Date(value);
+        if (value) result.releaseDate = value;
       }
 
       if (label.includes('Developer')) {
-        const dev = item.querySelector('.c-product-detail-link')?.textContent?.trim();
+        const dev = item
+          .querySelector('.c-product-details__section__list-item')
+          ?.textContent?.trim();
         if (dev) result.developer = dev;
       }
 
@@ -84,129 +88,148 @@ async function main() {
     .from(gamesTable)
     .where(eq(gamesTable.isDetailsScraped, false));
 
-  const browser = await chromium.launch({ headless: false });
+  const browser = await chromium.launch({ headless: true });
 
   const context = await browser.newContext({
     userAgent:
       'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/120 Safari/537.36',
   });
 
-  let page = await context.newPage();
+  await context.route('**/*', async (route) => {
+    const blocked = ['image', 'media', 'font', 'stylesheet'];
 
-  console.log(`🕷️  Starting scrape...`);
+    if (blocked.includes(route.request().resourceType())) {
+      await route.abort();
+    } else {
+      await route.continue();
+    }
+  });
+
+  const chunks: (typeof gamesToScrape)[] = [];
+
+  for (let i = 0; i < gamesToScrape.length; i += CONCURRENCY) {
+    chunks.push(gamesToScrape.slice(i, i + CONCURRENCY));
+  }
+
+  console.log(`🕷️  Starting scrape... (${gamesToScrape.length} games, ${chunks.length} chunks)`);
 
   const start = Date.now();
 
-  for (const game of gamesToScrape) {
-    console.log(`🕷️  Scraping details for "${game.title}" (${game.link})`);
+  for (const chunk of chunks) {
+    await Promise.all(
+      chunk.map(async (game) => {
+        const page = await context.newPage();
 
-    try {
-      const gameDetails = await withRetry(() => scrapeGameDetail(page, game.link));
+        try {
+          console.log(`🕷️  Scraping "${game.title}"`);
+          const gameDetails = await withRetry(() => scrapeGameDetail(page, game.link));
 
-      console.log(`💾 Inserting into DB...`);
+          console.log(`💾 Inserting "${game.title}"...`);
 
-      await db.transaction(async (tx) => {
-        if (gameDetails.developer) {
-          const devSlug = slug(gameDetails.developer);
+          await db.transaction(async (tx) => {
+            if (gameDetails.developer) {
+              const devSlug = slug(gameDetails.developer);
 
-          await tx
-            .insert(developersTable)
-            .values({ id: devSlug, name: gameDetails.developer })
-            .onConflictDoNothing({ target: developersTable.id });
+              await tx
+                .insert(developersTable)
+                .values({ id: devSlug, name: gameDetails.developer })
+                .onConflictDoNothing({ target: developersTable.id });
 
-          await tx
-            .insert(gameDevelopersTable)
-            .values({ gameId: game.id, developerId: devSlug })
-            .onConflictDoNothing({
-              target: [gameDevelopersTable.gameId, gameDevelopersTable.developerId],
-            });
-        }
-
-        if (gameDetails.genres.length > 0) {
-          const genreMap = new Map<string, { name: string; id: string }>();
-
-          gameDetails.genres.forEach((g) => {
-            const genreSlug = slug(g);
-
-            if (!genreMap.has(genreSlug)) {
-              genreMap.set(genreSlug, { name: g, id: genreSlug });
+              await tx
+                .insert(gameDevelopersTable)
+                .values({ gameId: game.id, developerId: devSlug })
+                .onConflictDoNothing({
+                  target: [gameDevelopersTable.gameId, gameDevelopersTable.developerId],
+                });
             }
+
+            if (gameDetails.genres.length > 0) {
+              const genreMap = new Map<string, { name: string; id: string }>();
+
+              gameDetails.genres.forEach((g) => {
+                const genreSlug = slug(g);
+
+                if (!genreMap.has(genreSlug)) {
+                  genreMap.set(genreSlug, { name: g, id: genreSlug });
+                }
+              });
+
+              const genreSlugs = Array.from(genreMap.values());
+
+              await tx
+                .insert(genresTable)
+                .values(genreSlugs)
+                .onConflictDoNothing({ target: genresTable.id });
+
+              await tx
+                .insert(gameGenresTable)
+                .values(
+                  genreSlugs.map((genre) => ({
+                    gameId: game.id,
+                    genreId: genre.id,
+                  })),
+                )
+                .onConflictDoNothing({
+                  target: [gameGenresTable.gameId, gameGenresTable.genreId],
+                });
+            }
+
+            if (gameDetails.platforms.length > 0) {
+              const platformMap = new Map<string, { name: string; id: string }>();
+
+              gameDetails.platforms.forEach((p) => {
+                const platformSlug = slug(p);
+
+                if (!platformMap.has(platformSlug)) {
+                  platformMap.set(platformSlug, { name: p, id: platformSlug });
+                }
+              });
+
+              const platformSlugs = Array.from(platformMap.values());
+
+              await tx
+                .insert(platformsTable)
+                .values(platformSlugs)
+                .onConflictDoNothing({ target: platformsTable.id });
+
+              await tx
+                .insert(gamePlatformsTable)
+                .values(
+                  platformSlugs.map((platform) => ({
+                    gameId: game.id,
+                    platformId: platform.id,
+                  })),
+                )
+                .onConflictDoNothing({
+                  target: [gamePlatformsTable.gameId, gamePlatformsTable.platformId],
+                });
+            }
+
+            await tx
+              .update(gamesTable)
+              .set({
+                releaseDate: gameDetails.releaseDate
+                  ? new Date(gameDetails.releaseDate).toISOString().substring(0, 10)
+                  : null,
+                isDetailsScraped: true,
+              })
+              .where(eq(gamesTable.id, game.id));
           });
 
-          const genreSlugs = Array.from(genreMap.values());
-
-          await tx
-            .insert(genresTable)
-            .values(genreSlugs)
-            .onConflictDoNothing({ target: genresTable.id });
-
-          await tx
-            .insert(gameGenresTable)
-            .values(
-              genreSlugs.map((genre) => ({
-                gameId: game.id,
-                genreId: genre.id,
-              })),
-            )
-            .onConflictDoNothing({
-              target: [gameGenresTable.gameId, gameGenresTable.genreId],
-            });
+          console.log(`✅ Done: "${game.title}"`);
+        } catch (error) {
+          console.error(`❌ Failed "${game.title}":`, error);
+        } finally {
+          await page.close();
         }
+      }),
+    );
 
-        if (gameDetails.platforms.length > 0) {
-          const platformMap = new Map<string, { name: string; id: string }>();
-
-          gameDetails.platforms.forEach((p) => {
-            const platformSlug = slug(p);
-
-            if (!platformMap.has(platformSlug)) {
-              platformMap.set(platformSlug, { name: p, id: platformSlug });
-            }
-          });
-
-          const platformSlugs = Array.from(platformMap.values());
-
-          await tx
-            .insert(platformsTable)
-            .values(platformSlugs)
-            .onConflictDoNothing({ target: platformsTable.id });
-
-          await tx
-            .insert(gamePlatformsTable)
-            .values(
-              platformSlugs.map((platform) => ({
-                gameId: game.id,
-                platformId: platform.id,
-              })),
-            )
-            .onConflictDoNothing({
-              target: [gamePlatformsTable.gameId, gamePlatformsTable.platformId],
-            });
-        }
-
-        await tx
-          .update(gamesTable)
-          .set({
-            releaseDate: gameDetails.releaseDate
-              ? gameDetails.releaseDate.toISOString().substring(0, 10)
-              : null,
-            isDetailsScraped: true,
-          })
-          .where(eq(gamesTable.id, game.id));
-      });
-
-      console.log(`✅ Insert done`);
-    } catch (error) {
-      console.error(`❌ Failed to scrape "${game.title}":`, error);
-      await page.close();
-      page = await context.newPage();
-    }
-
-    await sleep(1500 + Math.random() * 2000);
+    await sleep(500 + Math.random() * 500);
   }
 
   console.log(
-    `\n📦 Scraping done in ${((Date.now() - start) / 1000).toFixed(1)}s -- ${gamesToScrape.length} games scraped`,
+    `\n📦 Done in ${((Date.now() - start) / 1000).toFixed(1)}s -- ${gamesToScrape.length} games`,
   );
 
   await browser.close();

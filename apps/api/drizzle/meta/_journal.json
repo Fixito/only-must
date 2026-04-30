@@ -5,29 +5,8 @@
     {
       "idx": 0,
       "version": "7",
-      "when": 1776408777740,
-      "tag": "0000_opposite_thaddeus_ross",
-      "breakpoints": true
-    },
-    {
-      "idx": 1,
-      "version": "7",
-      "when": 1776667321069,
-      "tag": "0001_spicy_wong",
-      "breakpoints": true
-    },
-    {
-      "idx": 2,
-      "version": "7",
-      "when": 1777031394384,
-      "tag": "0002_aberrant_hellion",
-      "breakpoints": true
-    },
-    {
-      "idx": 3,
-      "version": "7",
-      "when": 1777182188931,
-      "tag": "0003_lean_ulik",
+      "when": 1777529310450,
+      "tag": "0000_clean_prima",
       "breakpoints": true
     }
   ]
