@@ -105,7 +105,10 @@ async function scrapeSource(page: Page, getUrl: (page: number) => string) {
 }
 
 async function main() {
-  const headless = process.env.HEADLESS === 'false' ? false : process.env.CI !== undefined || process.env.HEADLESS === 'true';
+  const headless =
+    process.env['HEADLESS'] === 'false'
+      ? false
+      : process.env['CI'] !== undefined || process.env['HEADLESS'] === 'true';
   const browser = await chromium.launch({ headless });
   const context = await browser.newContext({
     userAgent:
