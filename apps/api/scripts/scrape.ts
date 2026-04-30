@@ -35,13 +35,13 @@ async function scrapePage(page: Page): Promise<ScrapedItem[]> {
         })(),
         heroImg: (() => {
           const imgEl = card.querySelector('img[data-nuxt-img]');
-          return imgEl instanceof HTMLImageElement
-            ? imgEl.srcset
-                .split(',')
-                .find((s: string) => s.trim().endsWith('2x'))
-                ?.trim()
-                .split(' ')[0] || ''
-            : '';
+          if (!(imgEl instanceof HTMLImageElement)) return '';
+          const srcset2x = imgEl.srcset
+            .split(',')
+            .find((s: string) => s.trim().endsWith('2x'))
+            ?.trim()
+            .split(' ')[0];
+          return srcset2x || imgEl.src;
         })(),
         title:
           card
@@ -105,7 +105,8 @@ async function scrapeSource(page: Page, getUrl: (page: number) => string) {
 }
 
 async function main() {
-  const browser = await chromium.launch({ headless: false });
+  const headless = process.env.HEADLESS === 'false' ? false : process.env.CI !== undefined || process.env.HEADLESS === 'true';
+  const browser = await chromium.launch({ headless });
   const context = await browser.newContext({
     userAgent:
       'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/120 Safari/537.36',

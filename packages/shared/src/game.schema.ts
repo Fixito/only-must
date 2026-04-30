@@ -8,7 +8,7 @@ export const GameSchema = z.object({
   image: z.string(),
   heroImage: z.string(),
   metaScore: z.number(),
-  releaseDate: z.string(),
+  releaseDate: z.string().nullable(),
 });
 
 // --- relations ---

@@ -209,7 +209,12 @@ async function main() {
               .update(gamesTable)
               .set({
                 releaseDate: gameDetails.releaseDate
-                  ? new Date(gameDetails.releaseDate).toISOString().substring(0, 10)
+                  ? (() => {
+                      const d = new Date(gameDetails.releaseDate);
+                      return d instanceof Date && !isNaN(d.getTime())
+                        ? d.toISOString().substring(0, 10)
+                        : null;
+                    })()
                   : null,
                 isDetailsScraped: true,
               })
