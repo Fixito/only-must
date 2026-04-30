@@ -46,26 +46,34 @@ function RouteComponent() {
         <h1 className="text-4xl font-semibold">{title}</h1>
 
         <div className="mbs-4 flex flex-col items-start gap-4 sm:flex-row">
-          <img src={heroImage} alt={title} loading="lazy" className="rounded-md object-cover" />
+          <img
+            src={heroImage}
+            alt={title}
+            loading="lazy"
+            className="w-full max-w-44 rounded-md object-cover"
+          />
 
           <div className="w-max">
             <div className="space-y-4">
               <div className="bg-card text-muted-foreground p-4 shadow-sm">
-                <p className="flex items-center gap-[0.25ch]">
+                <p className="flex flex-wrap items-center gap-1">
                   <strong className="text-foreground rounded-md font-semibold">Platforms:</strong>
-                  {platforms
-                    .toSorted((a, b) => a.name.localeCompare(b.name))
-                    .map((p) => {
-                      return (
-                        <Badge
-                          key={p.id}
-                          variant="secondary"
-                          className={`text-xs ${PLATFORM_STYLES[p.id]}`}
-                        >
-                          {p.name}
-                        </Badge>
-                      );
-                    })}
+
+                  <div className="flex flex-wrap items-center gap-1">
+                    {platforms
+                      .toSorted((a, b) => a.name.localeCompare(b.name))
+                      .map((p) => {
+                        return (
+                          <Badge
+                            key={p.id}
+                            variant="secondary"
+                            className={`text-xs ${PLATFORM_STYLES[p.id] ?? 'bg-muted text-muted-foreground'}`}
+                          >
+                            {p.name}
+                          </Badge>
+                        );
+                      })}
+                  </div>
                 </p>
 
                 <p>
@@ -98,10 +106,10 @@ function RouteComponent() {
             </div>
           </div>
 
-          <div className="p-4">
+          <div className="flex flex-col items-start gap-2 p-4">
             <span className="font-semibold tracking-widest uppercase">Metascore</span>
 
-            <div className="mbs-4 flex gap-4">
+            <div className="flex gap-4">
               <img
                 src="/must-play.svg"
                 alt="Must Play"
