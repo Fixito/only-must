@@ -1,12 +1,12 @@
 {
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
-    "outDir": "./dist",
-    "rootDir": "./src",
+    "outDir": "dist",
+    "rootDir": "src",
 
     "composite": true,
     "declaration": true,
-    "declarationDir": "./dist",
+    "declarationDir": "dist",
 
     "target": "ES2022",
     "module": "NodeNext",
