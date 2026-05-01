@@ -15,7 +15,11 @@ export class ForbiddenError extends ApiError {
 
 export class NotFoundError extends ApiError {
   constructor(message = 'Resource') {
-    super(`${message} not found`, StatusCodes.NOT_FOUND);
+    const trimmed = message.trim();
+    const lowerMessage = trimmed.toLowerCase();
+    const alreadyHasNotFound = lowerMessage.endsWith('not found') || lowerMessage.endsWith('not found.');
+    const finalMessage = alreadyHasNotFound ? trimmed : `${trimmed} not found`;
+    super(finalMessage, StatusCodes.NOT_FOUND);
   }
 }
 

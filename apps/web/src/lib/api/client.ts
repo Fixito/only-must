@@ -18,7 +18,10 @@ apiClient.interceptors.response.use(
     const code: string = isAxiosError(error)
       ? String(error.response?.data?.code ?? 'UNKNOWN')
       : 'UNKNOWN';
+    const message: string = isAxiosError(error)
+      ? String(error.response?.data?.message ?? error.response?.data?.code ?? 'UNKNOWN')
+      : 'UNKNOWN';
 
-    return Promise.reject(new ApiError(code, status));
+    return Promise.reject(new ApiError(message, status));
   },
 );
