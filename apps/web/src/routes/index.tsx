@@ -44,6 +44,16 @@ function clampRange(
 }
 
 export const Route = createFileRoute('/')({
+  head: () => ({
+    meta: [
+      { title: 'Must Play Games of All Time | OnlyMust' },
+      {
+        name: 'description',
+        content:
+          'Find your next game for any platform. Filter by platform, genre, or release year. OnlyMust curates the best games across all platforms and genres to help you find your next must play game.',
+      },
+    ],
+  }),
   validateSearch: GamesQuerySchema,
   loaderDeps: ({ search }) => search,
   loader: async ({ deps }) => {
