@@ -31,7 +31,7 @@ export function getRouter() {
     scrollRestoration: true,
     defaultPreload: 'intent',
     defaultPreloadStaleTime: 0,
-    defaultErrorComponent: ({ error }) => <Error error={error} />,
+    defaultErrorComponent: ({ error, reset }) => <Error error={error} reset={reset} />,
     defaultNotFoundComponent: () => <NotFound />,
     parseSearch: (search) => queryString.parse(search.startsWith('?') ? search.slice(1) : search),
     stringifySearch: (search) => {

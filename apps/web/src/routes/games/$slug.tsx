@@ -41,7 +41,7 @@ export const Route = createFileRoute('/games/$slug')({
     ],
   }),
   component: RouteComponent,
-  errorComponent: ({ error }) => <Error error={error} />,
+  errorComponent: ({ error, reset }) => <Error error={error} reset={reset} />,
   notFoundComponent: () => (
     <NotFound title="Game not found" message="This game does not exist or has been removed." />
   ),

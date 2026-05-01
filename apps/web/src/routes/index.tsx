@@ -51,7 +51,7 @@ export const Route = createFileRoute('/')({
     return await queryClient.ensureQueryData(gamesQueryOptions(deps));
   },
   component: App,
-  errorComponent: ({ error }) => <Error error={error} />,
+  errorComponent: ({ error, reset }) => <Error error={error} reset={reset} />,
 });
 
 function App() {

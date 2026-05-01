@@ -49,7 +49,7 @@ export const Route = createRootRoute({
     ],
   }),
   shellComponent: RootDocument,
-  errorComponent: ({ error }) => <Error error={error} />,
+  errorComponent: ({ error, reset }) => <Error error={error} reset={reset} />,
   notFoundComponent: () => <NotFound />,
 });
 
