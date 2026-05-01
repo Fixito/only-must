@@ -17,7 +17,8 @@ export class NotFoundError extends ApiError {
   constructor(message = 'Resource') {
     const trimmed = message.trim() || 'Resource';
     const lowerMessage = trimmed.toLowerCase();
-    const alreadyHasNotFound = lowerMessage.endsWith('not found') || lowerMessage.endsWith('not found.');
+    const alreadyHasNotFound =
+      lowerMessage.endsWith('not found') || lowerMessage.endsWith('not found.');
     const finalMessage = alreadyHasNotFound ? trimmed : `${trimmed} not found`;
     super(finalMessage, StatusCodes.NOT_FOUND);
   }

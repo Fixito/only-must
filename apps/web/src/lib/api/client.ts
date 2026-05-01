@@ -14,14 +14,15 @@ export const apiClient = axios.create({
 apiClient.interceptors.response.use(
   (res) => res,
   (error: unknown) => {
-    const status: number = isAxiosError(error) ? (error.response?.status ?? 0) : 0;
-    const code: string = isAxiosError(error)
-      ? String(error.response?.data?.code ?? 'UNKNOWN')
-      : 'UNKNOWN';
-    const message: string = isAxiosError(error)
-      ? String(error.response?.data?.message ?? error.response?.data?.code ?? 'UNKNOWN')
-      : 'UNKNOWN';
+    const payload = isAxiosError(error) ? error.response?.data : undefined;
 
-    return Promise.reject(new ApiError(message, status));
+    const message =
+      typeof payload?.message === 'string' && payload.message.trim() !== ''
+        ? payload.message
+        : String(payload?.code ?? 'UNKNOWN');
+
+    const statusCode: number = isAxiosError(error) ? (error.response?.status ?? 0) : 0;
+
+    return Promise.reject(new ApiError(message, statusCode));
   },
 );

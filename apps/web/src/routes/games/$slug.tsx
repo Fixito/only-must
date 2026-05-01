@@ -36,7 +36,7 @@ export const Route = createFileRoute('/games/$slug')({
   head: ({ loaderData }) => ({
     meta: [
       {
-        title: `${loaderData?.data.title} | OnlyMust`,
+        title: `${loaderData?.data.title ?? 'Not Found'} | OnlyMust`,
       },
     ],
   }),
