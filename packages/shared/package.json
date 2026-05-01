@@ -11,7 +11,7 @@
   },
   "scripts": {
     "build": "tsc -p tsconfig.json",
-    "clean": "Remove-Item -Recurse -Force dist,tsconfig.tsbuildinfo -ErrorAction SilentlyContinue"
+    "clean": "rimraf dist tsconfig.tsbuildinfo"
   },
   "dependencies": {
     "zod": "^4.3.6"

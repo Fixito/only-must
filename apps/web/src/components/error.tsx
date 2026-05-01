@@ -1,28 +1,33 @@
-import { useQueryErrorResetBoundary } from '@tanstack/react-query';
+import type { ErrorComponentProps } from '@tanstack/react-router';
 import { useRouter } from '@tanstack/react-router';
-import { useEffect } from 'react';
+import { isAxiosError } from 'axios';
 
-export default function Error({ error }: { error: Error }) {
+import { Button } from '@/components/ui/button.tsx';
+
+export default function Error({ error }: ErrorComponentProps) {
   const router = useRouter();
-  const queryErrorResetBoundary = useQueryErrorResetBoundary();
 
-  useEffect(() => {
-    // Reset the query error boundary
-    queryErrorResetBoundary.reset();
-  }, [queryErrorResetBoundary]);
+  let message = 'Something went wrong';
+
+  if (isAxiosError(error)) {
+    message = error.message;
+  } else if (error instanceof Error) {
+    message = error.message;
+  }
 
   return (
-    <div>
-      <p>Something went wrong: {error.message}</p>
+    <div className="container py-12">
+      <h1 className="text-2xl font-semibold">Something went wrong</h1>
 
-      <button
-        onClick={() => {
-          // Invalidate the route to reload the loader, and reset any router error boundaries
-          void router.invalidate();
-        }}
-      >
-        Retry
-      </button>
+      <p className="text-muted-foreground mt-2 text-sm">{message}</p>
+
+      <div className="mt-4 flex gap-2">
+        <Button onClick={() => router.invalidate()}>Retry</Button>
+
+        <Button variant="outline" onClick={() => router.navigate({ to: '/' })}>
+          Back to games
+        </Button>
+      </div>
     </div>
   );
 }

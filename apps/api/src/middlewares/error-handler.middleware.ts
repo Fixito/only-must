@@ -1,10 +1,10 @@
+import { ApiError } from '@only-must/shared';
 import type { NextFunction, Request, Response } from 'express';
 import { StatusCodes, getReasonPhrase } from 'http-status-codes';
 import { ZodError } from 'zod';
 
 import { env } from '@/config/env.js';
 import { logger } from '@/config/logger.js';
-import { AppError } from '@/errors/index.js';
 
 export function errorHandler(err: Error, req: Request, res: Response, _next: NextFunction) {
   res.setHeader('Content-Type', 'application/problem+json');
@@ -28,7 +28,7 @@ export function errorHandler(err: Error, req: Request, res: Response, _next: Nex
   }
 
   const statusCode: StatusCodes =
-    err instanceof AppError ? err.statusCode : StatusCodes.INTERNAL_SERVER_ERROR;
+    err instanceof ApiError ? err.statusCode : StatusCodes.INTERNAL_SERVER_ERROR;
 
   const detail =
     statusCode === StatusCodes.INTERNAL_SERVER_ERROR && env.NODE_ENV !== 'development'

@@ -1,28 +1,31 @@
-import { Link } from '@tanstack/react-router';
+import { useRouter } from '@tanstack/react-router';
 
 import { Button } from './ui/button.tsx';
 
 interface NotFoundProps {
-  children?: React.ReactNode;
+  title?: string;
+  message?: string;
 }
 
-export function NotFound({ children }: NotFoundProps) {
-  return (
-    <div className="space-y-2 p-2">
-      <div className="text-gray-600 dark:text-gray-400">
-        {children || <p>The page you are looking for does not exist.</p>}
-      </div>
+export function NotFound({
+  title = 'Page not found',
+  message = 'The page you are looking for does not exist.',
+}: NotFoundProps) {
+  const router = useRouter();
 
-      <p className="flex flex-wrap items-center gap-2">
+  return (
+    <div className="container py-12">
+      <h1 className="text-2xl font-semibold">{title}</h1>
+
+      <p className="text-muted-foreground mt-2 text-sm">{message}</p>
+
+      <div className="mt-4 flex gap-2">
         <Button onClick={() => window.history.back()}>Go back</Button>
 
-        <Link
-          to="/"
-          className="rounded-sm bg-cyan-600 px-2 py-1 text-sm font-black text-white uppercase"
-        >
-          Start Over
-        </Link>
-      </p>
+        <Button variant="outline" onClick={() => router.navigate({ to: '/' })}>
+          Back to games
+        </Button>
+      </div>
     </div>
   );
 }
