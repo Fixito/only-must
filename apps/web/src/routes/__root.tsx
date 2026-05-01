@@ -3,6 +3,7 @@ import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 import { HeadContent, Scripts, createRootRoute } from '@tanstack/react-router';
 import { TanStackRouterDevtoolsPanel } from '@tanstack/react-router-devtools';
 
+import Error from '@/components/error.tsx';
 import Footer from '@/components/footer.tsx';
 import Navbar from '@/components/navbar/navbar.tsx';
 import { NotFound } from '@/components/not-found.tsx';
@@ -48,6 +49,7 @@ export const Route = createRootRoute({
     ],
   }),
   shellComponent: RootDocument,
+  errorComponent: ({ error, reset }) => <Error error={error} reset={reset} />,
   notFoundComponent: () => <NotFound />,
 });
 

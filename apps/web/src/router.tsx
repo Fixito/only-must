@@ -1,12 +1,28 @@
+import { ApiError } from '@only-must/shared';
 import { QueryClient } from '@tanstack/react-query';
 import { createRouter as createTanStackRouter } from '@tanstack/react-router';
 import { setupRouterSsrQueryIntegration } from '@tanstack/react-router-ssr-query';
 import queryString from 'query-string';
 
+import Error from './components/error.tsx';
 import { NotFound } from './components/not-found.tsx';
 import { routeTree } from './routeTree.gen';
 
-export const queryClient = new QueryClient();
+export const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      retry: (failureCount, error) => {
+        if (error instanceof ApiError && error.statusCode === 404) return false;
+        if (error instanceof ApiError && error.statusCode >= 400 && error.statusCode < 500)
+          return false;
+        return failureCount < 2;
+      },
+      throwOnError: (error) => {
+        return error instanceof ApiError && error.statusCode !== 404;
+      },
+    },
+  },
+});
 
 export function getRouter() {
   const router = createTanStackRouter({
@@ -15,6 +31,7 @@ export function getRouter() {
     scrollRestoration: true,
     defaultPreload: 'intent',
     defaultPreloadStaleTime: 0,
+    defaultErrorComponent: ({ error, reset }) => <Error error={error} reset={reset} />,
     defaultNotFoundComponent: () => <NotFound />,
     parseSearch: (search) => queryString.parse(search.startsWith('?') ? search.slice(1) : search),
     stringifySearch: (search) => {

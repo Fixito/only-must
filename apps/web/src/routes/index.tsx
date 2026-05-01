@@ -51,7 +51,7 @@ export const Route = createFileRoute('/')({
     return await queryClient.ensureQueryData(gamesQueryOptions(deps));
   },
   component: App,
-  errorComponent: Error,
+  errorComponent: ({ error, reset }) => <Error error={error} reset={reset} />,
 });
 
 function App() {
@@ -207,7 +207,9 @@ function App() {
 
         <section className="pbs-4">
           <div>
-            <p className="text-muted-foreground font-light">{total} results</p>
+            <p className="text-muted-foreground font-light">
+              {total} results {search.search && `for "${search.search}"`}
+            </p>
           </div>
 
           <div className="mbs-6 grid gap-4 md:grid-cols-2 lg:grid-cols-3">

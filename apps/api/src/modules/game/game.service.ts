@@ -2,6 +2,8 @@ import { GameSchema, GameWithRelationsSchema } from '@only-must/shared';
 import type { SQL } from 'drizzle-orm';
 import { and, inArray, sql } from 'drizzle-orm';
 
+import { NotFoundError } from '@/errors/index.js';
+
 import { gamesTable } from '../../../db/schemas/game/game.schema.js';
 import { gameGenresTable, gamePlatformsTable } from '../../../db/schemas/index.js';
 import * as gameRepository from './game.repository.js';
@@ -97,6 +99,6 @@ export async function getGames({
 
 export async function getGameBySlug(slug: string) {
   const game = await gameRepository.findGameBySlug(slug);
-  if (!game) return null;
+  if (!game) throw new NotFoundError('Game');
   return GameWithRelationsSchema.parse(game);
 }
