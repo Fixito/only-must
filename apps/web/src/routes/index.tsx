@@ -6,6 +6,7 @@ import { useEffect, useState } from 'react';
 
 import Error from '@/components/error.tsx';
 import GameCard from '@/components/game-card.tsx';
+import { default as CardsGridSkeleton } from '@/components/grid-page-skeleton';
 import {
   Collapsible,
   CollapsibleContent,
@@ -60,6 +61,7 @@ export const Route = createFileRoute('/')({
     await queryClient.prefetchQuery(platformsQueryOptions());
     return await queryClient.ensureQueryData(gamesQueryOptions(deps));
   },
+  pendingComponent: () => <CardsGridSkeleton />,
   component: App,
   errorComponent: ({ error, reset }) => <Error error={error} reset={reset} />,
 });

@@ -143,6 +143,9 @@
 
   html {
     @apply font-sans;
+    @media (prefers-reduced-motion: no-preference) {
+      @apply scroll-smooth;
+    }
   }
 
   body {
