@@ -11,6 +11,8 @@ import { routeTree } from './routeTree.gen';
 export const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
+      refetchOnWindowFocus: false,
+      staleTime: 1000 * 60 * 5, // 5 minutes
       retry: (failureCount, error) => {
         if (error instanceof ApiError && error.statusCode === 404) return false;
         if (error instanceof ApiError && error.statusCode >= 400 && error.statusCode < 500)

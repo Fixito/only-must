@@ -4,6 +4,7 @@ import { createFileRoute, notFound } from '@tanstack/react-router';
 import Error from '@/components/error.tsx';
 import { NotFound } from '@/components/not-found.tsx';
 import { Badge } from '@/components/ui/badge.tsx';
+import GameDetailSkeleton from '@/features/games/components/game-detail-skeleton.tsx';
 import { gameQueryOptions } from '@/features/games/queries/game.query';
 import { formatdate } from '@/lib/date.ts';
 import { queryClient } from '@/router.tsx';
@@ -35,11 +36,16 @@ export const Route = createFileRoute('/games/$slug')({
   },
   head: ({ loaderData }) => ({
     meta: [
+      { title: `${loaderData?.data.title ?? 'Not Found'} | OnlyMust` },
       {
-        title: `${loaderData?.data.title ?? 'Not Found'} | OnlyMust`,
+        name: 'description',
+        content: loaderData?.data.description
+          ? `${loaderData.data.description.slice(0, 150)}...`
+          : 'Discover the best games on OnlyMust.',
       },
     ],
   }),
+  pendingComponent: () => <GameDetailSkeleton />,
   component: RouteComponent,
   errorComponent: ({ error, reset }) => <Error error={error} reset={reset} />,
   notFoundComponent: () => (

@@ -7,7 +7,23 @@ import { defineConfig } from 'vite';
 
 const config = defineConfig({
   resolve: { tsconfigPaths: true },
-  plugins: [devtools(), tailwindcss(), tanstackStart(), netlify(), viteReact()],
+  plugins: [
+    devtools(),
+    tailwindcss(),
+    tanstackStart({
+      prerender: {
+        enabled: true,
+        crawlLinks: true,
+        filter: ({ path }) => !path.includes('?'),
+      },
+      sitemap: {
+        enabled: true,
+        host: 'https://onlymust.netlify.app',
+      },
+    }),
+    netlify(),
+    viteReact(),
+  ],
 });
 
 export default config;
