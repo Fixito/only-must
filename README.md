@@ -18,7 +18,7 @@ Too many games, not enough time. **Only Must** solves that by surfacing only the
 
 ## Project structure
 
-```
+```text
 only-must/
 ├── apps/
 │   ├── api/          # Express REST API

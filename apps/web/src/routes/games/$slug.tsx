@@ -39,7 +39,9 @@ export const Route = createFileRoute('/games/$slug')({
       { title: `${loaderData?.data.title ?? 'Not Found'} | OnlyMust` },
       {
         name: 'description',
-        content: `${loaderData?.data.description.slice(0, 150)}...`,
+        content: loaderData?.data.description
+          ? `${loaderData.data.description.slice(0, 150)}...`
+          : 'Discover the best games on OnlyMust.',
       },
     ],
   }),
