@@ -33,11 +33,24 @@ app.use(
 app.set('query parser', 'extended');
 
 app.get('/health', async (_req, res) => {
+  const timeoutMs = 5000; // 5 second timeout for health check
+
   try {
-    await db.execute('SELECT 1');
+    const dbCheck = db.execute('SELECT 1');
+    const timeout = new Promise((_, reject) =>
+      setTimeout(() => reject(new Error('Database health check timeout')), timeoutMs)
+    );
+
+    await Promise.race([dbCheck, timeout]);
     res.status(StatusCodes.OK).json({ status: 'ok', db: 'up' });
-  } catch {
-    res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ status: 'error', db: 'down' });
+  } catch (err) {
+    const error = err instanceof Error ? err : new Error('Unknown error');
+    logger.error({ error: error.message, stack: error.stack }, 'Health check failed');
+    res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+      status: 'error',
+      db: 'down',
+      error: error.message
+    });
   }
 });
 
