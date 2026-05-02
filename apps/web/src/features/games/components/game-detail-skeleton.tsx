@@ -12,7 +12,7 @@ export default function GameDetailSkeleton() {
           <div className="w-72">
             <div className="space-y-4">
               <div className="bg-card p-4 shadow-sm">
-                <p className="flex flex-wrap items-center gap-1">
+                <div className="flex flex-wrap items-center gap-1">
                   <strong className="text-foreground rounded-md font-semibold">Platforms:</strong>
 
                   <div className="flex flex-wrap gap-1">
@@ -20,7 +20,7 @@ export default function GameDetailSkeleton() {
                       <Skeleton key={i} className="h-5 w-16 rounded-full" />
                     ))}
                   </div>
-                </p>
+                </div>
 
                 <div>
                   <div className="flex flex-wrap items-center gap-2">
