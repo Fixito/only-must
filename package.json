@@ -12,7 +12,6 @@
     "clean": "pnpm -r clean",
     "build:api": "pnpm -F shared build && pnpm -F api build",
     "build:web": "pnpm -F shared build && pnpm -F web build",
-    "start:api": "pnpm -F api start",
     "dev:api": "pnpm -F api dev",
     "dev:web": "pnpm -F web dev",
     "dev": "concurrently -n TS,API,WEB -c blue,green,magenta \"pnpm typecheck:watch\" \"pnpm dev:api\" \"pnpm dev:web\"",
