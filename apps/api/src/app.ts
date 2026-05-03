@@ -38,7 +38,7 @@ app.get('/health', async (_req, res) => {
   try {
     const dbCheck = db.execute('SELECT 1');
     const timeout = new Promise((_, reject) =>
-      setTimeout(() => reject(new Error('Database health check timeout')), timeoutMs)
+      setTimeout(() => reject(new Error('Database health check timeout')), timeoutMs),
     );
 
     await Promise.race([dbCheck, timeout]);
@@ -49,7 +49,7 @@ app.get('/health', async (_req, res) => {
     res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
       status: 'error',
       db: 'down',
-      error: error.message
+      error: error.message,
     });
   }
 });

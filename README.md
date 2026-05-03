@@ -1,3 +1,5 @@
+[![Netlify Status](https://api.netlify.com/api/v1/badges/d1ba7f0b-88d3-423c-9155-901200b690d2/deploy-status)](https://app.netlify.com/projects/onlymust/deploys)
+
 # Only Must
 
 > Browse every **Must Play** game — filter by platform, genre, and year to find your next game.
