@@ -1,6 +1,9 @@
 [build]
-command = "npm install -g pnpm && pnpm install --frozen-lockfile && pnpm build:web"
+command = "pnpm install --frozen-lockfile && pnpm build:web"
 publish = "apps/web/dist/client"
 
 [build.environment]
 NODE_VERSION = "22"
+
+[context.production]
+ignore = "git diff --quiet $CACHED_COMMIT_REF $COMMIT_REF apps/api packages/shared"
