@@ -6,4 +6,4 @@ publish = "apps/web/dist/client"
 NODE_VERSION = "22"
 
 [context.production]
-ignore = "git diff --quiet $CACHED_COMMIT_REF $COMMIT_REF apps/api packages/shared"
+ignore = "git diff --quiet $CACHED_COMMIT_REF $COMMIT_REF -- apps/web packages/shared package.json pnpm-lock.yaml"
