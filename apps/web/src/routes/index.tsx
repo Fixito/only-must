@@ -85,7 +85,7 @@ function App() {
     ),
   );
   const navigate = Route.useNavigate();
-  const isFetching = useIsFetching({ queryKey: gamesQueryOptions().queryKey }) > 0;
+  const isFetching = useIsFetching({ queryKey: gamesQueryOptions().queryKey.slice(0, 1) }) > 0;
   const platformMap = Object.fromEntries(
     (platforms?.data ?? []).map((p: Platform) => [p.id, p.name]),
   );
