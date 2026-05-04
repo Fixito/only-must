@@ -1,4 +1,4 @@
-import type { Platform } from '@only-must/shared';
+import type { Genre, Platform } from '@only-must/shared';
 import { GamesQuerySchema } from '@only-must/shared';
 import { useIsFetching, useQuery } from '@tanstack/react-query';
 import { createFileRoute } from '@tanstack/react-router';
@@ -30,6 +30,7 @@ import EmptyState from '@/features/games/components/empty-state.tsx';
 import FilterChip from '@/features/games/components/filter-chip.tsx';
 import { FilterMulti } from '@/features/games/components/filter-multi.tsx';
 import { gamesQueryOptions } from '@/features/games/queries/games.query.ts';
+import { genresQueryOptions } from '@/features/genres/queries/genres.query.ts';
 import { platformsQueryOptions } from '@/features/platforms/queries/platforms.query';
 import { getPaginationItems } from '@/lib/pagination';
 import { queryClient } from '@/router.tsx';
@@ -63,6 +64,7 @@ export const Route = createFileRoute('/')({
   loaderDeps: ({ search }) => search,
   loader: async ({ deps }) => {
     await queryClient.prefetchQuery(platformsQueryOptions());
+    await queryClient.prefetchQuery(genresQueryOptions());
     return await queryClient.ensureQueryData(gamesQueryOptions(deps));
   },
   pendingComponent: () => <CardsGridSkeleton />,
@@ -76,6 +78,7 @@ function App() {
     meta: { page, total, totalPages, hasNext, hasPrev },
   } = Route.useLoaderData();
   const { data: platforms } = useQuery(platformsQueryOptions());
+  const { data: genres } = useQuery(genresQueryOptions());
   const search = Route.useSearch();
   const [value, setValue] = useState<[number, number]>(
     clampRange(
@@ -89,6 +92,7 @@ function App() {
   const platformMap = Object.fromEntries(
     (platforms?.data ?? []).map((p: Platform) => [p.id, p.name]),
   );
+  const genreMap = Object.fromEntries((genres?.data ?? []).map((g: Genre) => [g.id, g.name]));
 
   const commit = (next: [number, number]) => {
     const safe = clampRange(next, minYear, currentYear);
@@ -108,6 +112,16 @@ function App() {
       search: (prev) => ({
         ...prev,
         platforms: prev.platforms.filter((p) => p !== platform),
+        page: 1,
+      }),
+    });
+  };
+
+  const handleRemoveGenre = (genre: string) => {
+    void navigate({
+      search: (prev) => ({
+        ...prev,
+        genres: prev.genres.filter((g) => g !== genre),
         page: 1,
       }),
     });
@@ -177,6 +191,7 @@ function App() {
                         variant="ghost"
                         disabled={
                           !search.platforms.length &&
+                          !search.genres.length &&
                           !search.releaseYearMin &&
                           !search.releaseYearMax &&
                           !search.search
@@ -257,6 +272,13 @@ function App() {
                   options={Array.isArray(platforms) ? platforms : (platforms?.data ?? [])}
                   value={search.platforms}
                 />
+
+                <FilterMulti
+                  label="Genres"
+                  param="genres"
+                  options={Array.isArray(genres) ? genres : (genres?.data ?? [])}
+                  value={search.genres}
+                />
               </div>
             </CollapsibleContent>
           </Collapsible>
@@ -274,6 +296,14 @@ function App() {
                   key={p}
                   label={platformMap[p] ?? p}
                   onRemove={() => handleRemovePlatform(p)}
+                />
+              ))}
+
+              {search.genres.map((g) => (
+                <FilterChip
+                  key={g}
+                  label={genreMap[g] ?? g}
+                  onRemove={() => handleRemoveGenre(g)}
                 />
               ))}
 
@@ -300,6 +330,7 @@ function App() {
               hasFilters={Boolean(
                 search.search ||
                 search.platforms.length ||
+                search.genres.length ||
                 search.releaseYearMin ||
                 search.releaseYearMax,
               )}
