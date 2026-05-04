@@ -1,7 +1,7 @@
 import { Link, useNavigate, useSearch } from '@tanstack/react-router';
 import { useEffect, useRef, useState } from 'react';
 
-import { NavbarActions } from '@/components/navbar/ui/actions.tsx';
+import { NavbarActions } from '@/layout/navbar/ui/actions.tsx';
 
 import { navigation } from './data.ts';
 import { NavbarLinks } from './ui/links.tsx';
@@ -35,6 +35,7 @@ export default function Navbar() {
       return current === next ? current : next;
     });
   }, [search]);
+
   return (
     <nav className="bg-navbar after:bg-navbar-border relative after:pointer-events-none after:absolute after:inset-x-0 after:bottom-0 after:h-px">
       <div className="relative container flex h-16 items-center justify-between gap-x-6">

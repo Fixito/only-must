@@ -1,5 +1,7 @@
 import { z } from 'zod';
 
+import { PlatformSchema } from '../platform/platform.schema.js';
+
 export const GameSchema = z.object({
   id: z.string(),
   title: z.string(),
@@ -12,11 +14,6 @@ export const GameSchema = z.object({
 });
 
 // --- relations ---
-
-export const PlatformSchema = z.object({
-  id: z.string(),
-  name: z.string(),
-});
 
 export const GenreSchema = z.object({
   id: z.string(),

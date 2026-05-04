@@ -17,6 +17,5 @@ export default defineConfig({
   ignorePatterns: ['**/dist/**', '**/node_modules/**', '**/*.gen.ts', '**/drizzle/**'],
   options: {
     reportUnusedDisableDirectives: 'error',
-    typeAware: true,
   },
 });

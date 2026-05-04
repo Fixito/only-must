@@ -1,5 +1,6 @@
+import type { Platform } from '@only-must/shared';
 import { GamesQuerySchema } from '@only-must/shared';
-import { useQuery } from '@tanstack/react-query';
+import { useIsFetching, useQuery } from '@tanstack/react-query';
 import { createFileRoute } from '@tanstack/react-router';
 import { ChevronDownIcon } from 'lucide-react';
 import { useEffect, useState } from 'react';
@@ -7,6 +8,7 @@ import { useEffect, useState } from 'react';
 import Error from '@/components/error.tsx';
 import GameCard from '@/components/game-card.tsx';
 import { default as CardsGridSkeleton } from '@/components/grid-page-skeleton';
+import { Button } from '@/components/ui/button.tsx';
 import {
   Collapsible,
   CollapsibleContent,
@@ -24,6 +26,8 @@ import {
   PaginationPrevious,
 } from '@/components/ui/pagination';
 import { Slider } from '@/components/ui/slider.tsx';
+import EmptyState from '@/features/games/components/empty-state.tsx';
+import FilterChip from '@/features/games/components/filter-chip.tsx';
 import { FilterMulti } from '@/features/games/components/filter-multi.tsx';
 import { gamesQueryOptions } from '@/features/games/queries/games.query.ts';
 import { platformsQueryOptions } from '@/features/platforms/queries/platforms.query';
@@ -72,15 +76,18 @@ function App() {
     meta: { page, total, totalPages, hasNext, hasPrev },
   } = Route.useLoaderData();
   const { data: platforms } = useQuery(platformsQueryOptions());
-
   const search = Route.useSearch();
-  const navigate = Route.useNavigate();
   const [value, setValue] = useState<[number, number]>(
     clampRange(
       [search.releaseYearMin ?? minYear, search.releaseYearMax ?? currentYear],
       minYear,
       currentYear,
     ),
+  );
+  const navigate = Route.useNavigate();
+  const isFetching = useIsFetching({ queryKey: ['games'] }) > 0;
+  const platformMap = Object.fromEntries(
+    (platforms?.data ?? []).map((p: Platform) => [p.id, p.name]),
   );
 
   const commit = (next: [number, number]) => {
@@ -91,6 +98,16 @@ function App() {
         ...prev,
         releaseYearMin: safe[0],
         releaseYearMax: safe[1],
+        page: 1,
+      }),
+    });
+  };
+
+  const handleRemovePlatform = (platform: string) => {
+    void navigate({
+      search: (prev) => ({
+        ...prev,
+        platforms: prev.platforms.filter((p) => p !== platform),
         page: 1,
       }),
     });
@@ -132,22 +149,50 @@ function App() {
       <div className="container gap-6 md:grid-cols-[16rem_1fr] lg:grid">
         <aside>
           <Collapsible>
-            <CollapsibleTrigger className="group hover:text-accent-foreground w-full">
-              <header className="flex items-center justify-between py-4">
-                <h2 className="text-muted-foreground text-sm font-medium">Filters</h2>
-                <ChevronDownIcon className="group-data-panel-open:rotate-180" />
-              </header>
-            </CollapsibleTrigger>
+            <div className="py-4">
+              <CollapsibleTrigger
+                className="group"
+                render={
+                  <Button
+                    variant="ghost"
+                    className="group-data-panel-open:bg-muted w-full justify-between text-sm font-medium"
+                  >
+                    Filters
+                    <ChevronDownIcon className="group-data-panel-open:rotate-180" />
+                  </Button>
+                }
+              ></CollapsibleTrigger>
+            </div>
 
             <CollapsibleContent>
               <div className="border-t">
                 <div className="pbs-4">
                   <fieldset>
-                    <legend className="text-foreground mbe-2 text-xs font-medium tracking-widest uppercase">
-                      Release Year
-                    </legend>
+                    <div className="flex items-center justify-between">
+                      <legend className="text-foreground text-xs font-medium tracking-widest uppercase">
+                        Release Year
+                      </legend>
 
-                    <div className="mbs-2 w-full max-w-sm space-y-4">
+                      <Button
+                        variant="ghost"
+                        disabled={
+                          !search.platforms.length &&
+                          !search.releaseYearMin &&
+                          !search.releaseYearMax &&
+                          !search.search
+                        }
+                        className="disabled:cursor-not-allowed"
+                        onClick={() =>
+                          navigate({
+                            search: {},
+                          })
+                        }
+                      >
+                        Reset filters
+                      </Button>
+                    </div>
+
+                    <div className="mbs-4 w-full max-w-sm space-y-4">
                       {/* Slider */}
                       <Label htmlFor="release-year-range">
                         <span className="sr-only">Release year range</span>
@@ -218,19 +263,56 @@ function App() {
         </aside>
 
         <section className="pbs-4">
-          <div>
+          <div className="flex items-center justify-between">
             <p className="text-muted-foreground font-light">
               {total} results {search.search && `for "${search.search}"`}
             </p>
+
+            <div className="flex flex-wrap items-center gap-2">
+              {search.platforms.map((p) => (
+                <FilterChip
+                  key={p}
+                  label={platformMap[p] ?? p}
+                  onRemove={() => handleRemovePlatform(p)}
+                />
+              ))}
+
+              {search.releaseYearMin && search.releaseYearMax && (
+                <FilterChip
+                  label={`${search.releaseYearMin}-${search.releaseYearMax}`}
+                  onRemove={() =>
+                    navigate({
+                      search: (prev) => ({
+                        ...prev,
+                        page: 1,
+                        releaseYearMin: undefined,
+                        releaseYearMax: undefined,
+                      }),
+                    })
+                  }
+                />
+              )}
+            </div>
           </div>
 
-          <div className="mbs-6 grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-            {data.map((game, index) => (
-              <GameCard key={game.id} game={game} index={index} />
-            ))}
-          </div>
+          {data.length === 0 ? (
+            <EmptyState
+              hasFilters={Boolean(
+                search.search ||
+                search.platforms.length ||
+                search.releaseYearMin ||
+                search.releaseYearMax,
+              )}
+            />
+          ) : (
+            <div className="mbs-6 grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+              {data.map((game, index) => (
+                <GameCard key={game.id} game={game} index={index} />
+              ))}
+            </div>
+          )}
 
-          {data.length > 1 && (
+          {totalPages > 1 && (
             <div className="mbs-8">
               <Pagination>
                 <PaginationContent>
@@ -243,6 +325,7 @@ function App() {
                           page: (prev.page ?? 1) - 1,
                         })}
                         preload="intent"
+                        disabled={isFetching}
                       />
                     </PaginationItem>
                   )}
@@ -259,6 +342,7 @@ function App() {
                           search={(prev) => ({ ...prev, page: item })}
                           isActive={page === item}
                           preload="intent"
+                          disabled={isFetching}
                         >
                           {item}
                         </PaginationLink>
@@ -275,6 +359,7 @@ function App() {
                           page: (prev.page ?? 1) + 1,
                         })}
                         preload="intent"
+                        disabled={isFetching}
                       />
                     </PaginationItem>
                   )}

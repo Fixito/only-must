@@ -4,9 +4,9 @@ import { HeadContent, Scripts, createRootRoute } from '@tanstack/react-router';
 import { TanStackRouterDevtoolsPanel } from '@tanstack/react-router-devtools';
 
 import Error from '@/components/error.tsx';
-import Footer from '@/components/footer.tsx';
-import Navbar from '@/components/navbar/navbar.tsx';
 import { NotFound } from '@/components/not-found.tsx';
+import Footer from '@/layout/footer.tsx';
+import Navbar from '@/layout/navbar/';
 import { getThemeServFn } from '@/lib/theme.ts';
 
 import appCss from '../styles.css?url';
