@@ -1,3 +1,4 @@
+import type { Platform } from '@only-must/shared';
 import { GamesQuerySchema } from '@only-must/shared';
 import { useIsFetching, useQuery } from '@tanstack/react-query';
 import { createFileRoute } from '@tanstack/react-router';
@@ -85,7 +86,9 @@ function App() {
   );
   const navigate = Route.useNavigate();
   const isFetching = useIsFetching() > 0;
-  const platformMap = Object.fromEntries((platforms?.data ?? []).map((p) => [p.id, p.name]));
+  const platformMap = Object.fromEntries(
+    (platforms?.data ?? []).map((p: Platform) => [p.id, p.name]),
+  );
 
   const commit = (next: [number, number]) => {
     const safe = clampRange(next, minYear, currentYear);
