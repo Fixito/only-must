@@ -143,6 +143,10 @@ Returns a single game with its relations (platforms, genres, developers).
 
 Returns all available platforms.
 
+### `GET /genres`
+
+Returns all available genres.
+
 ## Development scripts
 
 | Command                      | Description                         |

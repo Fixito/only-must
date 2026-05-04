@@ -30,7 +30,8 @@ function RouteComponent() {
         </p>
 
         <p className="text-muted-foreground">
-          You can filter by platform or release year to quickly find your next must-play game.
+          You can filter by platform, genre or release year to quickly find your next must-play
+          game.
         </p>
       </section>
 
