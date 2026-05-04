@@ -149,15 +149,20 @@ function App() {
       <div className="container gap-6 md:grid-cols-[16rem_1fr] lg:grid">
         <aside>
           <Collapsible>
-            <CollapsibleTrigger className="group w-full py-4">
-              <Button
-                variant="ghost"
-                className="group-data-panel-open:bg-muted w-full justify-between text-sm font-medium"
-              >
-                Filters
-                <ChevronDownIcon className="group-data-panel-open:rotate-180" />
-              </Button>
-            </CollapsibleTrigger>
+            <div className="py-4">
+              <CollapsibleTrigger
+                className="group"
+                render={
+                  <Button
+                    variant="ghost"
+                    className="group-data-panel-open:bg-muted w-full justify-between text-sm font-medium"
+                  >
+                    Filters
+                    <ChevronDownIcon className="group-data-panel-open:rotate-180" />
+                  </Button>
+                }
+              ></CollapsibleTrigger>
+            </div>
 
             <CollapsibleContent>
               <div className="border-t">
