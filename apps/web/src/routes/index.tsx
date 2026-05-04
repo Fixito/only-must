@@ -24,6 +24,7 @@ import {
   PaginationPrevious,
 } from '@/components/ui/pagination';
 import { Slider } from '@/components/ui/slider.tsx';
+import EmptyState from '@/features/games/components/empty-state.tsx';
 import { FilterMulti } from '@/features/games/components/filter-multi.tsx';
 import { gamesQueryOptions } from '@/features/games/queries/games.query.ts';
 import { platformsQueryOptions } from '@/features/platforms/queries/platforms.query';
@@ -224,11 +225,22 @@ function App() {
             </p>
           </div>
 
-          <div className="mbs-6 grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-            {data.map((game, index) => (
-              <GameCard key={game.id} game={game} index={index} />
-            ))}
-          </div>
+          {data.length === 0 ? (
+            <EmptyState
+              hasFilters={Boolean(
+                search.search ||
+                search.platforms.length ||
+                search.releaseYearMin ||
+                search.releaseYearMax,
+              )}
+            />
+          ) : (
+            <div className="mbs-6 grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+              {data.map((game, index) => (
+                <GameCard key={game.id} game={game} index={index} />
+              ))}
+            </div>
+          )}
 
           {data.length > 1 && (
             <div className="mbs-8">
