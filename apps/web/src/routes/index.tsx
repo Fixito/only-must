@@ -85,7 +85,7 @@ function App() {
     ),
   );
   const navigate = Route.useNavigate();
-  const isFetching = useIsFetching({ queryKey: ['games'] }) > 0;
+  const isFetching = useIsFetching({ queryKey: gamesQueryOptions().queryKey.slice(0, 1) }) > 0;
   const platformMap = Object.fromEntries(
     (platforms?.data ?? []).map((p: Platform) => [p.id, p.name]),
   );
@@ -263,7 +263,7 @@ function App() {
         </aside>
 
         <section className="pbs-4">
-          <div className="flex items-center justify-between">
+          <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
             <p className="text-muted-foreground font-light">
               {total} results {search.search && `for "${search.search}"`}
             </p>
