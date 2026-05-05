@@ -362,7 +362,7 @@ function App() {
                   });
                 }}
               >
-                <SelectTrigger className="w-45">
+                <SelectTrigger aria-label="Sort by" className="w-45">
                   <SelectValue placeholder="Sort by" />
                 </SelectTrigger>
 
