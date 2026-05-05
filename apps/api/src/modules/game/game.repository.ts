@@ -1,5 +1,5 @@
 import type { SQL as SQLType } from 'drizzle-orm';
-import { asc, count, eq, getTableColumns, sql } from 'drizzle-orm';
+import { asc, count, desc, eq, getTableColumns, sql } from 'drizzle-orm';
 
 import { db } from '../../../db/client.js';
 import { gamesTable } from '../../../db/schemas/game/game.schema.js';
@@ -12,18 +12,29 @@ import {
   platformsTable,
 } from '../../../db/schemas/index.js';
 
+const defaultOrder = [sql`${gamesTable.metaScore} DESC NULLS LAST`, asc(gamesTable.releaseDate)];
+
+export const sortMap = {
+  'metascore-desc': defaultOrder,
+  'release-asc': [asc(gamesTable.releaseDate), sql`${gamesTable.metaScore} DESC NULLS LAST`],
+  'release-desc': [desc(gamesTable.releaseDate), sql`${gamesTable.metaScore} DESC NULLS LAST`],
+};
+
 interface FindGamesParams {
   where?: SQLType | undefined;
   page: number;
   pageSize: number;
+  sort?: keyof typeof sortMap | undefined;
 }
 
-export async function findGames({ where, page, pageSize }: FindGamesParams) {
+export async function findGames({ where, page, pageSize, sort }: FindGamesParams) {
+  const orderBy = sort ? sortMap[sort] : defaultOrder;
+
   const sq = db
     .select({ id: gamesTable.id })
     .from(gamesTable)
     .where(where)
-    .orderBy(sql`${gamesTable.metaScore} DESC NULLS LAST`)
+    .orderBy(...orderBy)
     .limit(pageSize)
     .offset((page - 1) * pageSize)
     .as('subquery');
@@ -34,7 +45,7 @@ export async function findGames({ where, page, pageSize }: FindGamesParams) {
     )
     .from(gamesTable)
     .innerJoin(sq, eq(gamesTable.id, sq.id))
-    .orderBy(sql`${gamesTable.metaScore} DESC NULLS LAST`, asc(gamesTable.releaseDate));
+    .orderBy(...orderBy);
 }
 
 export async function countGames({ where }: { where?: SQLType | undefined }) {

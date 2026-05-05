@@ -25,6 +25,15 @@ import {
   PaginationNext,
   PaginationPrevious,
 } from '@/components/ui/pagination';
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectLabel,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select.tsx';
 import { Slider } from '@/components/ui/slider.tsx';
 import EmptyState from '@/features/games/components/empty-state.tsx';
 import FilterChip from '@/features/games/components/filter-chip.tsx';
@@ -37,6 +46,21 @@ import { queryClient } from '@/router.tsx';
 
 const currentYear = new Date().getFullYear();
 const minYear = 1995;
+
+const items = [
+  {
+    label: 'Best rated',
+    value: 'metascore-desc',
+  },
+  {
+    label: 'Newest',
+    value: 'release-desc',
+  },
+  {
+    label: 'Oldest',
+    value: 'release-asc',
+  },
+];
 
 function clampRange(
   [min, max]: [number, number],
@@ -322,6 +346,37 @@ function App() {
                   }
                 />
               )}
+            </div>
+
+            <div>
+              <Select
+                items={items}
+                value={search.sort ?? 'metascore-desc'}
+                onValueChange={(v) => {
+                  void navigate({
+                    search: (prev) => ({
+                      ...prev,
+                      page: 1,
+                      sort: v as 'metascore-desc' | 'release-asc' | 'release-desc' | undefined,
+                    }),
+                  });
+                }}
+              >
+                <SelectTrigger aria-label="Sort by" className="w-45">
+                  <SelectValue placeholder="Sort by" />
+                </SelectTrigger>
+
+                <SelectContent alignItemWithTrigger={false}>
+                  <SelectGroup>
+                    <SelectLabel>Sort by</SelectLabel>
+                    {items.map((item) => (
+                      <SelectItem key={item.value} value={item.value}>
+                        {item.label}
+                      </SelectItem>
+                    ))}
+                  </SelectGroup>
+                </SelectContent>
+              </Select>
             </div>
           </div>
 

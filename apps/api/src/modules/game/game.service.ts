@@ -6,17 +6,19 @@ import { NotFoundError } from '@/errors/index.js';
 
 import { gamesTable } from '../../../db/schemas/game/game.schema.js';
 import { gameGenresTable, gamePlatformsTable } from '../../../db/schemas/index.js';
+import type { sortMap } from './game.repository.js';
 import * as gameRepository from './game.repository.js';
 
 export interface GamesFilters {
+  genres?: string[] | undefined;
   page?: number | undefined;
   pageSize?: number | undefined;
   platforms?: string[] | undefined;
-  genres?: string[] | undefined;
-  search?: string | undefined;
   releaseYear?: number | undefined;
   releaseYearMin?: number | undefined;
   releaseYearMax?: number | undefined;
+  search?: string | undefined;
+  sort?: keyof typeof sortMap | undefined;
 }
 
 export async function getGames({
@@ -28,6 +30,7 @@ export async function getGames({
   releaseYear,
   releaseYearMin,
   releaseYearMax,
+  sort,
 }: GamesFilters = {}) {
   const conditions: SQL[] = [];
 
@@ -79,7 +82,7 @@ export async function getGames({
   const where = conditions.length ? and(...conditions) : undefined;
 
   const [rows, total] = await Promise.all([
-    gameRepository.findGames({ where, page, pageSize }),
+    gameRepository.findGames({ where, page, pageSize, sort }),
     gameRepository.countGames({ where }),
   ]);
 

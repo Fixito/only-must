@@ -1,6 +1,6 @@
 import { queryOptions } from '@tanstack/react-query';
 
-import { getGenres } from '@/features/genres/api/genres.api.ts';
+import { getGenres } from '@/features/genres/queries/api/genres.api';
 
 export function genresQueryOptions() {
   return queryOptions({
