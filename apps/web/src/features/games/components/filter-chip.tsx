@@ -14,6 +14,7 @@ export default function FilterChip({ label, onRemove }: { label: string; onRemov
     <Badge
       onClick={onRemove}
       onKeyDown={handleKeyDown}
+      // oxlint-disable-next-line jsx_a11y/prefer-tag-over-role
       role="button"
       tabIndex={0}
       aria-label={`Remove filter ${label}`}

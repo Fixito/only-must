@@ -7,6 +7,7 @@ if (!apiUrl || apiUrl.trim() === '') {
   throw new Error('VITE_API_URL environment variable is required but not configured');
 }
 
+// oxlint-disable-next-line import/no-named-as-default-member
 export const apiClient = axios.create({
   baseURL: apiUrl,
 });
