@@ -8,19 +8,22 @@ on:
 jobs:
   scrape:
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: apps/api
+    env:
+      DATABASE_URL: ${{ secrets.DATABASE_URL }}
 
     steps:
       - uses: actions/checkout@v4
-
       - uses: pnpm/action-setup@v4
-
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
           cache: 'pnpm'
 
       - run: pnpm install --frozen-lockfile
+        working-directory: .
 
-      - run: pnpm --filter api scrape
-
-      - run: pnpm --filter api scrape-details
+      - run: pnpm exec tsx scripts/scrape.ts
+      - run: pnpm exec tsx scripts/scrape-details.ts
