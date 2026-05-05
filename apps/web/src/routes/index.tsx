@@ -351,8 +351,7 @@ function App() {
             <div>
               <Select
                 items={items}
-                // value={search.sort ?? 'metascore-desc'}
-                defaultValue="metascore-desc"
+                value={search.sort ?? 'metascore-desc'}
                 onValueChange={(v) => {
                   void navigate({
                     search: (prev) => ({
