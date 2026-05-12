@@ -18,13 +18,13 @@ interface GameCardProps {
     description: string;
     releaseDate: string | null;
     metaScore: number;
-    image: string;
+    heroImage: string;
   };
   index: number;
 }
 
 export default function GameCard({ game, index }: GameCardProps) {
-  const { id, slug, title, image, description, releaseDate, metaScore } = game;
+  const { id, slug, title, heroImage, description, releaseDate, metaScore } = game;
 
   return (
     <Card
@@ -32,7 +32,7 @@ export default function GameCard({ game, index }: GameCardProps) {
       className="bg-card text-card-foreground group has-focus-visible:border-ring has-focus-visible:ring-ring relative isolate grid cursor-pointer grid-cols-[7rem_auto] gap-4 p-0 shadow-sm transition-shadow outline-none hover:shadow-lg has-focus-visible:ring-3"
     >
       <div className="relative shrink-0">
-        <img src={image} alt={title} className="h-full w-full object-cover" />
+        <img src={heroImage} alt={title} className="h-full w-full object-cover" />
         <img
           src="/must-play.svg"
           alt="must-play"

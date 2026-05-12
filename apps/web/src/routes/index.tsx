@@ -310,7 +310,7 @@ function App() {
 
         <section className="pbs-4">
           <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
-            <p className="text-muted-foreground font-light">
+            <p className="text-muted-foreground text-sm font-light">
               {total} results {search.search && `for "${search.search}"`}
             </p>
 
