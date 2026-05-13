@@ -2,7 +2,7 @@ import type { Genre, Platform } from '@only-must/shared';
 import { GamesQuerySchema } from '@only-must/shared';
 import { useIsFetching, useQuery } from '@tanstack/react-query';
 import { createFileRoute } from '@tanstack/react-router';
-import { ChevronDownIcon } from 'lucide-react';
+import { ChevronDownIcon, Funnel } from 'lucide-react';
 import { useEffect, useState } from 'react';
 
 import Error from '@/components/error.tsx';
@@ -34,6 +34,15 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select.tsx';
+import {
+  Sheet,
+  SheetClose,
+  SheetContent,
+  SheetFooter,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from '@/components/ui/sheet.tsx';
 import { Slider } from '@/components/ui/slider.tsx';
 import EmptyState from '@/features/games/components/empty-state.tsx';
 import FilterChip from '@/features/games/components/filter-chip.tsx';
@@ -184,8 +193,133 @@ function App() {
         </p>
       </div>
 
-      <div className="container gap-6 md:grid-cols-[16rem_1fr] lg:grid">
-        <aside>
+      <div className="container lg:hidden">
+        <Sheet>
+          <SheetTrigger
+            render={
+              <Button variant="outline">
+                <Funnel data-icon="inline-start" />
+                Filters
+              </Button>
+            }
+          />
+
+          <SheetContent>
+            <SheetHeader>
+              <SheetTitle>Filters</SheetTitle>
+            </SheetHeader>
+
+            <div className="no-scrollbar overflow-y-auto border-t px-4">
+              <div className="pbs-4">
+                <fieldset>
+                  <div className="flex items-center justify-between">
+                    <legend className="text-foreground text-xs font-medium tracking-widest uppercase">
+                      Release Year
+                    </legend>
+
+                    <Button
+                      variant="ghost"
+                      disabled={
+                        !search.platforms.length &&
+                        !search.genres.length &&
+                        !search.releaseYearMin &&
+                        !search.releaseYearMax &&
+                        !search.search
+                      }
+                      className="disabled:cursor-not-allowed"
+                      onClick={() =>
+                        navigate({
+                          search: {},
+                        })
+                      }
+                    >
+                      Reset filters
+                    </Button>
+                  </div>
+
+                  <div className="mbs-4 w-full max-w-sm space-y-4">
+                    {/* Slider */}
+                    <Label htmlFor="release-year-range">
+                      <span className="sr-only">Release year range</span>
+
+                      <Slider
+                        name="release-year-range"
+                        id="release-year-range"
+                        min={minYear}
+                        max={currentYear}
+                        step={1}
+                        value={value}
+                        onValueChange={(val) => {
+                          if (Array.isArray(val) && val.length === 2) {
+                            setValue(clampRange([val[0], val[1]], minYear, currentYear));
+                          }
+                        }}
+                        onValueCommitted={(val) => {
+                          if (Array.isArray(val) && val.length === 2) {
+                            commit(clampRange([val[0], val[1]], minYear, currentYear));
+                          }
+                        }}
+                      />
+                    </Label>
+
+                    {/* Inputs */}
+                    <div className="mbs-4 flex items-center justify-between gap-2">
+                      {/* Min */}
+                      <label htmlFor="release-year-min" className="sr-only">
+                        Release year min
+                      </label>
+
+                      <Input
+                        type="number"
+                        id="release-year-min"
+                        value={value[0]}
+                        tabIndex={-1}
+                        readOnly
+                        className="pointer-events-none field-sizing-content w-auto"
+                      />
+
+                      {/* Max */}
+                      <label htmlFor="release-year-max" className="sr-only">
+                        Release year max
+                      </label>
+
+                      <Input
+                        type="number"
+                        id="release-year-max"
+                        value={value[1]}
+                        tabIndex={-1}
+                        readOnly
+                        className="pointer-events-none field-sizing-content w-auto"
+                      />
+                    </div>
+                  </div>
+                </fieldset>
+              </div>
+
+              <FilterMulti
+                label="Platforms"
+                param="platforms"
+                options={Array.isArray(platforms) ? platforms : (platforms?.data ?? [])}
+                value={search.platforms}
+              />
+
+              <FilterMulti
+                label="Genres"
+                param="genres"
+                options={Array.isArray(genres) ? genres : (genres?.data ?? [])}
+                value={search.genres}
+              />
+            </div>
+
+            <SheetFooter>
+              <SheetClose render={<Button variant="outline">Close</Button>} />
+            </SheetFooter>
+          </SheetContent>
+        </Sheet>
+      </div>
+
+      <div className="container gap-6 lg:grid lg:grid-cols-[16rem_1fr]">
+        <aside className="hidden lg:block">
           <Collapsible>
             <div className="py-4">
               <CollapsibleTrigger
