@@ -2,20 +2,13 @@ import type { Genre, Platform } from '@only-must/shared';
 import { GamesQuerySchema } from '@only-must/shared';
 import { useIsFetching, useQuery } from '@tanstack/react-query';
 import { createFileRoute } from '@tanstack/react-router';
-import { ChevronDownIcon, Funnel } from 'lucide-react';
 import { useEffect, useState } from 'react';
 
+import DesktopFiltersSidebar from '@/components/desktop-filters-sidebar';
 import Error from '@/components/error.tsx';
 import GameCard from '@/components/game-card.tsx';
 import { default as CardsGridSkeleton } from '@/components/grid-page-skeleton';
-import { Button } from '@/components/ui/button.tsx';
-import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from '@/components/ui/collapsible.tsx';
-import { Input } from '@/components/ui/input.tsx';
-import { Label } from '@/components/ui/label.tsx';
+import MobileFiltersSheet from '@/components/mobile-filters-sheet.tsx';
 import {
   Pagination,
   PaginationContent,
@@ -34,19 +27,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select.tsx';
-import {
-  Sheet,
-  SheetClose,
-  SheetContent,
-  SheetFooter,
-  SheetHeader,
-  SheetTitle,
-  SheetTrigger,
-} from '@/components/ui/sheet.tsx';
-import { Slider } from '@/components/ui/slider.tsx';
 import EmptyState from '@/features/games/components/empty-state.tsx';
 import FilterChip from '@/features/games/components/filter-chip.tsx';
-import { FilterMulti } from '@/features/games/components/filter-multi.tsx';
+import GamesFilterPanel from '@/features/games/components/games-filters-panel.tsx';
 import { gamesQueryOptions } from '@/features/games/queries/games.query.ts';
 import { genresQueryOptions } from '@/features/genres/queries/genres.query.ts';
 import { platformsQueryOptions } from '@/features/platforms/queries/platforms.query';
@@ -160,6 +143,28 @@ function App() {
     });
   };
 
+  const gamesFilterPanelProps = {
+    search: {
+      platforms: search.platforms,
+      genres: search.genres,
+      ...(search.releaseYearMin !== undefined && {
+        releaseYearMin: search.releaseYearMin,
+      }),
+      ...(search.releaseYearMax !== undefined && {
+        releaseYearMax: search.releaseYearMax,
+      }),
+      ...(search.search !== undefined && { search: search.search }),
+    },
+    platforms: platforms ?? [],
+    genres: genres ?? [],
+    minYear,
+    currentYear,
+    value,
+    setValue,
+    commit,
+    clampRange,
+  };
+
   useEffect(() => {
     if (hasNext) {
       void queryClient.prefetchQuery(
@@ -193,254 +198,14 @@ function App() {
         </p>
       </div>
 
-      <div className="container lg:hidden">
-        <Sheet>
-          <SheetTrigger
-            render={
-              <Button variant="outline">
-                <Funnel data-icon="inline-start" />
-                Filters
-              </Button>
-            }
-          />
-
-          <SheetContent>
-            <SheetHeader>
-              <SheetTitle>Filters</SheetTitle>
-            </SheetHeader>
-
-            <div className="no-scrollbar overflow-y-auto border-t px-4">
-              <div className="pbs-4">
-                <fieldset>
-                  <div className="flex items-center justify-between">
-                    <legend className="text-foreground text-xs font-medium tracking-widest uppercase">
-                      Release Year
-                    </legend>
-
-                    <Button
-                      variant="ghost"
-                      disabled={
-                        !search.platforms.length &&
-                        !search.genres.length &&
-                        !search.releaseYearMin &&
-                        !search.releaseYearMax &&
-                        !search.search
-                      }
-                      className="disabled:cursor-not-allowed"
-                      onClick={() =>
-                        navigate({
-                          search: {},
-                        })
-                      }
-                    >
-                      Reset filters
-                    </Button>
-                  </div>
-
-                  <div className="mbs-4 w-full max-w-sm space-y-4">
-                    {/* Slider */}
-                    <Label htmlFor="release-year-range">
-                      <span className="sr-only">Release year range</span>
-
-                      <Slider
-                        name="release-year-range"
-                        id="release-year-range"
-                        min={minYear}
-                        max={currentYear}
-                        step={1}
-                        value={value}
-                        onValueChange={(val) => {
-                          if (Array.isArray(val) && val.length === 2) {
-                            setValue(clampRange([val[0], val[1]], minYear, currentYear));
-                          }
-                        }}
-                        onValueCommitted={(val) => {
-                          if (Array.isArray(val) && val.length === 2) {
-                            commit(clampRange([val[0], val[1]], minYear, currentYear));
-                          }
-                        }}
-                      />
-                    </Label>
-
-                    {/* Inputs */}
-                    <div className="mbs-4 flex items-center justify-between gap-2">
-                      {/* Min */}
-                      <label htmlFor="release-year-min" className="sr-only">
-                        Release year min
-                      </label>
-
-                      <Input
-                        type="number"
-                        id="release-year-min"
-                        value={value[0]}
-                        tabIndex={-1}
-                        readOnly
-                        className="pointer-events-none field-sizing-content w-auto"
-                      />
-
-                      {/* Max */}
-                      <label htmlFor="release-year-max" className="sr-only">
-                        Release year max
-                      </label>
-
-                      <Input
-                        type="number"
-                        id="release-year-max"
-                        value={value[1]}
-                        tabIndex={-1}
-                        readOnly
-                        className="pointer-events-none field-sizing-content w-auto"
-                      />
-                    </div>
-                  </div>
-                </fieldset>
-              </div>
-
-              <FilterMulti
-                label="Platforms"
-                param="platforms"
-                options={Array.isArray(platforms) ? platforms : (platforms?.data ?? [])}
-                value={search.platforms}
-              />
-
-              <FilterMulti
-                label="Genres"
-                param="genres"
-                options={Array.isArray(genres) ? genres : (genres?.data ?? [])}
-                value={search.genres}
-              />
-            </div>
-
-            <SheetFooter>
-              <SheetClose render={<Button variant="outline">Close</Button>} />
-            </SheetFooter>
-          </SheetContent>
-        </Sheet>
-      </div>
+      <MobileFiltersSheet>
+        <GamesFilterPanel {...gamesFilterPanelProps} />
+      </MobileFiltersSheet>
 
       <div className="container gap-6 lg:grid lg:grid-cols-[16rem_1fr]">
-        <aside className="hidden lg:block">
-          <Collapsible>
-            <div className="py-4">
-              <CollapsibleTrigger
-                className="group"
-                render={
-                  <Button
-                    variant="ghost"
-                    className="group-data-panel-open:bg-muted w-full justify-between text-sm font-medium"
-                  >
-                    Filters
-                    <ChevronDownIcon className="group-data-panel-open:rotate-180" />
-                  </Button>
-                }
-              ></CollapsibleTrigger>
-            </div>
-
-            <CollapsibleContent>
-              <div className="border-t">
-                <div className="pbs-4">
-                  <fieldset>
-                    <div className="flex items-center justify-between">
-                      <legend className="text-foreground text-xs font-medium tracking-widest uppercase">
-                        Release Year
-                      </legend>
-
-                      <Button
-                        variant="ghost"
-                        disabled={
-                          !search.platforms.length &&
-                          !search.genres.length &&
-                          !search.releaseYearMin &&
-                          !search.releaseYearMax &&
-                          !search.search
-                        }
-                        className="disabled:cursor-not-allowed"
-                        onClick={() =>
-                          navigate({
-                            search: {},
-                          })
-                        }
-                      >
-                        Reset filters
-                      </Button>
-                    </div>
-
-                    <div className="mbs-4 w-full max-w-sm space-y-4">
-                      {/* Slider */}
-                      <Label htmlFor="release-year-range">
-                        <span className="sr-only">Release year range</span>
-
-                        <Slider
-                          name="release-year-range"
-                          id="release-year-range"
-                          min={minYear}
-                          max={currentYear}
-                          step={1}
-                          value={value}
-                          onValueChange={(val) => {
-                            if (Array.isArray(val) && val.length === 2) {
-                              setValue(clampRange([val[0], val[1]], minYear, currentYear));
-                            }
-                          }}
-                          onValueCommitted={(val) => {
-                            if (Array.isArray(val) && val.length === 2) {
-                              commit(clampRange([val[0], val[1]], minYear, currentYear));
-                            }
-                          }}
-                        />
-                      </Label>
-
-                      {/* Inputs */}
-                      <div className="mbs-4 flex items-center justify-between gap-2">
-                        {/* Min */}
-                        <label htmlFor="release-year-min" className="sr-only">
-                          Release year min
-                        </label>
-
-                        <Input
-                          type="number"
-                          id="release-year-min"
-                          value={value[0]}
-                          tabIndex={-1}
-                          readOnly
-                          className="pointer-events-none field-sizing-content w-auto"
-                        />
-
-                        {/* Max */}
-                        <label htmlFor="release-year-max" className="sr-only">
-                          Release year max
-                        </label>
-
-                        <Input
-                          type="number"
-                          id="release-year-max"
-                          value={value[1]}
-                          tabIndex={-1}
-                          readOnly
-                          className="pointer-events-none field-sizing-content w-auto"
-                        />
-                      </div>
-                    </div>
-                  </fieldset>
-                </div>
-
-                <FilterMulti
-                  label="Platforms"
-                  param="platforms"
-                  options={Array.isArray(platforms) ? platforms : (platforms?.data ?? [])}
-                  value={search.platforms}
-                />
-
-                <FilterMulti
-                  label="Genres"
-                  param="genres"
-                  options={Array.isArray(genres) ? genres : (genres?.data ?? [])}
-                  value={search.genres}
-                />
-              </div>
-            </CollapsibleContent>
-          </Collapsible>
-        </aside>
+        <DesktopFiltersSidebar>
+          <GamesFilterPanel {...gamesFilterPanelProps} />
+        </DesktopFiltersSidebar>
 
         <section className="pbs-4">
           <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
