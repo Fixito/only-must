@@ -6,6 +6,7 @@ import { gamesTable } from '../../../db/schemas/game/game.schema.js';
 import {
   developersTable,
   gameDevelopersTable,
+  gameDurationsTable,
   gameGenresTable,
   gamePlatformsTable,
   genresTable,
@@ -60,7 +61,7 @@ export async function findGameBySlug(slug: string) {
 
   if (!game) return null;
 
-  const [platforms, genres, developers] = await Promise.all([
+  const [platforms, genres, developers, durations] = await Promise.all([
     db
       .select({
         id: platformsTable.id,
@@ -87,6 +88,15 @@ export async function findGameBySlug(slug: string) {
       .from(gameDevelopersTable)
       .innerJoin(developersTable, eq(developersTable.id, gameDevelopersTable.developerId))
       .where(eq(gameDevelopersTable.gameId, game.id)),
+
+    db
+      .select({
+        mainStorySeconds: gameDurationsTable.mainStorySeconds,
+        mainExtraSeconds: gameDurationsTable.mainExtraSeconds,
+        completionistSeconds: gameDurationsTable.completionistSeconds,
+      })
+      .from(gameDurationsTable)
+      .where(eq(gameDurationsTable.gameId, game.id)),
   ]);
 
   return {
@@ -94,5 +104,6 @@ export async function findGameBySlug(slug: string) {
     platforms,
     genres,
     developers,
+    durations: durations[0] ?? null,
   };
 }

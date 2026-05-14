@@ -16,6 +16,12 @@ export const GameSchema = z.object({
 
 // --- relations ---
 
+export const GameDurationSchema = z.object({
+  mainStorySeconds: z.number().nullable(),
+  mainExtraSeconds: z.number().nullable(),
+  completionistSeconds: z.number().nullable(),
+});
+
 export const DeveloperSchema = z.object({
   id: z.string(),
   name: z.string(),
@@ -27,6 +33,7 @@ export const GameWithRelationsSchema = GameSchema.extend({
   platforms: z.array(PlatformSchema),
   genres: z.array(GenreSchema),
   developers: z.array(DeveloperSchema),
+  durations: GameDurationSchema.nullable(),
 });
 
 export type Game = z.infer<typeof GameSchema>;

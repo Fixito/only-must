@@ -8,7 +8,7 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card.tsx';
-import { formatdate } from '@/lib/date.ts';
+import { formatdate } from '@/lib/time';
 
 interface GameCardProps {
   game: {
