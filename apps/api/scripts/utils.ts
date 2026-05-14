@@ -41,7 +41,7 @@ export function cleanTitle(title: string): string[] {
 
   for (const cleaner of TITLE_CLEANERS) {
     const cleaned = cleaner(current);
-    if (cleaned !== current) {
+    if (cleaned && cleaned !== current) {
       variants.add(cleaned);
       current = cleaned;
     }

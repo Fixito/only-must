@@ -7,7 +7,7 @@ import { gameDurationsTable, gamesTable } from '../db/schemas/index.js';
 import { cleanTitle } from './utils.js';
 
 const hltbService = new HowLongToBeatService();
-const limit = pLimit(50);
+const searchLimit = pLimit(50);
 
 async function fetchDuration(game: typeof gamesTable.$inferSelect) {
   const searchTitle = game.hltbSearchOverride ?? game.title;
@@ -15,7 +15,7 @@ async function fetchDuration(game: typeof gamesTable.$inferSelect) {
   if (game.hltbIdOverride) {
     // searchById doesn't exist, so we search by title and find by ID in results
     // Risk: if no results match, override is ignored — set hltb_id_override only for games that return results
-    const result = await limit(() => hltbService.search(searchTitle));
+    const result = await searchLimit(() => hltbService.search(searchTitle));
     const hltb = result.data.find((d) => d.id === game.hltbIdOverride);
 
     if (hltb) {
@@ -25,7 +25,7 @@ async function fetchDuration(game: typeof gamesTable.$inferSelect) {
 
     // Fallback: try cleaned title variants to find the overridden ID
     for (const variant of cleanTitle(searchTitle)) {
-      const fallback = await limit(() => hltbService.search(variant));
+      const fallback = await searchLimit(() => hltbService.search(variant));
       const hltb = fallback.data.find((d) => d.id === game.hltbIdOverride);
       if (hltb) return buildDuration(game.id, hltb);
     }
@@ -33,12 +33,12 @@ async function fetchDuration(game: typeof gamesTable.$inferSelect) {
     console.warn(`Override ID ${game.hltbIdOverride} not found for: ${game.title}`);
   }
 
-  const titleVariants = cleanTitle(game.title);
+  const titleVariants = cleanTitle(searchTitle);
   const yearMatch = game.title.match(/\((\d{4})\)$/);
   const year = yearMatch?.[1] ? parseInt(yearMatch[1]) : null;
 
   for (const variant of titleVariants) {
-    const result = await limit(() => hltbService.search(variant));
+    const result = await searchLimit(() => hltbService.search(variant));
     if (!result.success || result.data.length === 0) continue;
 
     const hltb = year
@@ -68,7 +68,9 @@ function buildDuration(gameId: string, hltb: HowLongToBeatEntry) {
 async function main() {
   const games = await db.select().from(gamesTable);
 
-  const settled = await Promise.allSettled(games.map((game) => limit(() => fetchDuration(game))));
+  const settled = await Promise.allSettled(
+    games.map((game) => searchLimit(() => fetchDuration(game))),
+  );
 
   const results = settled.map((s, i) => {
     if (s.status === 'rejected') {
