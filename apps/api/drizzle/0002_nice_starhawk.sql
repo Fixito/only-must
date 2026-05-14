@@ -1,0 +1,1 @@
+ALTER TABLE "game_durations" ADD COLUMN "hltb_id_override" integer;
