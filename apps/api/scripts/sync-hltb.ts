@@ -7,7 +7,7 @@ import { gameDurationsTable, gamesTable } from '../db/schemas/index.js';
 import { cleanTitle } from './utils.js';
 
 const hltbService = new HowLongToBeatService();
-const limit = pLimit(5);
+const limit = pLimit(50);
 
 async function fetchDuration(game: typeof gamesTable.$inferSelect) {
   const searchTitle = game.hltbSearchOverride ?? game.title;
@@ -38,7 +38,7 @@ async function fetchDuration(game: typeof gamesTable.$inferSelect) {
   const year = yearMatch?.[1] ? parseInt(yearMatch[1]) : null;
 
   for (const variant of titleVariants) {
-    const result = await hltbService.search(variant);
+    const result = await limit(() => hltbService.search(variant));
     if (!result.success || result.data.length === 0) continue;
 
     const hltb = year
@@ -68,7 +68,15 @@ function buildDuration(gameId: string, hltb: HowLongToBeatEntry) {
 async function main() {
   const games = await db.select().from(gamesTable);
 
-  const results = await Promise.all(games.map((game) => limit(() => fetchDuration(game))));
+  const settled = await Promise.allSettled(games.map((game) => limit(() => fetchDuration(game))));
+
+  const results = settled.map((s, i) => {
+    if (s.status === 'rejected') {
+      console.error(`Failed to fetch duration for ${games[i]?.title}:`, s.reason);
+      return null;
+    }
+    return s.value;
+  });
 
   const durations = results.filter((r) => r !== null);
 

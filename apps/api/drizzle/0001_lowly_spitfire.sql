@@ -7,7 +7,11 @@ CREATE TABLE "game_durations" (
 	"game_id" uuid NOT NULL,
 	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
 	"updated_at" timestamp with time zone DEFAULT now(),
-	CONSTRAINT "game_durations_game_id_unique" UNIQUE("game_id")
+	CONSTRAINT "game_durations_game_id_unique" UNIQUE("game_id"),
+	CHECK ("hltb_id" >= 0),
+	CHECK ("main_story_seconds" >= 0),
+	CHECK ("main_extra_seconds" >= 0),
+	CHECK ("completionist_seconds" >= 0)
 );
 --> statement-breakpoint
 ALTER TABLE "game_durations" ADD CONSTRAINT "game_durations_game_id_games_id_fk" FOREIGN KEY ("game_id") REFERENCES "public"."games"("id") ON DELETE cascade ON UPDATE no action;

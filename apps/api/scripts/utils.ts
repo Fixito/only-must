@@ -32,7 +32,7 @@ const TITLE_CLEANERS: Array<(title: string) => string> = [
   // Take first part before " / ": "A Link to the Past / Four Swords" → "A Link to the Past"
   (t) => t.split(/\s*\/\s*/)[0]?.trim() ?? t,
   // Remove subtitle after ": ": "Shovel Knight: Treasure Trove" → "Shovel Knight"
-  (t) => t.split(/:\s+/)[0]?.trim() ?? t,
+  (t) => t.split(/:\s*/)[0]?.trim() ?? t,
 ];
 
 export function cleanTitle(title: string): string[] {
