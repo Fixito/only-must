@@ -96,6 +96,20 @@ export async function countGames({ where }: { where?: SQLType | undefined }) {
   return result[0]?.total ?? 0;
 }
 
+export async function findDurationRangeHours(): Promise<{ minHours: number; maxHours: number }> {
+  const result = await db
+    .select({
+      minHours: sql<number>`FLOOR(MIN(${gameDurationsTable.mainStorySeconds}) / 3600.0)`,
+      maxHours: sql<number>`CEIL(MAX(${gameDurationsTable.mainStorySeconds}) / 3600.0)`,
+    })
+    .from(gameDurationsTable);
+  // The pg driver returns numeric aggregates as strings at runtime despite the sql<number> hint.
+  return {
+    minHours: Number(result[0]?.minHours ?? 0),
+    maxHours: Number(result[0]?.maxHours ?? 0),
+  };
+}
+
 export async function findGameBySlug(slug: string) {
   const game = await db.query.gamesTable.findFirst({
     where: eq(gamesTable.slug, slug),

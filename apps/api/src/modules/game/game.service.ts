@@ -5,7 +5,11 @@ import { and, inArray, sql } from 'drizzle-orm';
 import { NotFoundError } from '@/errors/index.js';
 
 import { gamesTable } from '../../../db/schemas/game/game.schema.js';
-import { gameGenresTable, gamePlatformsTable } from '../../../db/schemas/index.js';
+import {
+  gameDurationsTable,
+  gameGenresTable,
+  gamePlatformsTable,
+} from '../../../db/schemas/index.js';
 import type { sortMap } from './game.repository.js';
 import * as gameRepository from './game.repository.js';
 
@@ -14,6 +18,8 @@ export interface GamesFilters {
   page?: number | undefined;
   pageSize?: number | undefined;
   platforms?: string[] | undefined;
+  playtimeMin?: number | undefined;
+  playtimeMax?: number | undefined;
   releaseYear?: number | undefined;
   releaseYearMin?: number | undefined;
   releaseYearMax?: number | undefined;
@@ -30,6 +36,8 @@ export async function getGames({
   releaseYear,
   releaseYearMin,
   releaseYearMax,
+  playtimeMin,
+  playtimeMax,
   sort,
 }: GamesFilters = {}) {
   const conditions: SQL[] = [];
@@ -79,6 +87,21 @@ export async function getGames({
 	`);
   }
 
+  if (playtimeMin !== undefined || playtimeMax !== undefined) {
+    const minSeconds = (playtimeMin ?? 0) * 3600;
+    const maxSeconds = (playtimeMax ?? Number.MAX_SAFE_INTEGER) * 3600;
+    conditions.push(sql`
+      EXISTS (
+        SELECT 1
+        FROM ${gameDurationsTable}
+        WHERE ${gameDurationsTable.gameId} = ${gamesTable.id}
+        AND ${gameDurationsTable.mainStorySeconds} IS NOT NULL
+        AND ${gameDurationsTable.mainStorySeconds} >= ${minSeconds}
+        AND ${gameDurationsTable.mainStorySeconds} <= ${maxSeconds}
+      )
+    `);
+  }
+
   const where = conditions.length ? and(...conditions) : undefined;
 
   const [rows, total] = await Promise.all([
@@ -114,4 +137,9 @@ export async function getGameBySlug(slug: string) {
   const game = await gameRepository.findGameBySlug(slug);
   if (!game) throw new NotFoundError('Game');
   return GameWithRelationsSchema.parse(game);
+}
+
+export async function getGamesDurationRange() {
+  const { minHours, maxHours } = await gameRepository.findDurationRangeHours();
+  return { minMainStoryHours: minHours, maxMainStoryHours: maxHours };
 }
