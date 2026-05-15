@@ -6,3 +6,9 @@ export const PlatformSchema = z.object({
 });
 
 export type Platform = z.infer<typeof PlatformSchema>;
+
+export const GetPlatformsResponseSchema = z.object({
+  data: z.array(PlatformSchema),
+});
+
+export type GetPlatformsResponse = z.infer<typeof GetPlatformsResponseSchema>;
