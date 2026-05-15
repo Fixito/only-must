@@ -13,6 +13,18 @@ export const SORT_OPTIONS: Array<{ label: string; value: NonNullable<GamesQuery[
   { label: 'Longest Duration', value: 'longest-duration-desc' },
 ];
 
+export const toggleFilterValue =
+  (param: 'platforms' | 'genres', id: string) => (prev: GamesQuery) => {
+    const currentSet = new Set(prev[param]);
+    if (currentSet.has(id)) {
+      currentSet.delete(id);
+    } else {
+      currentSet.add(id);
+    }
+    const next = Array.from(currentSet).toSorted();
+    return { ...prev, [param]: next.length ? next : undefined, page: 1 };
+  };
+
 export function isFiltersActive(search: GamesQuery): boolean {
   return Boolean(
     search.search ||

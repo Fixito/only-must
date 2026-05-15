@@ -7,6 +7,7 @@ import { gamesDurationRangeQueryOptions } from '@/features/games/queries/games.q
 import {
   MIN_PLAYTIME_FALLBACK,
   PLAYTIME_FALLBACK,
+  toggleFilterValue,
 } from '@/features/games/utils/games-filter.utils.ts';
 import { genresQueryOptions } from '@/features/genres/queries/genres.query.ts';
 import { platformsQueryOptions } from '@/features/platforms/queries/platforms.query';
@@ -26,34 +27,22 @@ export default function ActiveFilterChips() {
   );
   const genreMap = Object.fromEntries((genres?.data ?? []).map((g: Genre) => [g.id, g.name]));
 
-  const handleRemovePlatform = (platform: string) => {
-    void navigate({
-      search: (prev) => ({
-        ...prev,
-        platforms: prev.platforms.filter((p) => p !== platform),
-        page: 1,
-      }),
-    });
-  };
-
-  const handleRemoveGenre = (genre: string) => {
-    void navigate({
-      search: (prev) => ({
-        ...prev,
-        genres: prev.genres.filter((g) => g !== genre),
-        page: 1,
-      }),
-    });
-  };
-
   return (
     <div className="flex flex-wrap items-center gap-2">
       {search.platforms.map((p) => (
-        <FilterChip key={p} label={platformMap[p] ?? p} onRemove={() => handleRemovePlatform(p)} />
+        <FilterChip
+          key={p}
+          label={platformMap[p] ?? p}
+          onRemove={() => void navigate({ search: toggleFilterValue('platforms', p) })}
+        />
       ))}
 
       {search.genres.map((g) => (
-        <FilterChip key={g} label={genreMap[g] ?? g} onRemove={() => handleRemoveGenre(g)} />
+        <FilterChip
+          key={g}
+          label={genreMap[g] ?? g}
+          onRemove={() => void navigate({ search: toggleFilterValue('genres', g) })}
+        />
       ))}
 
       {search.releaseYearMin && search.releaseYearMax && (
