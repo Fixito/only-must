@@ -1,54 +1,103 @@
-import type { Genre, Platform } from '@only-must/shared';
-import { useNavigate } from '@tanstack/react-router';
+import { useQuery } from '@tanstack/react-query';
+import { useNavigate, useSearch } from '@tanstack/react-router';
+import { useEffect, useState } from 'react';
 
 import { Button } from '@/components/ui/button.tsx';
 import { Input } from '@/components/ui/input.tsx';
 import { Label } from '@/components/ui/label.tsx';
 import { Slider } from '@/components/ui/slider.tsx';
 import { FilterMulti } from '@/features/games/components/filter-multi.tsx';
+import { gamesDurationRangeQueryOptions } from '@/features/games/queries/games.query.ts';
+import { genresQueryOptions } from '@/features/genres/queries/genres.query.ts';
+import { platformsQueryOptions } from '@/features/platforms/queries/platforms.query';
 
-interface GamesFilterPanelProps {
-  search: {
-    platforms: Array<string>;
-    genres: Array<string>;
-    releaseYearMin?: number;
-    releaseYearMax?: number;
-    playtimeMin?: number;
-    playtimeMax?: number;
-    search?: string;
-  };
-  platforms: Array<Platform> | { data: Array<Platform> };
-  genres: Array<Genre> | { data: Array<Genre> };
-  minYear: number;
-  currentYear: number;
-  value: [number, number];
-  minPlaytime: number;
-  maxPlaytime: number;
-  playtimeValue: [number, number];
-  setValue: (value: [number, number]) => void;
-  commit: (value: [number, number]) => void;
-  setPlaytimeValue: (value: [number, number]) => void;
-  commitPlaytime: (value: [number, number]) => void;
-  clampRange: (value: [number, number], min: number, max: number) => [number, number];
+const MIN_YEAR = 1995;
+const CURRENT_YEAR = new Date().getFullYear();
+const MIN_PLAYTIME_FALLBACK = 0;
+const PLAYTIME_FALLBACK = 250;
+
+function clampRange(
+  [min, max]: [number, number],
+  minLimit: number,
+  maxLimit: number,
+): [number, number] {
+  const clampedMin = Math.max(minLimit, Math.min(min, maxLimit));
+  const clampedMax = Math.max(minLimit, Math.min(max, maxLimit));
+  return [Math.min(clampedMin, clampedMax), Math.max(clampedMin, clampedMax)];
 }
 
-export default function GamesFilterPanel({
-  search,
-  platforms,
-  genres,
-  minYear,
-  currentYear,
-  value,
-  minPlaytime,
-  maxPlaytime,
-  playtimeValue,
-  setValue,
-  commit,
-  setPlaytimeValue,
-  commitPlaytime,
-  clampRange,
-}: GamesFilterPanelProps) {
-  const navigate = useNavigate();
+export default function GamesFilterPanel() {
+  const search = useSearch({ from: '/' });
+  const navigate = useNavigate({ from: '/' });
+  const { data: platformsResponse } = useQuery(platformsQueryOptions());
+  const { data: genresResponse } = useQuery(genresQueryOptions());
+  const { data: durationRange } = useQuery(gamesDurationRangeQueryOptions());
+
+  const maxPlaytime = durationRange?.maxMainStoryHours ?? PLAYTIME_FALLBACK;
+  const minPlaytime = durationRange?.minMainStoryHours ?? MIN_PLAYTIME_FALLBACK;
+  const platforms = platformsResponse?.data ?? [];
+  const genres = genresResponse?.data ?? [];
+
+  const [yearValue, setYearValue] = useState<[number, number]>(
+    clampRange(
+      [search.releaseYearMin ?? MIN_YEAR, search.releaseYearMax ?? CURRENT_YEAR],
+      MIN_YEAR,
+      CURRENT_YEAR,
+    ),
+  );
+
+  const [playtimeValue, setPlaytimeValue] = useState<[number, number]>(
+    clampRange(
+      [search.playtimeMin ?? minPlaytime, search.playtimeMax ?? maxPlaytime],
+      minPlaytime,
+      maxPlaytime,
+    ),
+  );
+
+  useEffect(() => {
+    setYearValue(
+      clampRange(
+        [search.releaseYearMin ?? MIN_YEAR, search.releaseYearMax ?? CURRENT_YEAR],
+        MIN_YEAR,
+        CURRENT_YEAR,
+      ),
+    );
+  }, [search.releaseYearMin, search.releaseYearMax]);
+
+  useEffect(() => {
+    setPlaytimeValue(
+      clampRange(
+        [search.playtimeMin ?? minPlaytime, search.playtimeMax ?? maxPlaytime],
+        minPlaytime,
+        maxPlaytime,
+      ),
+    );
+  }, [search.playtimeMin, search.playtimeMax, minPlaytime, maxPlaytime]);
+
+  const commit = (next: [number, number]) => {
+    const safe = clampRange(next, MIN_YEAR, CURRENT_YEAR);
+    void navigate({
+      search: (prev) => ({
+        ...prev,
+        releaseYearMin: safe[0],
+        releaseYearMax: safe[1],
+        page: 1,
+      }),
+    });
+  };
+
+  const commitPlaytime = (next: [number, number]) => {
+    const safe = clampRange(next, minPlaytime, maxPlaytime);
+    const isFullRange = safe[0] === minPlaytime && safe[1] === maxPlaytime;
+    void navigate({
+      search: (prev) => ({
+        ...prev,
+        playtimeMin: isFullRange ? undefined : safe[0],
+        playtimeMax: isFullRange ? undefined : safe[1],
+        page: 1,
+      }),
+    });
+  };
 
   return (
     <>
@@ -98,18 +147,18 @@ export default function GamesFilterPanel({
               <Slider
                 name="release-year-range"
                 id="release-year-range"
-                min={minYear}
-                max={currentYear}
+                min={MIN_YEAR}
+                max={CURRENT_YEAR}
                 step={1}
-                value={value}
+                value={yearValue}
                 onValueChange={(val) => {
                   if (Array.isArray(val) && val.length === 2) {
-                    setValue(clampRange([val[0], val[1]], minYear, currentYear));
+                    setYearValue(clampRange([val[0], val[1]], MIN_YEAR, CURRENT_YEAR));
                   }
                 }}
                 onValueCommitted={(val) => {
                   if (Array.isArray(val) && val.length === 2) {
-                    commit(clampRange([val[0], val[1]], minYear, currentYear));
+                    commit(clampRange([val[0], val[1]], MIN_YEAR, CURRENT_YEAR));
                   }
                 }}
               />
@@ -125,7 +174,7 @@ export default function GamesFilterPanel({
               <Input
                 type="number"
                 id="release-year-min"
-                value={value[0]}
+                value={yearValue[0]}
                 tabIndex={-1}
                 readOnly
                 className="pointer-events-none field-sizing-content w-auto"
@@ -139,7 +188,7 @@ export default function GamesFilterPanel({
               <Input
                 type="number"
                 id="release-year-max"
-                value={value[1]}
+                value={yearValue[1]}
                 tabIndex={-1}
                 readOnly
                 className="pointer-events-none field-sizing-content w-auto"
@@ -219,16 +268,11 @@ export default function GamesFilterPanel({
       <FilterMulti
         label="Platforms"
         param="platforms"
-        options={Array.isArray(platforms) ? platforms : (platforms?.data ?? [])}
+        options={platforms}
         value={search.platforms}
       />
 
-      <FilterMulti
-        label="Genres"
-        param="genres"
-        options={Array.isArray(genres) ? genres : (genres?.data ?? [])}
-        value={search.genres}
-      />
+      <FilterMulti label="Genres" param="genres" options={genres} value={search.genres} />
     </>
   );
 }

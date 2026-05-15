@@ -2,7 +2,7 @@ import type { Genre, Platform } from '@only-must/shared';
 import { GamesQuerySchema } from '@only-must/shared';
 import { useIsFetching, useQuery } from '@tanstack/react-query';
 import { createFileRoute } from '@tanstack/react-router';
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 
 import DesktopFiltersSidebar from '@/components/desktop-filters-sidebar';
 import Error from '@/components/error.tsx';
@@ -39,8 +39,6 @@ import { platformsQueryOptions } from '@/features/platforms/queries/platforms.qu
 import { getPaginationItems } from '@/lib/pagination';
 import { queryClient } from '@/router.tsx';
 
-const currentYear = new Date().getFullYear();
-const minYear = 1995;
 const minPlaytimeFallback = 0;
 const playtimeFallback = 250;
 
@@ -66,17 +64,6 @@ const items = [
     value: 'longest-duration-desc',
   },
 ];
-
-function clampRange(
-  [min, max]: [number, number],
-  minLimit: number,
-  maxLimit: number,
-): [number, number] {
-  const clampedMin = Math.max(minLimit, Math.min(min, maxLimit));
-  const clampedMax = Math.max(minLimit, Math.min(max, maxLimit));
-
-  return [Math.min(clampedMin, clampedMax), Math.max(clampedMin, clampedMax)];
-}
 
 export const Route = createFileRoute('/')({
   head: () => ({
@@ -113,53 +100,12 @@ function App() {
   const maxPlaytime = durationRange?.maxMainStoryHours ?? playtimeFallback;
   const minPlaytime = durationRange?.minMainStoryHours ?? minPlaytimeFallback;
   const search = Route.useSearch();
-  const [yearValue, setYearValue] = useState<[number, number]>(
-    clampRange(
-      [search.releaseYearMin ?? minYear, search.releaseYearMax ?? currentYear],
-      minYear,
-      currentYear,
-    ),
-  );
-  const [playtimeValue, setPlaytimeValue] = useState<[number, number]>(
-    clampRange(
-      [search.playtimeMin ?? minPlaytime, search.playtimeMax ?? maxPlaytime],
-      minPlaytime,
-      maxPlaytime,
-    ),
-  );
   const navigate = Route.useNavigate();
   const isFetching = useIsFetching({ queryKey: gamesQueryOptions().queryKey.slice(0, 1) }) > 0;
   const platformMap = Object.fromEntries(
     (platforms?.data ?? []).map((p: Platform) => [p.id, p.name]),
   );
   const genreMap = Object.fromEntries((genres?.data ?? []).map((g: Genre) => [g.id, g.name]));
-
-  const commit = (next: [number, number]) => {
-    const safe = clampRange(next, minYear, currentYear);
-
-    void navigate({
-      search: (prev) => ({
-        ...prev,
-        releaseYearMin: safe[0],
-        releaseYearMax: safe[1],
-        page: 1,
-      }),
-    });
-  };
-
-  const commitPlaytime = (next: [number, number]) => {
-    const safe = clampRange(next, minPlaytime, maxPlaytime);
-    const isFullRange = safe[0] === minPlaytime && safe[1] === maxPlaytime;
-
-    void navigate({
-      search: (prev) => ({
-        ...prev,
-        playtimeMin: isFullRange ? undefined : safe[0],
-        playtimeMax: isFullRange ? undefined : safe[1],
-        page: 1,
-      }),
-    });
-  };
 
   const handleRemovePlatform = (platform: string) => {
     void navigate({
@@ -181,35 +127,6 @@ function App() {
     });
   };
 
-  const gamesFilterPanelProps = {
-    search: {
-      platforms: search.platforms,
-      genres: search.genres,
-      ...(search.releaseYearMin !== undefined && {
-        releaseYearMin: search.releaseYearMin,
-      }),
-      ...(search.releaseYearMax !== undefined && {
-        releaseYearMax: search.releaseYearMax,
-      }),
-      ...(search.playtimeMin !== undefined && { playtimeMin: search.playtimeMin }),
-      ...(search.playtimeMax !== undefined && { playtimeMax: search.playtimeMax }),
-      ...(search.search !== undefined && { search: search.search }),
-    },
-    platforms: platforms ?? [],
-    genres: genres ?? [],
-    minYear,
-    currentYear,
-    value: yearValue,
-    minPlaytime,
-    maxPlaytime,
-    playtimeValue,
-    setValue: setYearValue,
-    commit,
-    setPlaytimeValue,
-    commitPlaytime,
-    clampRange,
-  };
-
   useEffect(() => {
     if (hasNext) {
       void queryClient.prefetchQuery(
@@ -220,26 +137,6 @@ function App() {
       );
     }
   }, [page, search, hasNext]);
-
-  useEffect(() => {
-    setYearValue(
-      clampRange(
-        [search.releaseYearMin ?? minYear, search.releaseYearMax ?? currentYear],
-        minYear,
-        currentYear,
-      ),
-    );
-  }, [search.releaseYearMin, search.releaseYearMax]);
-
-  useEffect(() => {
-    setPlaytimeValue(
-      clampRange(
-        [search.playtimeMin ?? minPlaytime, search.playtimeMax ?? maxPlaytime],
-        minPlaytime,
-        maxPlaytime,
-      ),
-    );
-  }, [search.playtimeMin, search.playtimeMax, minPlaytime, maxPlaytime]);
 
   return (
     <>
@@ -254,12 +151,12 @@ function App() {
       </div>
 
       <MobileFiltersSheet>
-        <GamesFilterPanel {...gamesFilterPanelProps} />
+        <GamesFilterPanel />
       </MobileFiltersSheet>
 
       <div className="container gap-6 lg:grid lg:grid-cols-[16rem_1fr]">
         <DesktopFiltersSidebar>
-          <GamesFilterPanel {...gamesFilterPanelProps} />
+          <GamesFilterPanel />
         </DesktopFiltersSidebar>
 
         <section className="pbs-4">
