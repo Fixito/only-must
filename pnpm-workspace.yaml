@@ -1,6 +1,11 @@
 packages:
   - 'apps/*'
   - 'packages/*'
+allowBuilds:
+  '@parcel/watcher': true
+  esbuild: true
+  msw: true
+  sharp: true
 overrides:
   '@tanstack/start-server-core@<1.167.30': '>=1.167.30'
   axios@<0.30.0: '>=0.30.0'
