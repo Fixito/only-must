@@ -127,34 +127,26 @@ export async function findGames({ page, pageSize, sort, ...filters }: FindGamesP
   const where = buildWhere(filters);
   const orderBy = sort ? sortMap[sort] : defaultOrder;
   const offset = (page - 1) * pageSize;
+  const needsDurationSort = sort !== undefined && durationSorts.has(sort);
 
-  if (sort !== undefined && durationSorts.has(sort)) {
-    const sq = db
-      .select({ id: gamesTable.id })
-      .from(gamesTable)
-      .leftJoin(gameDurationsTable, eq(gameDurationsTable.gameId, gamesTable.id))
-      .where(where)
-      .orderBy(...orderBy)
-      .limit(pageSize)
-      .offset(offset)
-      .as('subquery');
-
-    return db
-      .select({ ...gameColumns, ...durationColumns })
-      .from(gamesTable)
-      .innerJoin(sq, eq(gamesTable.id, sq.id))
-      .leftJoin(gameDurationsTable, eq(gameDurationsTable.gameId, gamesTable.id))
-      .orderBy(...orderBy);
-  }
-
-  const sq = db
-    .select({ id: gamesTable.id })
-    .from(gamesTable)
-    .where(where)
-    .orderBy(...orderBy)
-    .limit(pageSize)
-    .offset(offset)
-    .as('subquery');
+  const sq = needsDurationSort
+    ? db
+        .select({ id: gamesTable.id })
+        .from(gamesTable)
+        .leftJoin(gameDurationsTable, eq(gameDurationsTable.gameId, gamesTable.id))
+        .where(where)
+        .orderBy(...orderBy)
+        .limit(pageSize)
+        .offset(offset)
+        .as('subquery')
+    : db
+        .select({ id: gamesTable.id })
+        .from(gamesTable)
+        .where(where)
+        .orderBy(...orderBy)
+        .limit(pageSize)
+        .offset(offset)
+        .as('subquery');
 
   return db
     .select({ ...gameColumns, ...durationColumns })
