@@ -33,34 +33,15 @@ import {
   gamesDurationRangeQueryOptions,
   gamesQueryOptions,
 } from '@/features/games/queries/games.query.ts';
-import { isFiltersActive } from '@/features/games/utils/games-filter.utils.ts';
+import {
+  DEFAULT_SORT,
+  isFiltersActive,
+  SORT_OPTIONS,
+} from '@/features/games/utils/games-filter.utils.ts';
 import { genresQueryOptions } from '@/features/genres/queries/genres.query.ts';
 import { platformsQueryOptions } from '@/features/platforms/queries/platforms.query';
 import { getPaginationItems } from '@/lib/pagination';
 import { queryClient } from '@/router.tsx';
-
-const items = [
-  {
-    label: 'Best rated',
-    value: 'metascore-desc',
-  },
-  {
-    label: 'Newest',
-    value: 'release-desc',
-  },
-  {
-    label: 'Oldest',
-    value: 'release-asc',
-  },
-  {
-    label: 'Shortest Duration',
-    value: 'shortest-duration-asc',
-  },
-  {
-    label: 'Longest Duration',
-    value: 'longest-duration-desc',
-  },
-];
 
 export const Route = createFileRoute('/')({
   head: () => ({
@@ -140,20 +121,14 @@ function App() {
 
             <div>
               <Select
-                items={items}
-                value={search.sort ?? 'metascore-desc'}
+                items={SORT_OPTIONS}
+                value={search.sort ?? DEFAULT_SORT}
                 onValueChange={(v) => {
                   void navigate({
                     search: (prev) => ({
                       ...prev,
                       page: 1,
-                      sort: v as
-                        | 'metascore-desc'
-                        | 'release-asc'
-                        | 'release-desc'
-                        | 'shortest-duration-asc'
-                        | 'longest-duration-desc'
-                        | undefined,
+                      sort: v,
                     }),
                   });
                 }}
@@ -165,7 +140,7 @@ function App() {
                 <SelectContent alignItemWithTrigger={false}>
                   <SelectGroup>
                     <SelectLabel>Sort by</SelectLabel>
-                    {items.map((item) => (
+                    {SORT_OPTIONS.map((item) => (
                       <SelectItem key={item.value} value={item.value}>
                         {item.label}
                       </SelectItem>
