@@ -1,5 +1,5 @@
 import type { SQL as SQLType } from 'drizzle-orm';
-import { asc, count, desc, eq, getTableColumns, sql } from 'drizzle-orm';
+import { and, asc, count, desc, eq, getTableColumns, inArray, sql } from 'drizzle-orm';
 
 import { db } from '../../../db/client.js';
 import { gamesTable } from '../../../db/schemas/game/game.schema.js';
@@ -29,8 +29,18 @@ export const sortMap = {
   ],
 };
 
-interface FindGamesParams {
-  where?: SQLType | undefined;
+export interface GameFilters {
+  platforms?: string[] | undefined;
+  genres?: string[] | undefined;
+  search?: string | undefined;
+  releaseYear?: number | undefined;
+  releaseYearMin?: number | undefined;
+  releaseYearMax?: number | undefined;
+  playtimeMin?: number | undefined;
+  playtimeMax?: number | undefined;
+}
+
+interface FindGamesParams extends GameFilters {
   page: number;
   pageSize: number;
   sort?: keyof typeof sortMap | undefined;
@@ -51,7 +61,74 @@ const durationColumns = {
   completionistSeconds: gameDurationsTable.completionistSeconds,
 };
 
-export async function findGames({ where, page, pageSize, sort }: FindGamesParams) {
+function buildWhere(filters: GameFilters): SQLType | undefined {
+  const conditions: SQLType[] = [];
+
+  if (filters.search) {
+    conditions.push(sql`${gamesTable.title} ILIKE ${`%${filters.search}%`}`);
+  }
+
+  if (filters.releaseYear != null) {
+    conditions.push(sql`
+      ${gamesTable.releaseDate} IS NOT NULL
+      AND EXTRACT(YEAR FROM ${gamesTable.releaseDate}) = ${filters.releaseYear}
+    `);
+  } else {
+    if (filters.releaseYearMin) {
+      conditions.push(sql`
+      ${gamesTable.releaseDate} IS NOT NULL
+      AND EXTRACT(YEAR FROM ${gamesTable.releaseDate}) >= ${filters.releaseYearMin}`);
+    }
+
+    if (filters.releaseYearMax) {
+      conditions.push(sql`
+      ${gamesTable.releaseDate} IS NOT NULL
+      AND EXTRACT(YEAR FROM ${gamesTable.releaseDate}) <= ${filters.releaseYearMax}`);
+    }
+  }
+
+  if (filters.platforms?.length) {
+    conditions.push(sql`
+      EXISTS (
+        SELECT 1
+        FROM ${gamePlatformsTable}
+        WHERE ${gamePlatformsTable.gameId} = ${gamesTable.id}
+        AND ${inArray(gamePlatformsTable.platformId, filters.platforms)}
+      )
+    `);
+  }
+
+  if (filters.genres?.length) {
+    conditions.push(sql`
+      EXISTS (
+        SELECT 1
+        FROM ${gameGenresTable}
+        WHERE ${gameGenresTable.gameId} = ${gamesTable.id}
+        AND ${inArray(gameGenresTable.genreId, filters.genres)}
+      )
+    `);
+  }
+
+  if (filters.playtimeMin !== undefined || filters.playtimeMax !== undefined) {
+    const minSeconds = (filters.playtimeMin ?? 0) * 3600;
+    const maxSeconds = (filters.playtimeMax ?? Number.MAX_SAFE_INTEGER) * 3600;
+    conditions.push(sql`
+      EXISTS (
+        SELECT 1
+        FROM ${gameDurationsTable}
+        WHERE ${gameDurationsTable.gameId} = ${gamesTable.id}
+        AND ${gameDurationsTable.mainStorySeconds} IS NOT NULL
+        AND ${gameDurationsTable.mainStorySeconds} >= ${minSeconds}
+        AND ${gameDurationsTable.mainStorySeconds} <= ${maxSeconds}
+      )
+    `);
+  }
+
+  return conditions.length ? and(...conditions) : undefined;
+}
+
+export async function findGames({ page, pageSize, sort, ...filters }: FindGamesParams) {
+  const where = buildWhere(filters);
   const orderBy = sort ? sortMap[sort] : defaultOrder;
   const offset = (page - 1) * pageSize;
 
@@ -91,7 +168,8 @@ export async function findGames({ where, page, pageSize, sort }: FindGamesParams
     .orderBy(...orderBy);
 }
 
-export async function countGames({ where }: { where?: SQLType | undefined }) {
+export async function countGames(filters: GameFilters) {
+  const where = buildWhere(filters);
   const result = await db.select({ total: count() }).from(gamesTable).where(where);
   return result[0]?.total ?? 0;
 }
