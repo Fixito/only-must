@@ -1,7 +1,18 @@
-import { boolean, date, pgTable, smallint, text, timestamp, uuid } from 'drizzle-orm/pg-core';
+import {
+  boolean,
+  date,
+  integer,
+  pgTable,
+  smallint,
+  text,
+  timestamp,
+  uuid,
+} from 'drizzle-orm/pg-core';
 
 export const gamesTable = pgTable('games', {
   id: uuid().primaryKey().defaultRandom(),
+  hltbIdOverride: integer('hltb_id_override'),
+  hltbSearchOverride: text('hltb_search_override'),
   title: text().notNull(),
   description: text().notNull(),
   slug: text().notNull().unique(),

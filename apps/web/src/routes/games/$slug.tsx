@@ -6,14 +6,14 @@ import { NotFound } from '@/components/not-found.tsx';
 import { Badge } from '@/components/ui/badge.tsx';
 import GameDetailSkeleton from '@/features/games/components/game-detail-skeleton.tsx';
 import { gameQueryOptions } from '@/features/games/queries/game.query';
-import { formatdate } from '@/lib/date.ts';
+import { formatdate, formatDuration } from '@/lib/time';
 import { queryClient } from '@/router.tsx';
 
 const PLATFORM_STYLES: Record<string, string> = {
   'ios-iphoneipad': 'bg-black text-white dark:bg-white dark:text-black',
   'nintendo-switch': 'bg-nintendo text-white',
   'nintendo-switch-2': 'bg-nintendo text-white',
-  pc: 'bg-black text-white',
+  pc: 'bg-black text-white dark:text-black dark:bg-white',
   playstation: 'bg-playstation text-white dark:text-black',
   'playstation-2': 'bg-playstation text-white dark:text-black',
   'playstation-3': 'bg-playstation text-white dark:text-black',
@@ -55,7 +55,17 @@ export const Route = createFileRoute('/games/$slug')({
 
 function RouteComponent() {
   const {
-    data: { title, platforms, releaseDate, description, genres, developers, metaScore, heroImage },
+    data: {
+      title,
+      platforms,
+      releaseDate,
+      description,
+      genres,
+      developers,
+      metaScore,
+      heroImage,
+      durations,
+    },
   } = Route.useLoaderData();
 
   const formatter = new Intl.ListFormat('en', { type: 'conjunction' });
@@ -70,14 +80,14 @@ function RouteComponent() {
             src={heroImage}
             alt={title}
             loading="lazy"
-            className="w-full max-w-44 rounded-md object-cover"
+            className="w-full max-w-44 self-stretch rounded-md object-cover"
           />
 
           <div className="w-max">
             <div className="space-y-4">
               <div className="bg-card text-muted-foreground p-4 shadow-sm">
-                <p className="flex flex-wrap items-center gap-1">
-                  <strong className="text-foreground rounded-md font-semibold">Platforms:</strong>
+                <div className="flex flex-wrap items-center gap-1">
+                  <span className="text-muted-foreground rounded-md">Platforms:</span>
 
                   <div className="flex flex-wrap items-center gap-1">
                     {platforms
@@ -94,34 +104,60 @@ function RouteComponent() {
                         );
                       })}
                   </div>
-                </p>
+                </div>
 
-                <p>
-                  <strong className="text-foreground rounded-md font-semibold">
-                    Initial release date:
-                  </strong>{' '}
+                <p className="text-foreground">
+                  <span className="text-muted-foreground rounded-md">Initial release date:</span>{' '}
                   {releaseDate ? formatdate(releaseDate) : 'Unknown'}
                 </p>
               </div>
 
-              <div className="bg-card text-muted-foreground p-4 shadow-sm">
+              <div className="bg-card p-4 shadow-sm">
                 <p>
-                  <strong className="text-foreground rounded-md font-semibold">
+                  <span className="text-muted-foreground rounded-md">
                     {developers.length > 1 ? 'Developers:' : 'Developer:'}
-                  </strong>{' '}
+                  </span>{' '}
                   {developers.length > 0
                     ? formatter.format(developers.map((d) => d.name))
                     : 'Unknown'}
                 </p>
               </div>
 
-              <div className="bg-card text-muted-foreground flex flex-wrap items-center gap-2 p-4 shadow-sm">
-                <strong className="text-foreground rounded-md font-semibold">Genres:</strong>
+              <div className="bg-card flex flex-wrap items-center gap-2 p-4 shadow-sm">
+                <span className="text-muted-foreground rounded-md">Genres:</span>
                 {genres.map((g) => (
                   <Badge key={g.id} className="text-xs">
                     {g.name}
                   </Badge>
                 ))}
+              </div>
+
+              {/* Durations */}
+
+              <div className="flex flex-wrap">
+                {/* Main story */}
+                <div className="bg-card border-l p-4 shadow-sm">
+                  <span className="text-muted-foreground rounded-md">Main Story:</span>{' '}
+                  <span className="text-foreground font-semibold">
+                    {formatDuration(durations?.mainStorySeconds ?? null) || '-'}
+                  </span>
+                </div>
+
+                {/* Main story + Sides */}
+                <div className="bg-card border-l p-4 shadow-sm">
+                  <span className="text-muted-foreground rounded-md">Main Story + Sides:</span>{' '}
+                  <span className="text-foreground font-semibold">
+                    {formatDuration(durations?.mainExtraSeconds ?? null) || '-'}
+                  </span>
+                </div>
+
+                {/* Completionist */}
+                <div className="bg-card border-l p-4 shadow-sm">
+                  <span className="text-muted-foreground rounded-md">Completionist:</span>{' '}
+                  <span className="text-foreground font-semibold">
+                    {formatDuration(durations?.completionistSeconds ?? null) || '-'}
+                  </span>
+                </div>
               </div>
             </div>
           </div>

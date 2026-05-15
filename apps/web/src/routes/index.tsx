@@ -30,7 +30,10 @@ import {
 import EmptyState from '@/features/games/components/empty-state.tsx';
 import FilterChip from '@/features/games/components/filter-chip.tsx';
 import GamesFilterPanel from '@/features/games/components/games-filters-panel.tsx';
-import { gamesQueryOptions } from '@/features/games/queries/games.query.ts';
+import {
+  gamesDurationRangeQueryOptions,
+  gamesQueryOptions,
+} from '@/features/games/queries/games.query.ts';
 import { genresQueryOptions } from '@/features/genres/queries/genres.query.ts';
 import { platformsQueryOptions } from '@/features/platforms/queries/platforms.query';
 import { getPaginationItems } from '@/lib/pagination';
@@ -38,6 +41,8 @@ import { queryClient } from '@/router.tsx';
 
 const currentYear = new Date().getFullYear();
 const minYear = 1995;
+const minPlaytimeFallback = 0;
+const playtimeFallback = 250;
 
 const items = [
   {
@@ -51,6 +56,14 @@ const items = [
   {
     label: 'Oldest',
     value: 'release-asc',
+  },
+  {
+    label: 'Shortest Duration',
+    value: 'shortest-duration-asc',
+  },
+  {
+    label: 'Longest Duration',
+    value: 'longest-duration-desc',
   },
 ];
 
@@ -81,6 +94,7 @@ export const Route = createFileRoute('/')({
   loader: async ({ deps }) => {
     await queryClient.prefetchQuery(platformsQueryOptions());
     await queryClient.prefetchQuery(genresQueryOptions());
+    await queryClient.prefetchQuery(gamesDurationRangeQueryOptions());
     return await queryClient.ensureQueryData(gamesQueryOptions(deps));
   },
   pendingComponent: () => <CardsGridSkeleton />,
@@ -95,12 +109,22 @@ function App() {
   } = Route.useLoaderData();
   const { data: platforms } = useQuery(platformsQueryOptions());
   const { data: genres } = useQuery(genresQueryOptions());
+  const { data: durationRange } = useQuery(gamesDurationRangeQueryOptions());
+  const maxPlaytime = durationRange?.maxMainStoryHours ?? playtimeFallback;
+  const minPlaytime = durationRange?.minMainStoryHours ?? minPlaytimeFallback;
   const search = Route.useSearch();
-  const [value, setValue] = useState<[number, number]>(
+  const [yearValue, setYearValue] = useState<[number, number]>(
     clampRange(
       [search.releaseYearMin ?? minYear, search.releaseYearMax ?? currentYear],
       minYear,
       currentYear,
+    ),
+  );
+  const [playtimeValue, setPlaytimeValue] = useState<[number, number]>(
+    clampRange(
+      [search.playtimeMin ?? minPlaytime, search.playtimeMax ?? maxPlaytime],
+      minPlaytime,
+      maxPlaytime,
     ),
   );
   const navigate = Route.useNavigate();
@@ -118,6 +142,20 @@ function App() {
         ...prev,
         releaseYearMin: safe[0],
         releaseYearMax: safe[1],
+        page: 1,
+      }),
+    });
+  };
+
+  const commitPlaytime = (next: [number, number]) => {
+    const safe = clampRange(next, minPlaytime, maxPlaytime);
+    const isFullRange = safe[0] === minPlaytime && safe[1] === maxPlaytime;
+
+    void navigate({
+      search: (prev) => ({
+        ...prev,
+        playtimeMin: isFullRange ? undefined : safe[0],
+        playtimeMax: isFullRange ? undefined : safe[1],
         page: 1,
       }),
     });
@@ -153,15 +191,22 @@ function App() {
       ...(search.releaseYearMax !== undefined && {
         releaseYearMax: search.releaseYearMax,
       }),
+      ...(search.playtimeMin !== undefined && { playtimeMin: search.playtimeMin }),
+      ...(search.playtimeMax !== undefined && { playtimeMax: search.playtimeMax }),
       ...(search.search !== undefined && { search: search.search }),
     },
     platforms: platforms ?? [],
     genres: genres ?? [],
     minYear,
     currentYear,
-    value,
-    setValue,
+    value: yearValue,
+    minPlaytime,
+    maxPlaytime,
+    playtimeValue,
+    setValue: setYearValue,
     commit,
+    setPlaytimeValue,
+    commitPlaytime,
     clampRange,
   };
 
@@ -177,7 +222,7 @@ function App() {
   }, [page, search, hasNext]);
 
   useEffect(() => {
-    setValue(
+    setYearValue(
       clampRange(
         [search.releaseYearMin ?? minYear, search.releaseYearMax ?? currentYear],
         minYear,
@@ -185,6 +230,16 @@ function App() {
       ),
     );
   }, [search.releaseYearMin, search.releaseYearMax]);
+
+  useEffect(() => {
+    setPlaytimeValue(
+      clampRange(
+        [search.playtimeMin ?? minPlaytime, search.playtimeMax ?? maxPlaytime],
+        minPlaytime,
+        maxPlaytime,
+      ),
+    );
+  }, [search.playtimeMin, search.playtimeMax, minPlaytime, maxPlaytime]);
 
   return (
     <>
@@ -245,6 +300,22 @@ function App() {
                   }
                 />
               )}
+
+              {(search.playtimeMin !== undefined || search.playtimeMax !== undefined) && (
+                <FilterChip
+                  label={`${search.playtimeMin ?? minPlaytime}h–${search.playtimeMax ?? maxPlaytime}h`}
+                  onRemove={() =>
+                    navigate({
+                      search: (prev) => ({
+                        ...prev,
+                        page: 1,
+                        playtimeMin: undefined,
+                        playtimeMax: undefined,
+                      }),
+                    })
+                  }
+                />
+              )}
             </div>
 
             <div>
@@ -256,7 +327,13 @@ function App() {
                     search: (prev) => ({
                       ...prev,
                       page: 1,
-                      sort: v as 'metascore-desc' | 'release-asc' | 'release-desc' | undefined,
+                      sort: v as
+                        | 'metascore-desc'
+                        | 'release-asc'
+                        | 'release-desc'
+                        | 'shortest-duration-asc'
+                        | 'longest-duration-desc'
+                        | undefined,
                     }),
                   });
                 }}
@@ -286,7 +363,9 @@ function App() {
                 search.platforms.length ||
                 search.genres.length ||
                 search.releaseYearMin ||
-                search.releaseYearMax,
+                search.releaseYearMax ||
+                search.playtimeMin !== undefined ||
+                search.playtimeMax !== undefined,
               )}
             />
           ) : (

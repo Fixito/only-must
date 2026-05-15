@@ -13,6 +13,8 @@ interface GamesFilterPanelProps {
     genres: Array<string>;
     releaseYearMin?: number;
     releaseYearMax?: number;
+    playtimeMin?: number;
+    playtimeMax?: number;
     search?: string;
   };
   platforms: Array<Platform> | { data: Array<Platform> };
@@ -20,8 +22,13 @@ interface GamesFilterPanelProps {
   minYear: number;
   currentYear: number;
   value: [number, number];
+  minPlaytime: number;
+  maxPlaytime: number;
+  playtimeValue: [number, number];
   setValue: (value: [number, number]) => void;
   commit: (value: [number, number]) => void;
+  setPlaytimeValue: (value: [number, number]) => void;
+  commitPlaytime: (value: [number, number]) => void;
   clampRange: (value: [number, number], min: number, max: number) => [number, number];
 }
 
@@ -32,8 +39,13 @@ export default function GamesFilterPanel({
   minYear,
   currentYear,
   value,
+  minPlaytime,
+  maxPlaytime,
+  playtimeValue,
   setValue,
   commit,
+  setPlaytimeValue,
+  commitPlaytime,
   clampRange,
 }: GamesFilterPanelProps) {
   const navigate = useNavigate();
@@ -54,6 +66,8 @@ export default function GamesFilterPanel({
                 !search.genres.length &&
                 !search.releaseYearMin &&
                 !search.releaseYearMax &&
+                search.playtimeMin === undefined &&
+                search.playtimeMax === undefined &&
                 !search.search
               }
               className="disabled:cursor-not-allowed"
@@ -65,6 +79,8 @@ export default function GamesFilterPanel({
                     genres: undefined,
                     releaseYearMin: undefined,
                     releaseYearMax: undefined,
+                    playtimeMin: undefined,
+                    playtimeMax: undefined,
                     search: undefined,
                   },
                 })
@@ -124,6 +140,73 @@ export default function GamesFilterPanel({
                 type="number"
                 id="release-year-max"
                 value={value[1]}
+                tabIndex={-1}
+                readOnly
+                className="pointer-events-none field-sizing-content w-auto"
+              />
+            </div>
+          </div>
+        </fieldset>
+      </div>
+
+      <div className="mbs-4 border-t pbs-4">
+        <fieldset>
+          <div className="flex items-center justify-between">
+            <legend className="text-foreground text-xs font-medium tracking-widest uppercase">
+              Playtime
+            </legend>
+          </div>
+
+          <div className="mbs-4 w-full max-w-sm space-y-4">
+            {/* Slider */}
+            <Label htmlFor="playtime-range">
+              <span className="sr-only">Playtime range</span>
+
+              <Slider
+                name="playtime-range"
+                id="playtime-range"
+                min={minPlaytime}
+                max={maxPlaytime}
+                step={1}
+                value={playtimeValue}
+                onValueChange={(val) => {
+                  if (Array.isArray(val) && val.length === 2) {
+                    setPlaytimeValue(clampRange([val[0], val[1]], minPlaytime, maxPlaytime));
+                  }
+                }}
+                onValueCommitted={(val) => {
+                  if (Array.isArray(val) && val.length === 2) {
+                    commitPlaytime(clampRange([val[0], val[1]], minPlaytime, maxPlaytime));
+                  }
+                }}
+              />
+            </Label>
+
+            {/* Inputs */}
+            <div className="mbs-4 flex items-center justify-between gap-2">
+              {/* Min */}
+              <label htmlFor="playtime-min" className="sr-only">
+                Playtime min
+              </label>
+
+              <Input
+                type="text"
+                id="playtime-min"
+                value={`${playtimeValue[0]}h`}
+                tabIndex={-1}
+                readOnly
+                className="pointer-events-none field-sizing-content w-auto"
+              />
+
+              {/* Max */}
+              <label htmlFor="playtime-max" className="sr-only">
+                Playtime max
+              </label>
+
+              <Input
+                type="text"
+                id="playtime-max"
+                value={`${playtimeValue[1]}h`}
                 tabIndex={-1}
                 readOnly
                 className="pointer-events-none field-sizing-content w-auto"

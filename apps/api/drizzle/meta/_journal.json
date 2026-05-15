@@ -8,6 +8,34 @@
       "when": 1777529310450,
       "tag": "0000_clean_prima",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1778674450053,
+      "tag": "0001_lowly_spitfire",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1778738662863,
+      "tag": "0002_nice_starhawk",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1778738737016,
+      "tag": "0003_petite_shinobi_shaw",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1778742078825,
+      "tag": "0004_fine_betty_ross",
+      "breakpoints": true
     }
   ]
 }

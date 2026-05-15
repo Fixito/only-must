@@ -29,7 +29,18 @@ export const GamesQuerySchema = z
     platforms: arrayParam,
     genres: arrayParam,
 
-    sort: z.enum(['metascore-desc', 'release-asc', 'release-desc']).optional(),
+    playtimeMin: z.coerce.number().int().min(0).optional(),
+    playtimeMax: z.coerce.number().int().min(0).optional(),
+
+    sort: z
+      .enum([
+        'metascore-desc',
+        'release-asc',
+        'release-desc',
+        'shortest-duration-asc',
+        'longest-duration-desc',
+      ])
+      .optional(),
   })
   .refine(
     (data) => {
@@ -44,6 +55,18 @@ export const GamesQuerySchema = z
     {
       message: 'Invalid year range',
       path: ['releaseYearMin'],
+    },
+  )
+  .refine(
+    (data) => {
+      if (data.playtimeMin !== undefined && data.playtimeMax !== undefined) {
+        return data.playtimeMin <= data.playtimeMax;
+      }
+      return true;
+    },
+    {
+      message: 'Invalid playtime range',
+      path: ['playtimeMin'],
     },
   )
   .transform((data) => ({

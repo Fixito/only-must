@@ -9,6 +9,11 @@ import * as gameService from './game.service.js';
 const router = Router();
 
 function createGameRouter() {
+  router.get('/duration-range', async (_req, res) => {
+    const range = await gameService.getGamesDurationRange();
+    return res.status(StatusCodes.OK).json(range);
+  });
+
   router.get('/', async (req, res) => {
     const filters = GamesQuerySchema.parse(req.query);
 
