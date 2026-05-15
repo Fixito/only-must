@@ -1,5 +1,4 @@
 import { GamesQuerySchema } from '@only-must/shared';
-import { useIsFetching } from '@tanstack/react-query';
 import { createFileRoute } from '@tanstack/react-router';
 import { useEffect } from 'react';
 
@@ -8,15 +7,6 @@ import Error from '@/components/error.tsx';
 import GameCard from '@/components/game-card.tsx';
 import { default as CardsGridSkeleton } from '@/components/grid-page-skeleton';
 import MobileFiltersSheet from '@/components/mobile-filters-sheet.tsx';
-import {
-  Pagination,
-  PaginationContent,
-  PaginationEllipsis,
-  PaginationItem,
-  PaginationLink,
-  PaginationNext,
-  PaginationPrevious,
-} from '@/components/ui/pagination';
 import {
   Select,
   SelectContent,
@@ -29,6 +19,7 @@ import {
 import ActiveFilterChips from '@/features/games/components/active-filter-chips.tsx';
 import EmptyState from '@/features/games/components/empty-state.tsx';
 import GamesFilterPanel from '@/features/games/components/games-filters-panel.tsx';
+import GamesPagination from '@/features/games/components/games-pagination.tsx';
 import {
   gamesDurationRangeQueryOptions,
   gamesQueryOptions,
@@ -41,7 +32,6 @@ import {
 } from '@/features/games/utils/games-filter.utils.ts';
 import { genresQueryOptions } from '@/features/genres/queries/genres.query.ts';
 import { platformsQueryOptions } from '@/features/platforms/queries/platforms.query';
-import { getPaginationItems } from '@/lib/pagination';
 import { queryClient } from '@/router.tsx';
 
 export const Route = createFileRoute('/')({
@@ -78,7 +68,6 @@ function App() {
   } = Route.useLoaderData();
   const search = Route.useSearch();
   const navigate = Route.useNavigate();
-  const isFetching = useIsFetching({ queryKey: gamesQueryOptions().queryKey.slice(0, 1) }) > 0;
 
   useEffect(() => {
     if (hasNext) {
@@ -129,7 +118,7 @@ function App() {
                     search: (prev) => ({
                       ...prev,
                       page: 1,
-                      sort: v,
+                      sort: v || undefined,
                     }),
                   });
                 }}
@@ -167,61 +156,12 @@ function App() {
             </div>
           )}
 
-          {totalPages > 1 && (
-            <div className="mbs-8">
-              <Pagination>
-                <PaginationContent>
-                  {hasPrev && (
-                    <PaginationItem>
-                      <PaginationPrevious
-                        to="."
-                        search={(prev) => ({
-                          ...prev,
-                          page: (prev.page ?? 1) - 1,
-                        })}
-                        preload="intent"
-                        disabled={isFetching}
-                      />
-                    </PaginationItem>
-                  )}
-
-                  {getPaginationItems(page, totalPages).map((item, i) =>
-                    item === 'ellipsis' ? (
-                      <PaginationItem key={`ellipsis-${i}`}>
-                        <PaginationEllipsis />
-                      </PaginationItem>
-                    ) : (
-                      <PaginationItem key={item}>
-                        <PaginationLink
-                          to="."
-                          search={(prev) => ({ ...prev, page: item })}
-                          isActive={page === item}
-                          preload="intent"
-                          disabled={isFetching}
-                        >
-                          {item}
-                        </PaginationLink>
-                      </PaginationItem>
-                    ),
-                  )}
-
-                  {hasNext && (
-                    <PaginationItem>
-                      <PaginationNext
-                        to="."
-                        search={(prev) => ({
-                          ...prev,
-                          page: (prev.page ?? 1) + 1,
-                        })}
-                        preload="intent"
-                        disabled={isFetching}
-                      />
-                    </PaginationItem>
-                  )}
-                </PaginationContent>
-              </Pagination>
-            </div>
-          )}
+          <GamesPagination
+            page={page}
+            totalPages={totalPages}
+            hasNext={hasNext}
+            hasPrev={hasPrev}
+          />
         </section>
       </div>
     </>
