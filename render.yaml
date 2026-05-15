@@ -1,0 +1,6 @@
+services:
+  - type: web
+    name: only-must-api
+    runtime: node
+    buildCommand: corepack enable && pnpm install --frozen-lockfile && pnpm build:api
+    startCommand: pnpm -F api start
