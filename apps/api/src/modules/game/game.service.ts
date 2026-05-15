@@ -1,4 +1,4 @@
-import { GameSchema, GameWithRelationsSchema } from '@only-must/shared';
+import { GameSchema, GameWithRelationsSchema, type GamesQuery } from '@only-must/shared';
 import type { SQL } from 'drizzle-orm';
 import { and, inArray, sql } from 'drizzle-orm';
 
@@ -10,26 +10,12 @@ import {
   gameGenresTable,
   gamePlatformsTable,
 } from '../../../db/schemas/index.js';
-import type { sortMap } from './game.repository.js';
 import * as gameRepository from './game.repository.js';
 
-export interface GamesFilters {
-  genres?: string[] | undefined;
-  page?: number | undefined;
-  pageSize?: number | undefined;
-  platforms?: string[] | undefined;
-  playtimeMin?: number | undefined;
-  playtimeMax?: number | undefined;
-  releaseYear?: number | undefined;
-  releaseYearMin?: number | undefined;
-  releaseYearMax?: number | undefined;
-  search?: string | undefined;
-  sort?: keyof typeof sortMap | undefined;
-}
+const PAGE_SIZE = 24;
 
 export async function getGames({
-  page = 1,
-  pageSize = 24,
+  page,
   platforms,
   genres,
   search,
@@ -39,7 +25,8 @@ export async function getGames({
   playtimeMin,
   playtimeMax,
   sort,
-}: GamesFilters = {}) {
+}: GamesQuery) {
+  const pageSize = PAGE_SIZE;
   const conditions: SQL[] = [];
 
   if (search) {
