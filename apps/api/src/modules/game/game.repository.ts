@@ -4,13 +4,9 @@ import { and, asc, count, desc, eq, getTableColumns, inArray, sql } from 'drizzl
 import { db } from '../../../db/client.js';
 import { gamesTable } from '../../../db/schemas/game/game.schema.js';
 import {
-  developersTable,
-  gameDevelopersTable,
   gameDurationsTable,
   gameGenresTable,
   gamePlatformsTable,
-  genresTable,
-  platformsTable,
 } from '../../../db/schemas/index.js';
 
 const defaultOrder = [sql`${gamesTable.metaScore} DESC NULLS LAST`, asc(gamesTable.releaseDate)];
@@ -191,53 +187,43 @@ export async function findDurationRangeHours(): Promise<{ minHours: number; maxH
 export async function findGameBySlug(slug: string) {
   const game = await db.query.gamesTable.findFirst({
     where: eq(gamesTable.slug, slug),
+    columns: {
+      scrapedAt: false,
+      updatedAt: false,
+      isDetailsScraped: false,
+    },
+    with: {
+      gamePlatforms: {
+        columns: {},
+        with: { platform: { columns: { id: true, name: true } } },
+      },
+      gameGenres: {
+        columns: {},
+        with: { genre: { columns: { id: true, name: true } } },
+      },
+      gameDevelopers: {
+        columns: {},
+        with: { developer: { columns: { id: true, name: true } } },
+      },
+      duration: {
+        columns: {
+          mainStorySeconds: true,
+          mainExtraSeconds: true,
+          completionistSeconds: true,
+        },
+      },
+    },
   });
 
   if (!game) return null;
 
-  const [platforms, genres, developers, durations] = await Promise.all([
-    db
-      .select({
-        id: platformsTable.id,
-        name: platformsTable.name,
-      })
-      .from(gamePlatformsTable)
-      .innerJoin(platformsTable, eq(platformsTable.id, gamePlatformsTable.platformId))
-      .where(eq(gamePlatformsTable.gameId, game.id)),
-
-    db
-      .select({
-        id: genresTable.id,
-        name: genresTable.name,
-      })
-      .from(gameGenresTable)
-      .innerJoin(genresTable, eq(genresTable.id, gameGenresTable.genreId))
-      .where(eq(gameGenresTable.gameId, game.id)),
-
-    db
-      .select({
-        id: developersTable.id,
-        name: developersTable.name,
-      })
-      .from(gameDevelopersTable)
-      .innerJoin(developersTable, eq(developersTable.id, gameDevelopersTable.developerId))
-      .where(eq(gameDevelopersTable.gameId, game.id)),
-
-    db
-      .select({
-        mainStorySeconds: gameDurationsTable.mainStorySeconds,
-        mainExtraSeconds: gameDurationsTable.mainExtraSeconds,
-        completionistSeconds: gameDurationsTable.completionistSeconds,
-      })
-      .from(gameDurationsTable)
-      .where(eq(gameDurationsTable.gameId, game.id)),
-  ]);
+  const { gamePlatforms, gameGenres, gameDevelopers, duration, ...gameData } = game;
 
   return {
-    ...game,
-    platforms,
-    genres,
-    developers,
-    durations: durations[0] ?? null,
+    ...gameData,
+    platforms: gamePlatforms.map((gp) => gp.platform),
+    genres: gameGenres.map((gg) => gg.genre),
+    developers: gameDevelopers.map((gd) => gd.developer),
+    durations: duration ?? null,
   };
 }

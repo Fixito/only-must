@@ -79,10 +79,13 @@ export const Route = createFileRoute('/')({
   validateSearch: GamesQuerySchema,
   loaderDeps: ({ search }) => search,
   loader: async ({ deps }) => {
-    await queryClient.prefetchQuery(platformsQueryOptions());
-    await queryClient.prefetchQuery(genresQueryOptions());
-    await queryClient.prefetchQuery(gamesDurationRangeQueryOptions());
-    return await queryClient.ensureQueryData(gamesQueryOptions(deps));
+    const [gamesData] = await Promise.all([
+      queryClient.ensureQueryData(gamesQueryOptions(deps)),
+      queryClient.prefetchQuery(platformsQueryOptions()),
+      queryClient.prefetchQuery(genresQueryOptions()),
+      queryClient.prefetchQuery(gamesDurationRangeQueryOptions()),
+    ]);
+    return gamesData;
   },
   pendingComponent: () => <CardsGridSkeleton />,
   component: App,
