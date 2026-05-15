@@ -26,8 +26,8 @@ async function fetchDuration(game: typeof gamesTable.$inferSelect) {
     // Fallback: try cleaned title variants to find the overridden ID
     for (const variant of cleanTitle(searchTitle)) {
       const fallback = await searchLimit(() => hltbService.search(variant));
-      const hltb = fallback.data.find((d) => d.id === game.hltbIdOverride);
-      if (hltb) return buildDuration(game.id, hltb);
+      const fallbackHltb = fallback.data.find((d) => d.id === game.hltbIdOverride);
+      if (fallbackHltb) return buildDuration(game.id, fallbackHltb);
     }
 
     console.warn(`Override ID ${game.hltbIdOverride} not found for: ${game.title}`);
