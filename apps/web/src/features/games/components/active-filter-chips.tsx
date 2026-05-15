@@ -3,10 +3,10 @@ import { useQuery } from '@tanstack/react-query';
 import { useNavigate, useSearch } from '@tanstack/react-router';
 
 import FilterChip from '@/features/games/components/filter-chip.tsx';
-import { gamesDurationRangeQueryOptions } from '@/features/games/queries/games.query.ts';
+import { usePlaytimeBounds } from '@/features/games/hooks/use-playtime-bounds.ts';
 import {
-  MIN_PLAYTIME_FALLBACK,
-  PLAYTIME_FALLBACK,
+  removePlaytimeRange,
+  removeYearRange,
   toggleFilterValue,
 } from '@/features/games/utils/games-filter.utils.ts';
 import { genresQueryOptions } from '@/features/genres/queries/genres.query.ts';
@@ -17,10 +17,7 @@ export default function ActiveFilterChips() {
   const navigate = useNavigate({ from: '/' });
   const { data: platforms } = useQuery(platformsQueryOptions());
   const { data: genres } = useQuery(genresQueryOptions());
-  const { data: durationRange } = useQuery(gamesDurationRangeQueryOptions());
-
-  const maxPlaytime = durationRange?.maxMainStoryHours ?? PLAYTIME_FALLBACK;
-  const minPlaytime = durationRange?.minMainStoryHours ?? MIN_PLAYTIME_FALLBACK;
+  const { min: minPlaytime, max: maxPlaytime } = usePlaytimeBounds();
 
   const platformMap = Object.fromEntries(
     (platforms?.data ?? []).map((p: Platform) => [p.id, p.name]),
@@ -48,32 +45,14 @@ export default function ActiveFilterChips() {
       {search.releaseYearMin && search.releaseYearMax && (
         <FilterChip
           label={`${search.releaseYearMin}-${search.releaseYearMax}`}
-          onRemove={() =>
-            navigate({
-              search: (prev) => ({
-                ...prev,
-                page: 1,
-                releaseYearMin: undefined,
-                releaseYearMax: undefined,
-              }),
-            })
-          }
+          onRemove={() => void navigate({ search: removeYearRange })}
         />
       )}
 
       {(search.playtimeMin !== undefined || search.playtimeMax !== undefined) && (
         <FilterChip
           label={`${search.playtimeMin ?? minPlaytime}h–${search.playtimeMax ?? maxPlaytime}h`}
-          onRemove={() =>
-            navigate({
-              search: (prev) => ({
-                ...prev,
-                page: 1,
-                playtimeMin: undefined,
-                playtimeMax: undefined,
-              }),
-            })
-          }
+          onRemove={() => void navigate({ search: removePlaytimeRange })}
         />
       )}
     </div>

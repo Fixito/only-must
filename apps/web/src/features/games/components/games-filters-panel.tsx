@@ -4,12 +4,8 @@ import { useNavigate, useSearch } from '@tanstack/react-router';
 import { Button } from '@/components/ui/button.tsx';
 import { FilterMulti } from '@/features/games/components/filter-multi.tsx';
 import { RangeFilterField } from '@/features/games/components/range-filter-field.tsx';
-import { gamesDurationRangeQueryOptions } from '@/features/games/queries/games.query.ts';
-import {
-  isFiltersActive,
-  MIN_PLAYTIME_FALLBACK,
-  PLAYTIME_FALLBACK,
-} from '@/features/games/utils/games-filter.utils.ts';
+import { usePlaytimeBounds } from '@/features/games/hooks/use-playtime-bounds.ts';
+import { isFiltersActive, resetFilters } from '@/features/games/utils/games-filter.utils.ts';
 import { genresQueryOptions } from '@/features/genres/queries/genres.query.ts';
 import { platformsQueryOptions } from '@/features/platforms/queries/platforms.query';
 
@@ -21,10 +17,7 @@ export default function GamesFilterPanel() {
   const navigate = useNavigate({ from: '/' });
   const { data: platformsResponse } = useQuery(platformsQueryOptions());
   const { data: genresResponse } = useQuery(genresQueryOptions());
-  const { data: durationRange } = useQuery(gamesDurationRangeQueryOptions());
-
-  const maxPlaytime = durationRange?.maxMainStoryHours ?? PLAYTIME_FALLBACK;
-  const minPlaytime = durationRange?.minMainStoryHours ?? MIN_PLAYTIME_FALLBACK;
+  const { min: minPlaytime, max: maxPlaytime } = usePlaytimeBounds();
   const platforms = platformsResponse?.data ?? [];
   const genres = genresResponse?.data ?? [];
 
@@ -41,20 +34,7 @@ export default function GamesFilterPanel() {
               variant="ghost"
               disabled={!isFiltersActive(search)}
               className="disabled:cursor-not-allowed"
-              onClick={() =>
-                navigate({
-                  to: '.',
-                  search: {
-                    platforms: undefined,
-                    genres: undefined,
-                    releaseYearMin: undefined,
-                    releaseYearMax: undefined,
-                    playtimeMin: undefined,
-                    playtimeMax: undefined,
-                    search: undefined,
-                  },
-                })
-              }
+              onClick={() => void navigate({ search: resetFilters })}
             >
               Reset filters
             </Button>

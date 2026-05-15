@@ -33,6 +33,32 @@ export const DURATION_SORTS = new Set<NonNullable<GamesQuery['sort']>>([
 export const isDurationSort = (sort: GamesQuery['sort']): boolean =>
   sort !== undefined && DURATION_SORTS.has(sort);
 
+export const resetFilters = (prev: GamesQuery) => ({
+  ...prev,
+  platforms: undefined,
+  genres: undefined,
+  releaseYearMin: undefined,
+  releaseYearMax: undefined,
+  playtimeMin: undefined,
+  playtimeMax: undefined,
+  search: undefined,
+  page: 1,
+});
+
+export const removeYearRange = (prev: GamesQuery) => ({
+  ...prev,
+  releaseYearMin: undefined,
+  releaseYearMax: undefined,
+  page: 1,
+});
+
+export const removePlaytimeRange = (prev: GamesQuery) => ({
+  ...prev,
+  playtimeMin: undefined,
+  playtimeMax: undefined,
+  page: 1,
+});
+
 export function isFiltersActive(search: GamesQuery): boolean {
   return Boolean(
     search.search ||
