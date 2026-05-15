@@ -1,6 +1,5 @@
-import type { Genre, Platform } from '@only-must/shared';
 import { GamesQuerySchema } from '@only-must/shared';
-import { useIsFetching, useQuery } from '@tanstack/react-query';
+import { useIsFetching } from '@tanstack/react-query';
 import { createFileRoute } from '@tanstack/react-router';
 import { useEffect } from 'react';
 
@@ -27,8 +26,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select.tsx';
+import ActiveFilterChips from '@/features/games/components/active-filter-chips.tsx';
 import EmptyState from '@/features/games/components/empty-state.tsx';
-import FilterChip from '@/features/games/components/filter-chip.tsx';
 import GamesFilterPanel from '@/features/games/components/games-filters-panel.tsx';
 import {
   gamesDurationRangeQueryOptions,
@@ -38,9 +37,6 @@ import { genresQueryOptions } from '@/features/genres/queries/genres.query.ts';
 import { platformsQueryOptions } from '@/features/platforms/queries/platforms.query';
 import { getPaginationItems } from '@/lib/pagination';
 import { queryClient } from '@/router.tsx';
-
-const minPlaytimeFallback = 0;
-const playtimeFallback = 250;
 
 const items = [
   {
@@ -97,38 +93,9 @@ function App() {
     data,
     meta: { page, total, totalPages, hasNext, hasPrev },
   } = Route.useLoaderData();
-  const { data: platforms } = useQuery(platformsQueryOptions());
-  const { data: genres } = useQuery(genresQueryOptions());
-  const { data: durationRange } = useQuery(gamesDurationRangeQueryOptions());
-  const maxPlaytime = durationRange?.maxMainStoryHours ?? playtimeFallback;
-  const minPlaytime = durationRange?.minMainStoryHours ?? minPlaytimeFallback;
   const search = Route.useSearch();
   const navigate = Route.useNavigate();
   const isFetching = useIsFetching({ queryKey: gamesQueryOptions().queryKey.slice(0, 1) }) > 0;
-  const platformMap = Object.fromEntries(
-    (platforms?.data ?? []).map((p: Platform) => [p.id, p.name]),
-  );
-  const genreMap = Object.fromEntries((genres?.data ?? []).map((g: Genre) => [g.id, g.name]));
-
-  const handleRemovePlatform = (platform: string) => {
-    void navigate({
-      search: (prev) => ({
-        ...prev,
-        platforms: prev.platforms.filter((p) => p !== platform),
-        page: 1,
-      }),
-    });
-  };
-
-  const handleRemoveGenre = (genre: string) => {
-    void navigate({
-      search: (prev) => ({
-        ...prev,
-        genres: prev.genres.filter((g) => g !== genre),
-        page: 1,
-      }),
-    });
-  };
 
   useEffect(() => {
     if (hasNext) {
@@ -168,55 +135,7 @@ function App() {
               {total} results {search.search && `for "${search.search}"`}
             </p>
 
-            <div className="flex flex-wrap items-center gap-2">
-              {search.platforms.map((p) => (
-                <FilterChip
-                  key={p}
-                  label={platformMap[p] ?? p}
-                  onRemove={() => handleRemovePlatform(p)}
-                />
-              ))}
-
-              {search.genres.map((g) => (
-                <FilterChip
-                  key={g}
-                  label={genreMap[g] ?? g}
-                  onRemove={() => handleRemoveGenre(g)}
-                />
-              ))}
-
-              {search.releaseYearMin && search.releaseYearMax && (
-                <FilterChip
-                  label={`${search.releaseYearMin}-${search.releaseYearMax}`}
-                  onRemove={() =>
-                    navigate({
-                      search: (prev) => ({
-                        ...prev,
-                        page: 1,
-                        releaseYearMin: undefined,
-                        releaseYearMax: undefined,
-                      }),
-                    })
-                  }
-                />
-              )}
-
-              {(search.playtimeMin !== undefined || search.playtimeMax !== undefined) && (
-                <FilterChip
-                  label={`${search.playtimeMin ?? minPlaytime}h–${search.playtimeMax ?? maxPlaytime}h`}
-                  onRemove={() =>
-                    navigate({
-                      search: (prev) => ({
-                        ...prev,
-                        page: 1,
-                        playtimeMin: undefined,
-                        playtimeMax: undefined,
-                      }),
-                    })
-                  }
-                />
-              )}
-            </div>
+            <ActiveFilterChips />
 
             <div>
               <Select

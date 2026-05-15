@@ -3,27 +3,12 @@ import { createFileRoute, notFound } from '@tanstack/react-router';
 
 import Error from '@/components/error.tsx';
 import { NotFound } from '@/components/not-found.tsx';
+import { PlatformBadge } from '@/components/platform-badge.tsx';
 import { Badge } from '@/components/ui/badge.tsx';
 import GameDetailSkeleton from '@/features/games/components/game-detail-skeleton.tsx';
 import { gameQueryOptions } from '@/features/games/queries/game.query';
 import { formatdate, formatDuration } from '@/lib/time';
 import { queryClient } from '@/router.tsx';
-
-const PLATFORM_STYLES: Record<string, string> = {
-  'ios-iphoneipad': 'bg-black text-white dark:bg-white dark:text-black',
-  'nintendo-switch': 'bg-nintendo text-white',
-  'nintendo-switch-2': 'bg-nintendo text-white',
-  pc: 'bg-black text-white dark:text-black dark:bg-white',
-  playstation: 'bg-playstation text-white dark:text-black',
-  'playstation-2': 'bg-playstation text-white dark:text-black',
-  'playstation-3': 'bg-playstation text-white dark:text-black',
-  'playstation-4': 'bg-playstation text-white dark:text-black',
-  'playstation-5': 'bg-playstation text-white dark:text-black',
-  xbox: 'bg-xbox text-white',
-  'xbox-360': 'bg-xbox text-white',
-  'xbox-one': 'bg-xbox text-white',
-  'xbox-series-x': 'bg-xbox text-white',
-};
 
 export const Route = createFileRoute('/games/$slug')({
   loader: async ({ params }) => {
@@ -92,17 +77,9 @@ function RouteComponent() {
                   <div className="flex flex-wrap items-center gap-1">
                     {platforms
                       .toSorted((a, b) => a.name.localeCompare(b.name))
-                      .map((p) => {
-                        return (
-                          <Badge
-                            key={p.id}
-                            variant="secondary"
-                            className={`text-xs ${PLATFORM_STYLES[p.id] ?? 'bg-muted text-muted-foreground'}`}
-                          >
-                            {p.name}
-                          </Badge>
-                        );
-                      })}
+                      .map((p) => (
+                        <PlatformBadge key={p.id} platform={p} />
+                      ))}
                   </div>
                 </div>
 
