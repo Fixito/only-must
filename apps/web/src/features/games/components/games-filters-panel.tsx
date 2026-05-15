@@ -1,12 +1,9 @@
 import { useQuery } from '@tanstack/react-query';
 import { useNavigate, useSearch } from '@tanstack/react-router';
-import { useEffect, useState } from 'react';
 
 import { Button } from '@/components/ui/button.tsx';
-import { Input } from '@/components/ui/input.tsx';
-import { Label } from '@/components/ui/label.tsx';
-import { Slider } from '@/components/ui/slider.tsx';
 import { FilterMulti } from '@/features/games/components/filter-multi.tsx';
+import { RangeFilterField } from '@/features/games/components/range-filter-field.tsx';
 import { gamesDurationRangeQueryOptions } from '@/features/games/queries/games.query.ts';
 import {
   isFiltersActive,
@@ -19,16 +16,6 @@ import { platformsQueryOptions } from '@/features/platforms/queries/platforms.qu
 const MIN_YEAR = 1995;
 const CURRENT_YEAR = new Date().getFullYear();
 
-function clampRange(
-  [min, max]: [number, number],
-  minLimit: number,
-  maxLimit: number,
-): [number, number] {
-  const clampedMin = Math.max(minLimit, Math.min(min, maxLimit));
-  const clampedMax = Math.max(minLimit, Math.min(max, maxLimit));
-  return [Math.min(clampedMin, clampedMax), Math.max(clampedMin, clampedMax)];
-}
-
 export default function GamesFilterPanel() {
   const search = useSearch({ from: '/' });
   const navigate = useNavigate({ from: '/' });
@@ -40,67 +27,6 @@ export default function GamesFilterPanel() {
   const minPlaytime = durationRange?.minMainStoryHours ?? MIN_PLAYTIME_FALLBACK;
   const platforms = platformsResponse?.data ?? [];
   const genres = genresResponse?.data ?? [];
-
-  const [yearValue, setYearValue] = useState<[number, number]>(
-    clampRange(
-      [search.releaseYearMin ?? MIN_YEAR, search.releaseYearMax ?? CURRENT_YEAR],
-      MIN_YEAR,
-      CURRENT_YEAR,
-    ),
-  );
-
-  const [playtimeValue, setPlaytimeValue] = useState<[number, number]>(
-    clampRange(
-      [search.playtimeMin ?? minPlaytime, search.playtimeMax ?? maxPlaytime],
-      minPlaytime,
-      maxPlaytime,
-    ),
-  );
-
-  useEffect(() => {
-    setYearValue(
-      clampRange(
-        [search.releaseYearMin ?? MIN_YEAR, search.releaseYearMax ?? CURRENT_YEAR],
-        MIN_YEAR,
-        CURRENT_YEAR,
-      ),
-    );
-  }, [search.releaseYearMin, search.releaseYearMax]);
-
-  useEffect(() => {
-    setPlaytimeValue(
-      clampRange(
-        [search.playtimeMin ?? minPlaytime, search.playtimeMax ?? maxPlaytime],
-        minPlaytime,
-        maxPlaytime,
-      ),
-    );
-  }, [search.playtimeMin, search.playtimeMax, minPlaytime, maxPlaytime]);
-
-  const commit = (next: [number, number]) => {
-    const safe = clampRange(next, MIN_YEAR, CURRENT_YEAR);
-    void navigate({
-      search: (prev) => ({
-        ...prev,
-        releaseYearMin: safe[0],
-        releaseYearMax: safe[1],
-        page: 1,
-      }),
-    });
-  };
-
-  const commitPlaytime = (next: [number, number]) => {
-    const safe = clampRange(next, minPlaytime, maxPlaytime);
-    const isFullRange = safe[0] === minPlaytime && safe[1] === maxPlaytime;
-    void navigate({
-      search: (prev) => ({
-        ...prev,
-        playtimeMin: isFullRange ? undefined : safe[0],
-        playtimeMax: isFullRange ? undefined : safe[1],
-        page: 1,
-      }),
-    });
-  };
 
   return (
     <>
@@ -134,62 +60,24 @@ export default function GamesFilterPanel() {
             </Button>
           </div>
 
-          <div className="mbs-4 w-full max-w-sm space-y-4">
-            {/* Slider */}
-            <Label htmlFor="release-year-range">
-              <span className="sr-only">Release year range</span>
-
-              <Slider
-                name="release-year-range"
-                id="release-year-range"
-                min={MIN_YEAR}
-                max={CURRENT_YEAR}
-                step={1}
-                value={yearValue}
-                onValueChange={(val) => {
-                  if (Array.isArray(val) && val.length === 2) {
-                    setYearValue(clampRange([val[0], val[1]], MIN_YEAR, CURRENT_YEAR));
-                  }
-                }}
-                onValueCommitted={(val) => {
-                  if (Array.isArray(val) && val.length === 2) {
-                    commit(clampRange([val[0], val[1]], MIN_YEAR, CURRENT_YEAR));
-                  }
-                }}
-              />
-            </Label>
-
-            {/* Inputs */}
-            <div className="mbs-4 flex items-center justify-between gap-2">
-              {/* Min */}
-              <label htmlFor="release-year-min" className="sr-only">
-                Release year min
-              </label>
-
-              <Input
-                type="number"
-                id="release-year-min"
-                value={yearValue[0]}
-                tabIndex={-1}
-                readOnly
-                className="pointer-events-none field-sizing-content w-auto"
-              />
-
-              {/* Max */}
-              <label htmlFor="release-year-max" className="sr-only">
-                Release year max
-              </label>
-
-              <Input
-                type="number"
-                id="release-year-max"
-                value={yearValue[1]}
-                tabIndex={-1}
-                readOnly
-                className="pointer-events-none field-sizing-content w-auto"
-              />
-            </div>
-          </div>
+          <RangeFilterField
+            id="release-year-range"
+            label="Release year range"
+            min={MIN_YEAR}
+            max={CURRENT_YEAR}
+            urlMin={search.releaseYearMin}
+            urlMax={search.releaseYearMax}
+            onCommit={([min, max]) =>
+              void navigate({
+                search: (prev) => ({
+                  ...prev,
+                  releaseYearMin: min,
+                  releaseYearMax: max,
+                  page: 1,
+                }),
+              })
+            }
+          />
         </fieldset>
       </div>
 
@@ -201,62 +89,26 @@ export default function GamesFilterPanel() {
             </legend>
           </div>
 
-          <div className="mbs-4 w-full max-w-sm space-y-4">
-            {/* Slider */}
-            <Label htmlFor="playtime-range">
-              <span className="sr-only">Playtime range</span>
-
-              <Slider
-                name="playtime-range"
-                id="playtime-range"
-                min={minPlaytime}
-                max={maxPlaytime}
-                step={1}
-                value={playtimeValue}
-                onValueChange={(val) => {
-                  if (Array.isArray(val) && val.length === 2) {
-                    setPlaytimeValue(clampRange([val[0], val[1]], minPlaytime, maxPlaytime));
-                  }
-                }}
-                onValueCommitted={(val) => {
-                  if (Array.isArray(val) && val.length === 2) {
-                    commitPlaytime(clampRange([val[0], val[1]], minPlaytime, maxPlaytime));
-                  }
-                }}
-              />
-            </Label>
-
-            {/* Inputs */}
-            <div className="mbs-4 flex items-center justify-between gap-2">
-              {/* Min */}
-              <label htmlFor="playtime-min" className="sr-only">
-                Playtime min
-              </label>
-
-              <Input
-                type="text"
-                id="playtime-min"
-                value={`${playtimeValue[0]}h`}
-                tabIndex={-1}
-                readOnly
-                className="pointer-events-none field-sizing-content w-auto"
-              />
-
-              {/* Max */}
-              <label htmlFor="playtime-max" className="sr-only">
-                Playtime max
-              </label>
-
-              <Input
-                type="text"
-                id="playtime-max"
-                value={`${playtimeValue[1]}h`}
-                tabIndex={-1}
-                readOnly
-                className="pointer-events-none field-sizing-content w-auto"
-              />
-            </div>
-          </div>
+          <RangeFilterField
+            id="playtime-range"
+            label="Playtime range"
+            min={minPlaytime}
+            max={maxPlaytime}
+            urlMin={search.playtimeMin}
+            urlMax={search.playtimeMax}
+            onCommit={([min, max]) => {
+              const isFullRange = min === minPlaytime && max === maxPlaytime;
+              void navigate({
+                search: (prev) => ({
+                  ...prev,
+                  playtimeMin: isFullRange ? undefined : min,
+                  playtimeMax: isFullRange ? undefined : max,
+                  page: 1,
+                }),
+              });
+            }}
+            formatValue={(v) => `${v}h`}
+          />
         </fieldset>
       </div>
 
