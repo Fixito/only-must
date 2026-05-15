@@ -25,6 +25,14 @@ export const toggleFilterValue =
     return { ...prev, [param]: next.length ? next : undefined, page: 1 };
   };
 
+export const DURATION_SORTS = new Set<NonNullable<GamesQuery['sort']>>([
+  'shortest-duration-asc',
+  'longest-duration-desc',
+]);
+
+export const isDurationSort = (sort: GamesQuery['sort']): boolean =>
+  sort !== undefined && DURATION_SORTS.has(sort);
+
 export function isFiltersActive(search: GamesQuery): boolean {
   return Boolean(
     search.search ||

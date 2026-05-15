@@ -35,6 +35,7 @@ import {
 } from '@/features/games/queries/games.query.ts';
 import {
   DEFAULT_SORT,
+  isDurationSort,
   isFiltersActive,
   SORT_OPTIONS,
 } from '@/features/games/utils/games-filter.utils.ts';
@@ -156,7 +157,12 @@ function App() {
           ) : (
             <div className="mbs-6 grid gap-4 md:grid-cols-2 lg:grid-cols-3">
               {data.map((game, index) => (
-                <GameCard key={game.id} game={game} index={index} />
+                <GameCard
+                  key={game.id}
+                  game={game}
+                  index={index}
+                  showDuration={isDurationSort(search.sort)}
+                />
               ))}
             </div>
           )}

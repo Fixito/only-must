@@ -1,4 +1,4 @@
-import { Link, useSearch } from '@tanstack/react-router';
+import { Link } from '@tanstack/react-router';
 import { Clock } from 'lucide-react';
 
 import {
@@ -25,12 +25,12 @@ interface GameCardProps {
     } | null;
   };
   index: number;
+  showDuration: boolean;
 }
 
-export default function GameCard({ game, index }: GameCardProps) {
+export default function GameCard({ game, index, showDuration }: GameCardProps) {
   const { id, slug, title, heroImage, description, releaseDate, metaScore, durations } = game;
   const { mainStorySeconds } = durations ?? {};
-  const search = useSearch({ from: '/' });
 
   return (
     <Card
@@ -83,7 +83,7 @@ export default function GameCard({ game, index }: GameCardProps) {
             <span className="text-muted-foreground text-sm">Metascore</span>
           </div>
 
-          {search.sort === 'shortest-duration-asc' || search.sort === 'longest-duration-desc' ? (
+          {showDuration ? (
             <div className="flex items-center gap-2">
               <span className="inline-flex place-items-center bg-blue-900 px-1 text-sm font-semibold text-white">
                 {formatDuration(mainStorySeconds ?? null) ?? 'N/A'}
