@@ -31,6 +31,7 @@ async function fetchDuration(game: typeof gamesTable.$inferSelect) {
     }
 
     console.warn(`Override ID ${game.hltbIdOverride} not found for: ${game.title}`);
+    return null;
   }
 
   const titleVariants = cleanTitle(searchTitle);
@@ -103,4 +104,7 @@ async function main() {
   console.log(`Synced ${durations.length}/${games.length} games.`);
 }
 
-main().catch(console.error);
+main().catch((err) => {
+  console.error(err);
+  process.exit(1);
+});
