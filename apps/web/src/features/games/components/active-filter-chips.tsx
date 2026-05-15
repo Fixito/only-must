@@ -42,9 +42,15 @@ export default function ActiveFilterChips() {
         />
       ))}
 
-      {search.releaseYearMin && search.releaseYearMax && (
+      {(search.releaseYearMin || search.releaseYearMax) && (
         <FilterChip
-          label={`${search.releaseYearMin}-${search.releaseYearMax}`}
+          label={
+            search.releaseYearMin && search.releaseYearMax
+              ? `${search.releaseYearMin}-${search.releaseYearMax}`
+              : search.releaseYearMin
+                ? `${search.releaseYearMin}-`
+                : `-${search.releaseYearMax}`
+          }
           onRemove={() => void navigate({ search: removeYearRange })}
         />
       )}

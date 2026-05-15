@@ -1,3 +1,4 @@
+import { useId } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useNavigate, useSearch } from '@tanstack/react-router';
 
@@ -13,6 +14,8 @@ const MIN_YEAR = 1995;
 const CURRENT_YEAR = new Date().getFullYear();
 
 export default function GamesFilterPanel() {
+  const releaseYearRangeId = useId();
+  const playtimeRangeId = useId();
   const search = useSearch({ from: '/' });
   const navigate = useNavigate({ from: '/' });
   const { data: platformsResponse } = useQuery(platformsQueryOptions());
@@ -41,22 +44,23 @@ export default function GamesFilterPanel() {
           </div>
 
           <RangeFilterField
-            id="release-year-range"
+            id={releaseYearRangeId}
             label="Release year range"
             min={MIN_YEAR}
             max={CURRENT_YEAR}
             urlMin={search.releaseYearMin}
             urlMax={search.releaseYearMax}
-            onCommit={([min, max]) =>
+            onCommit={([min, max]) => {
+              const isFullRange = min === MIN_YEAR && max === CURRENT_YEAR;
               void navigate({
                 search: (prev) => ({
                   ...prev,
-                  releaseYearMin: min,
-                  releaseYearMax: max,
+                  releaseYearMin: isFullRange ? undefined : min,
+                  releaseYearMax: isFullRange ? undefined : max,
                   page: 1,
                 }),
-              })
-            }
+              });
+            }}
           />
         </fieldset>
       </div>
@@ -70,7 +74,7 @@ export default function GamesFilterPanel() {
           </div>
 
           <RangeFilterField
-            id="playtime-range"
+            id={playtimeRangeId}
             label="Playtime range"
             min={minPlaytime}
             max={maxPlaytime}

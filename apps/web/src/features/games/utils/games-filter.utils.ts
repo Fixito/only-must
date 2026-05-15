@@ -62,8 +62,8 @@ export const removePlaytimeRange = (prev: GamesQuery) => ({
 export function isFiltersActive(search: GamesQuery): boolean {
   return Boolean(
     search.search ||
-    search.platforms.length ||
-    search.genres.length ||
+    search.platforms?.length ||
+    search.genres?.length ||
     search.releaseYearMin ||
     search.releaseYearMax ||
     search.playtimeMin !== undefined ||

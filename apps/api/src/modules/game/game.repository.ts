@@ -9,19 +9,21 @@ import {
   gamePlatformsTable,
 } from '../../../db/schemas/index.js';
 
-const defaultOrder = [sql`${gamesTable.metaScore} DESC NULLS LAST`, asc(gamesTable.releaseDate)];
+const defaultOrder = [sql`${gamesTable.metaScore} DESC NULLS LAST`, asc(gamesTable.releaseDate), asc(gamesTable.id)];
 
 export const sortMap = {
   'metascore-desc': defaultOrder,
-  'release-asc': [asc(gamesTable.releaseDate), sql`${gamesTable.metaScore} DESC NULLS LAST`],
-  'release-desc': [desc(gamesTable.releaseDate), sql`${gamesTable.metaScore} DESC NULLS LAST`],
+  'release-asc': [asc(gamesTable.releaseDate), sql`${gamesTable.metaScore} DESC NULLS LAST`, asc(gamesTable.id)],
+  'release-desc': [desc(gamesTable.releaseDate), sql`${gamesTable.metaScore} DESC NULLS LAST`, asc(gamesTable.id)],
   'shortest-duration-asc': [
     sql`${gameDurationsTable.mainStorySeconds} ASC NULLS LAST`,
     asc(gamesTable.releaseDate),
+    asc(gamesTable.id),
   ],
   'longest-duration-desc': [
     sql`${gameDurationsTable.mainStorySeconds} DESC NULLS LAST`,
     desc(gamesTable.releaseDate),
+    asc(gamesTable.id),
   ],
 };
 

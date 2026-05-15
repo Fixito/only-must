@@ -5,10 +5,10 @@ import { tanstackStart } from '@tanstack/react-start/plugin/vite';
 import viteReact from '@vitejs/plugin-react';
 import { defineConfig } from 'vite';
 
-const config = defineConfig({
+const config = defineConfig(({ mode }) => ({
   resolve: { tsconfigPaths: true },
   plugins: [
-    devtools(),
+    mode === 'development' && devtools(),
     tailwindcss(),
     tanstackStart({
       prerender: {
@@ -23,7 +23,7 @@ const config = defineConfig({
     }),
     netlify(),
     viteReact(),
-  ],
-});
+  ].filter(Boolean),
+}));
 
 export default config;
