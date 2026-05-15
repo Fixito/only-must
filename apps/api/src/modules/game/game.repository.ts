@@ -153,7 +153,13 @@ export async function findGames({ page, pageSize, sort, ...filters }: FindGamesP
     .from(gamesTable)
     .innerJoin(sq, eq(gamesTable.id, sq.id))
     .leftJoin(gameDurationsTable, eq(gameDurationsTable.gameId, gamesTable.id))
-    .orderBy(...orderBy);
+    .orderBy(...orderBy)
+    .then((rows) =>
+      rows.map(({ mainStorySeconds, mainExtraSeconds, completionistSeconds, ...gameData }) => ({
+        ...gameData,
+        durations: { mainStorySeconds, mainExtraSeconds, completionistSeconds },
+      })),
+    );
 }
 
 export async function countGames(filters: GameFilters) {
@@ -162,17 +168,20 @@ export async function countGames(filters: GameFilters) {
   return result[0]?.total ?? 0;
 }
 
-export async function findDurationRangeHours(): Promise<{ minHours: number; maxHours: number }> {
+export async function findDurationRangeHours(): Promise<{
+  minMainStoryHours: number;
+  maxMainStoryHours: number;
+}> {
   const result = await db
     .select({
-      minHours: sql<number>`FLOOR(MIN(${gameDurationsTable.mainStorySeconds}) / 3600.0)`,
-      maxHours: sql<number>`CEIL(MAX(${gameDurationsTable.mainStorySeconds}) / 3600.0)`,
+      minMainStoryHours: sql<number>`FLOOR(MIN(${gameDurationsTable.mainStorySeconds}) / 3600.0)`,
+      maxMainStoryHours: sql<number>`CEIL(MAX(${gameDurationsTable.mainStorySeconds}) / 3600.0)`,
     })
     .from(gameDurationsTable);
   // The pg driver returns numeric aggregates as strings at runtime despite the sql<number> hint.
   return {
-    minHours: Number(result[0]?.minHours ?? 0),
-    maxHours: Number(result[0]?.maxHours ?? 0),
+    minMainStoryHours: Number(result[0]?.minMainStoryHours ?? 0),
+    maxMainStoryHours: Number(result[0]?.maxMainStoryHours ?? 0),
   };
 }
 

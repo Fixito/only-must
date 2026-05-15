@@ -14,17 +14,7 @@ export async function getGames({ page, sort, ...filters }: GamesQuery) {
     gameRepository.countGames(filters),
   ]);
 
-  const parsedRows = rows.map(
-    ({ mainStorySeconds, mainExtraSeconds, completionistSeconds, ...gameData }) =>
-      GameSchema.parse({
-        ...gameData,
-        durations: {
-          mainStorySeconds,
-          mainExtraSeconds,
-          completionistSeconds,
-        },
-      }),
-  );
+  const parsedRows = rows.map((game) => GameSchema.parse(game));
 
   const totalPages = Math.max(1, Math.ceil(total / pageSize));
 
@@ -44,7 +34,6 @@ export async function getGameBySlug(slug: string) {
   return GameWithRelationsSchema.parse(game);
 }
 
-export async function getGamesDurationRange() {
-  const { minHours, maxHours } = await gameRepository.findDurationRangeHours();
-  return { minMainStoryHours: minHours, maxMainStoryHours: maxHours };
+export function getGamesDurationRange() {
+  return gameRepository.findDurationRangeHours();
 }
