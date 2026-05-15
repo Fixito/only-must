@@ -2,34 +2,12 @@ import { GameSchema, GameWithRelationsSchema, type GamesQuery } from '@only-must
 
 import { NotFoundError } from '@/errors/index.js';
 
-import type { GameFilters } from './game.repository.js';
 import * as gameRepository from './game.repository.js';
 
 const PAGE_SIZE = 24;
 
-export async function getGames({
-  page,
-  platforms,
-  genres,
-  search,
-  releaseYear,
-  releaseYearMin,
-  releaseYearMax,
-  playtimeMin,
-  playtimeMax,
-  sort,
-}: GamesQuery) {
+export async function getGames({ page, sort, ...filters }: GamesQuery) {
   const pageSize = PAGE_SIZE;
-  const filters: GameFilters = {
-    platforms,
-    genres,
-    search,
-    releaseYear,
-    releaseYearMin,
-    releaseYearMax,
-    playtimeMin,
-    playtimeMax,
-  };
 
   const [rows, total] = await Promise.all([
     gameRepository.findGames({ ...filters, page, pageSize, sort }),
