@@ -8,13 +8,16 @@ import { Label } from '@/components/ui/label.tsx';
 import { Slider } from '@/components/ui/slider.tsx';
 import { FilterMulti } from '@/features/games/components/filter-multi.tsx';
 import { gamesDurationRangeQueryOptions } from '@/features/games/queries/games.query.ts';
+import {
+  isFiltersActive,
+  MIN_PLAYTIME_FALLBACK,
+  PLAYTIME_FALLBACK,
+} from '@/features/games/utils/games-filter.utils.ts';
 import { genresQueryOptions } from '@/features/genres/queries/genres.query.ts';
 import { platformsQueryOptions } from '@/features/platforms/queries/platforms.query';
 
 const MIN_YEAR = 1995;
 const CURRENT_YEAR = new Date().getFullYear();
-const MIN_PLAYTIME_FALLBACK = 0;
-const PLAYTIME_FALLBACK = 250;
 
 function clampRange(
   [min, max]: [number, number],
@@ -110,15 +113,7 @@ export default function GamesFilterPanel() {
 
             <Button
               variant="ghost"
-              disabled={
-                !search.platforms.length &&
-                !search.genres.length &&
-                !search.releaseYearMin &&
-                !search.releaseYearMax &&
-                search.playtimeMin === undefined &&
-                search.playtimeMax === undefined &&
-                !search.search
-              }
+              disabled={!isFiltersActive(search)}
               className="disabled:cursor-not-allowed"
               onClick={() =>
                 navigate({

@@ -33,6 +33,7 @@ import {
   gamesDurationRangeQueryOptions,
   gamesQueryOptions,
 } from '@/features/games/queries/games.query.ts';
+import { isFiltersActive } from '@/features/games/utils/games-filter.utils.ts';
 import { genresQueryOptions } from '@/features/genres/queries/genres.query.ts';
 import { platformsQueryOptions } from '@/features/platforms/queries/platforms.query';
 import { getPaginationItems } from '@/lib/pagination';
@@ -176,17 +177,7 @@ function App() {
           </div>
 
           {data.length === 0 ? (
-            <EmptyState
-              hasFilters={Boolean(
-                search.search ||
-                search.platforms.length ||
-                search.genres.length ||
-                search.releaseYearMin ||
-                search.releaseYearMax ||
-                search.playtimeMin !== undefined ||
-                search.playtimeMax !== undefined,
-              )}
-            />
+            <EmptyState hasFilters={isFiltersActive(search)} />
           ) : (
             <div className="mbs-6 grid gap-4 md:grid-cols-2 lg:grid-cols-3">
               {data.map((game, index) => (

@@ -4,11 +4,12 @@ import { useNavigate, useSearch } from '@tanstack/react-router';
 
 import FilterChip from '@/features/games/components/filter-chip.tsx';
 import { gamesDurationRangeQueryOptions } from '@/features/games/queries/games.query.ts';
+import {
+  MIN_PLAYTIME_FALLBACK,
+  PLAYTIME_FALLBACK,
+} from '@/features/games/utils/games-filter.utils.ts';
 import { genresQueryOptions } from '@/features/genres/queries/genres.query.ts';
 import { platformsQueryOptions } from '@/features/platforms/queries/platforms.query';
-
-const MIN_PLAYTIME_FALLBACK = 0;
-const PLAYTIME_FALLBACK = 250;
 
 export default function ActiveFilterChips() {
   const search = useSearch({ from: '/' });
