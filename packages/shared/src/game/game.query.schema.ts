@@ -29,7 +29,15 @@ export const GamesQuerySchema = z
     platforms: arrayParam,
     genres: arrayParam,
 
-    sort: z.enum(['metascore-desc', 'release-asc', 'release-desc']).optional(),
+    sort: z
+      .enum([
+        'metascore-desc',
+        'release-asc',
+        'release-desc',
+        'shortest-duration-asc',
+        'longest-duration-desc',
+      ])
+      .optional(),
   })
   .refine(
     (data) => {

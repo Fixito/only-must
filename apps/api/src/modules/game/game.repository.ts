@@ -19,6 +19,14 @@ export const sortMap = {
   'metascore-desc': defaultOrder,
   'release-asc': [asc(gamesTable.releaseDate), sql`${gamesTable.metaScore} DESC NULLS LAST`],
   'release-desc': [desc(gamesTable.releaseDate), sql`${gamesTable.metaScore} DESC NULLS LAST`],
+  'shortest-duration-asc': [
+    sql`${gameDurationsTable.mainStorySeconds} ASC NULLS LAST`,
+    asc(gamesTable.releaseDate),
+  ],
+  'longest-duration-desc': [
+    sql`${gameDurationsTable.mainStorySeconds} DESC NULLS LAST`,
+    desc(gamesTable.releaseDate),
+  ],
 };
 
 interface FindGamesParams {
@@ -28,8 +36,43 @@ interface FindGamesParams {
   sort?: keyof typeof sortMap | undefined;
 }
 
+const durationSorts = new Set<keyof typeof sortMap>([
+  'shortest-duration-asc',
+  'longest-duration-desc',
+]);
+
+const gameColumns = (({ scrapedAt, updatedAt, isDetailsScraped, ...cols }) => cols)(
+  getTableColumns(gamesTable),
+);
+
+const durationColumns = {
+  mainStorySeconds: gameDurationsTable.mainStorySeconds,
+  mainExtraSeconds: gameDurationsTable.mainExtraSeconds,
+  completionistSeconds: gameDurationsTable.completionistSeconds,
+};
+
 export async function findGames({ where, page, pageSize, sort }: FindGamesParams) {
   const orderBy = sort ? sortMap[sort] : defaultOrder;
+  const offset = (page - 1) * pageSize;
+
+  if (sort !== undefined && durationSorts.has(sort)) {
+    const sq = db
+      .select({ id: gamesTable.id })
+      .from(gamesTable)
+      .leftJoin(gameDurationsTable, eq(gameDurationsTable.gameId, gamesTable.id))
+      .where(where)
+      .orderBy(...orderBy)
+      .limit(pageSize)
+      .offset(offset)
+      .as('subquery');
+
+    return db
+      .select({ ...gameColumns, ...durationColumns })
+      .from(gamesTable)
+      .innerJoin(sq, eq(gamesTable.id, sq.id))
+      .leftJoin(gameDurationsTable, eq(gameDurationsTable.gameId, gamesTable.id))
+      .orderBy(...orderBy);
+  }
 
   const sq = db
     .select({ id: gamesTable.id })
@@ -37,15 +80,14 @@ export async function findGames({ where, page, pageSize, sort }: FindGamesParams
     .where(where)
     .orderBy(...orderBy)
     .limit(pageSize)
-    .offset((page - 1) * pageSize)
+    .offset(offset)
     .as('subquery');
 
   return db
-    .select(
-      (({ scrapedAt, updatedAt, isDetailsScraped, ...cols }) => cols)(getTableColumns(gamesTable)),
-    )
+    .select({ ...gameColumns, ...durationColumns })
     .from(gamesTable)
     .innerJoin(sq, eq(gamesTable.id, sq.id))
+    .leftJoin(gameDurationsTable, eq(gameDurationsTable.gameId, gamesTable.id))
     .orderBy(...orderBy);
 }
 

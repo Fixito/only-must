@@ -52,6 +52,14 @@ const items = [
     label: 'Oldest',
     value: 'release-asc',
   },
+  {
+    label: 'Shortest Duration',
+    value: 'shortest-duration-asc',
+  },
+  {
+    label: 'Longest Duration',
+    value: 'longest-duration-desc',
+  },
 ];
 
 function clampRange(
@@ -256,7 +264,13 @@ function App() {
                     search: (prev) => ({
                       ...prev,
                       page: 1,
-                      sort: v as 'metascore-desc' | 'release-asc' | 'release-desc' | undefined,
+                      sort: v as
+                        | 'metascore-desc'
+                        | 'release-asc'
+                        | 'release-desc'
+                        | 'shortest-duration-asc'
+                        | 'longest-duration-desc'
+                        | undefined,
                     }),
                   });
                 }}

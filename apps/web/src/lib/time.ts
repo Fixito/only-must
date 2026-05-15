@@ -6,7 +6,7 @@ export function formatdate(date: string) {
 }
 
 export function formatDuration(seconds: number | null) {
-  if (seconds === null || seconds < 0) return null;
+  if (seconds === null || seconds <= 0) return null;
 
   const duration = Temporal.Duration.from({ seconds }).round({
     largestUnit: 'hours',

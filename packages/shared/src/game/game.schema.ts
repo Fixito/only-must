@@ -3,17 +3,6 @@ import { z } from 'zod';
 import { GenreSchema } from '../genre/genre.schema.js';
 import { PlatformSchema } from '../platform/platform.schema.js';
 
-export const GameSchema = z.object({
-  id: z.string(),
-  title: z.string(),
-  description: z.string(),
-  slug: z.string(),
-  image: z.string(),
-  heroImage: z.string(),
-  metaScore: z.number(),
-  releaseDate: z.string().nullable(),
-});
-
 // --- relations ---
 
 export const GameDurationSchema = z.object({
@@ -25,6 +14,20 @@ export const GameDurationSchema = z.object({
 export const DeveloperSchema = z.object({
   id: z.string(),
   name: z.string(),
+});
+
+// -- main object ---
+
+export const GameSchema = z.object({
+  id: z.string(),
+  title: z.string(),
+  description: z.string(),
+  slug: z.string(),
+  image: z.string(),
+  heroImage: z.string(),
+  metaScore: z.number(),
+  releaseDate: z.string().nullable(),
+  durations: GameDurationSchema.nullable(),
 });
 
 // --- full object ---

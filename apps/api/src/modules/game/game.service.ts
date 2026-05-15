@@ -86,7 +86,17 @@ export async function getGames({
     gameRepository.countGames({ where }),
   ]);
 
-  const parsedRows = rows.map((row) => GameSchema.parse(row));
+  const parsedRows = rows.map(
+    ({ mainStorySeconds, mainExtraSeconds, completionistSeconds, ...gameData }) =>
+      GameSchema.parse({
+        ...gameData,
+        durations: {
+          mainStorySeconds,
+          mainExtraSeconds,
+          completionistSeconds,
+        },
+      }),
+  );
 
   const totalPages = Math.max(1, Math.ceil(total / pageSize));
 

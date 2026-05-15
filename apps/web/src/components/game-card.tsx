@@ -1,4 +1,5 @@
-import { Link } from '@tanstack/react-router';
+import { Link, useSearch } from '@tanstack/react-router';
+import { Clock } from 'lucide-react';
 
 import {
   Card,
@@ -8,7 +9,7 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card.tsx';
-import { formatdate } from '@/lib/time';
+import { formatdate, formatDuration } from '@/lib/time';
 
 interface GameCardProps {
   game: {
@@ -19,12 +20,17 @@ interface GameCardProps {
     releaseDate: string | null;
     metaScore: number;
     heroImage: string;
+    durations: {
+      mainStorySeconds: number | null;
+    } | null;
   };
   index: number;
 }
 
 export default function GameCard({ game, index }: GameCardProps) {
-  const { id, slug, title, heroImage, description, releaseDate, metaScore } = game;
+  const { id, slug, title, heroImage, description, releaseDate, metaScore, durations } = game;
+  const { mainStorySeconds } = durations ?? {};
+  const search = useSearch({ from: '/' });
 
   return (
     <Card
@@ -69,11 +75,22 @@ export default function GameCard({ game, index }: GameCardProps) {
           {description}
         </CardDescription>
 
-        <CardFooter className="mbs-3 gap-2 px-0">
-          <span className="inline-flex aspect-square items-center justify-center bg-green-900 px-1 text-sm font-semibold text-white">
-            {metaScore}
-          </span>
-          <span className="text-muted-foreground text-sm">Metascore</span>
+        <CardFooter className="mbs-3 flex-col items-start justify-start gap-2 px-0">
+          <div className="flex items-center gap-2">
+            <span className="inline-flex aspect-square place-items-center bg-green-900 px-1 text-sm font-semibold text-white">
+              {metaScore}
+            </span>
+            <span className="text-muted-foreground text-sm">Metascore</span>
+          </div>
+
+          {search.sort === 'shortest-duration-asc' || search.sort === 'longest-duration-desc' ? (
+            <div className="flex items-center gap-2">
+              <span className="inline-flex place-items-center bg-blue-900 px-1 text-sm font-semibold text-white">
+                {formatDuration(mainStorySeconds ?? null) ?? 'N/A'}
+              </span>
+              <Clock aria-label="estimate duration" className="size-4" />
+            </div>
+          ) : null}
         </CardFooter>
       </CardContent>
     </Card>

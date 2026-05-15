@@ -134,12 +134,12 @@ function RouteComponent() {
 
               {/* Durations */}
 
-              <div className="flex">
+              <div className="flex flex-wrap">
                 {/* Main story */}
                 <div className="bg-card border-l p-4 shadow-sm">
                   <span className="text-muted-foreground rounded-md">Main Story:</span>{' '}
                   <span className="text-foreground font-semibold">
-                    {formatDuration(durations?.mainStorySeconds ?? null)}
+                    {formatDuration(durations?.mainStorySeconds ?? null) || '-'}
                   </span>
                 </div>
 
@@ -147,7 +147,7 @@ function RouteComponent() {
                 <div className="bg-card border-l p-4 shadow-sm">
                   <span className="text-muted-foreground rounded-md">Main Story + Sides:</span>{' '}
                   <span className="text-foreground font-semibold">
-                    {formatDuration(durations?.mainExtraSeconds ?? null)}
+                    {formatDuration(durations?.mainExtraSeconds ?? null) || '-'}
                   </span>
                 </div>
 
@@ -155,7 +155,7 @@ function RouteComponent() {
                 <div className="bg-card border-l p-4 shadow-sm">
                   <span className="text-muted-foreground rounded-md">Completionist:</span>{' '}
                   <span className="text-foreground font-semibold">
-                    {formatDuration(durations?.completionistSeconds ?? null)}
+                    {formatDuration(durations?.completionistSeconds ?? null) || '-'}
                   </span>
                 </div>
               </div>
