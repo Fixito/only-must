@@ -34,13 +34,13 @@ export function buildWhere(filters: GameFilters): SQLType | undefined {
       AND EXTRACT(YEAR FROM ${gamesTable.releaseDate}) = ${filters.releaseYear}
     `);
   } else {
-    if (filters.releaseYearMin) {
+    if (filters.releaseYearMin !== undefined) {
       conditions.push(sql`
       ${gamesTable.releaseDate} IS NOT NULL
       AND EXTRACT(YEAR FROM ${gamesTable.releaseDate}) >= ${filters.releaseYearMin}`);
     }
 
-    if (filters.releaseYearMax) {
+    if (filters.releaseYearMax !== undefined) {
       conditions.push(sql`
       ${gamesTable.releaseDate} IS NOT NULL
       AND EXTRACT(YEAR FROM ${gamesTable.releaseDate}) <= ${filters.releaseYearMax}`);

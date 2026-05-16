@@ -3,7 +3,7 @@ import { z } from 'zod';
 import { GameSchema, GameWithRelationsSchema } from './game.schema.js';
 
 export const GamesDurationRangeSchema = z.object({
-  // z.coerce handles the pg driver returning numeric strings; .int().nonnegative() enforces FLOOR/CEIL semantics
+  // z.coerce.number() converts numeric strings from the PG driver to numbers; .int().nonnegative() validates the value is already an integer and nonnegative (does not perform floor/ceil conversion)
   minMainStoryHours: z.coerce.number().int().nonnegative(),
   maxMainStoryHours: z.coerce.number().int().nonnegative(),
 });
