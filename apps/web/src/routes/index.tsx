@@ -77,6 +77,20 @@ function App() {
 
   const pageOffset = (page - 1) * 24;
 
+  const hasFilters = Boolean(
+    search.search ||
+      search.releaseYear ||
+      search.releaseYearMin ||
+      search.releaseYearMax ||
+      search.platforms.length > 0 ||
+      search.genres.length > 0 ||
+      search.playtimeMin ||
+      search.playtimeMax ||
+      search.metaScoreMin ||
+      search.metaScoreMax ||
+      search.sort,
+  );
+
   return (
     <div className="container py-8">
       <header className="mbe-6">
@@ -109,7 +123,7 @@ function App() {
         <ActiveFilterChips />
 
         {data.length === 0 ? (
-          <EmptyState hasFilters={true} />
+          <EmptyState hasFilters={hasFilters} />
         ) : viewMode === 'list' ? (
           <div className="mbs-4">
             <GameList
