@@ -3,9 +3,9 @@ import { z } from 'zod';
 import { GameSchema, GameWithRelationsSchema } from './game.schema.js';
 
 export const GamesDurationRangeSchema = z.object({
-  // z.coerce.number() handles the case where the pg driver returns a numeric string
-  minMainStoryHours: z.coerce.number(),
-  maxMainStoryHours: z.coerce.number(),
+  // z.coerce handles the pg driver returning numeric strings; .int().nonnegative() enforces FLOOR/CEIL semantics
+  minMainStoryHours: z.coerce.number().int().nonnegative(),
+  maxMainStoryHours: z.coerce.number().int().nonnegative(),
 });
 
 export type GamesDurationRange = z.infer<typeof GamesDurationRangeSchema>;
