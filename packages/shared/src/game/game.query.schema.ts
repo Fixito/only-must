@@ -1,6 +1,6 @@
 import { z } from 'zod';
 
-export const LATEST_RELEASE_YEAR = new Date().getFullYear();
+export const LATEST_RELEASE_YEAR = new Date().getUTCFullYear();
 export const EARLIEST_RELEASE_YEAR = 1995;
 
 const arrayParam = z
