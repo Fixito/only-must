@@ -1,4 +1,4 @@
-import { ApiError } from '@only-must/shared';
+import { ApiError, ProblemDetailsSchema } from '@only-must/shared';
 import axios, { isAxiosError } from 'axios';
 
 const apiUrl = import.meta.env['VITE_API_URL'];
@@ -15,13 +15,10 @@ export const apiClient = axios.create({
 apiClient.interceptors.response.use(
   (res) => res,
   (error: unknown) => {
-    const payload = isAxiosError(error) ? error.response?.data : undefined;
+    const rawPayload = isAxiosError(error) ? error.response?.data : undefined;
+    const parsed = ProblemDetailsSchema.safeParse(rawPayload);
 
-    const message =
-      typeof payload?.message === 'string' && payload.message.trim() !== ''
-        ? payload.message
-        : String(payload?.code ?? 'UNKNOWN');
-
+    const message = parsed.success && parsed.data.detail ? parsed.data.detail : 'UNKNOWN';
     const statusCode: number = isAxiosError(error) ? (error.response?.status ?? 0) : 0;
 
     return Promise.reject(new ApiError(message, statusCode));

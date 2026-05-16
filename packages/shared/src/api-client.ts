@@ -1,3 +1,13 @@
+import { z } from 'zod';
+
+export const ProblemDetailsSchema = z.object({
+  status: z.number().int(),
+  title: z.string(),
+  detail: z.string().optional(),
+});
+
+export type ProblemDetails = z.infer<typeof ProblemDetailsSchema>;
+
 export class ApiError extends Error {
   public readonly statusCode: number;
 
