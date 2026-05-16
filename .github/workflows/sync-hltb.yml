@@ -1,12 +1,12 @@
-name: Scrape Games
+name: Sync HLTB
 
 on:
   schedule:
-    - cron: '0 3 * * *'
+    - cron: '0 3 * * 0'
   workflow_dispatch:
 
 jobs:
-  scrape:
+  sync-hltb:
     runs-on: ubuntu-latest
 
     defaults:
@@ -15,6 +15,8 @@ jobs:
 
     env:
       DATABASE_URL: ${{ secrets.DATABASE_URL }}
+
+    timeout-minutes: 30
 
     steps:
       - uses: actions/checkout@v4
@@ -29,7 +31,4 @@ jobs:
       - run: pnpm install --frozen-lockfile
         working-directory: .
 
-      - run: pnpm exec playwright install chromium --with-deps
-
-      - run: pnpm exec tsx scripts/scrape.ts
-      - run: pnpm exec tsx scripts/scrape-details.ts
+      - run: pnpm exec tsx scripts/sync-hltb.ts
