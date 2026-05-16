@@ -30,9 +30,25 @@ function RouteComponent() {
         </p>
 
         <p className="text-muted-foreground">
-          You can filter by platform, genre or release year to quickly find your next must-play
-          game.
+          Search by title, filter by platform, genre, release year, or playtime to quickly find your
+          next must-play game. Sort by best rated, newest, oldest, or game duration.
         </p>
+      </section>
+
+      {/* Features */}
+      <section className="max-w-2xl space-y-3">
+        <h2 className="text-xl font-semibold">Features</h2>
+
+        <ul className="text-muted-foreground list-disc space-y-1 pl-5">
+          <li>Curated catalog of the highest-rated games across all platforms</li>
+          <li>Search by title</li>
+          <li>Filter by platform, genre, release year, and playtime</li>
+          <li>Sort by best rated, newest, oldest, shortest or longest duration</li>
+          <li>
+            Game detail pages with description, developer info, platforms, genres, Metascore, and
+            playtime breakdown (Main Story / Main Story + Sides / Completionist)
+          </li>
+        </ul>
       </section>
 
       {/* How */}
@@ -40,8 +56,14 @@ function RouteComponent() {
         <h2 className="text-xl font-semibold">How does it work?</h2>
 
         <p className="text-muted-foreground">
-          The data is collected from trusted sources and filtered to keep only the highest-rated
-          titles. Each game includes key information such as platforms, release date, and metascore.
+          Game scores and metadata are scraped from Metacritic using Playwright. Only titles above a
+          high score threshold are kept, eliminating the noise from mediocre releases.
+        </p>
+
+        <p className="text-muted-foreground">
+          Playtime data (Main Story, Main Story + Sides, Completionist) is synced from HowLongToBeat
+          and stored alongside each game, so you can filter and sort by how long a game actually
+          takes to finish.
         </p>
 
         <p className="text-muted-foreground">
@@ -54,10 +76,12 @@ function RouteComponent() {
         <h2 className="text-xl font-semibold">Tech stack</h2>
 
         <ul className="text-muted-foreground list-disc space-y-1 pl-5">
-          <li>React + TanStack Router + React Query</li>
-          <li>Node.js + Express</li>
+          <li>React 19 + TanStack Start + TanStack Router + React Query</li>
+          <li>Tailwind CSS v4 + shadcn/ui</li>
+          <li>Node.js + Express 5</li>
           <li>PostgreSQL (Neon) + Drizzle ORM</li>
-          <li>Web scraping with Playwright</li>
+          <li>Web scraping with Playwright + HowLongToBeat sync</li>
+          <li>Deployed on Netlify</li>
         </ul>
       </section>
 
