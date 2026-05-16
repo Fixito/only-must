@@ -16,7 +16,6 @@ export default function FilterChip({ label, onRemove }: { label: string; onRemov
       onClick={onRemove}
       onKeyDown={handleKeyDown}
       tabIndex={0}
-      aria-label={`Remove filter ${label}`}
       className="hover:bg-primary/80 cursor-pointer uppercase"
     >
       {label} <X aria-hidden="true" />
