@@ -84,3 +84,17 @@ export function isFiltersActive(search: GamesQuery): boolean {
     search.playtimeMax !== undefined,
   );
 }
+
+export function formatYearRangeLabel(min: number | undefined, max: number | undefined): string {
+  if (min && max) return `${min}–${max}`;
+  if (min) return `${min}–`;
+  return `–${max}`;
+}
+
+export function formatPlaytimeRangeLabel(
+  min: number | undefined,
+  max: number | undefined,
+  fallbacks: { min: number; max: number },
+): string {
+  return `${min ?? fallbacks.min}h–${max ?? fallbacks.max}h`;
+}

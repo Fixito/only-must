@@ -19,6 +19,21 @@ interface FacetMultiSelectProps {
   param: 'platforms' | 'genres';
 }
 
+interface FacetOptionProps {
+  opt: { id: string; name: string };
+  checked: boolean;
+  onChange: () => void;
+}
+
+function FacetOption({ opt, checked, onChange }: FacetOptionProps) {
+  return (
+    <label className="flex items-center gap-2">
+      <input type="checkbox" checked={checked} aria-label={opt.name} onChange={onChange} />
+      <span>{opt.name}</span>
+    </label>
+  );
+}
+
 export function FacetMultiSelect({ label, options, value = [], param }: FacetMultiSelectProps) {
   const [open, setOpen] = useState(false);
   const visible = options.slice(0, VISIBLE_COUNT);
@@ -33,44 +48,31 @@ export function FacetMultiSelect({ label, options, value = [], param }: FacetMul
         </legend>
 
         <div className="mbs-4 space-y-1">
-          {visible.map((opt) => {
-            const checked = value.includes(opt.id);
-
-            return (
-              <label key={opt.id} className="flex items-center gap-2">
-                <input
-                  type="checkbox"
-                  checked={checked}
-                  aria-label={opt.name}
-                  onChange={() =>
-                    void navigate({ from: '/', search: toggleFilterValue(param, opt.id) })
-                  }
-                />
-                <span>{opt.name}</span>
-              </label>
-            );
-          })}
+          {visible.map((opt) => (
+            <FacetOption
+              key={opt.id}
+              opt={opt}
+              checked={value.includes(opt.id)}
+              onChange={() =>
+                void navigate({ from: '/', search: toggleFilterValue(param, opt.id) })
+              }
+            />
+          ))}
 
           {hidden.length > 0 && (
             <Collapsible open={open} onOpenChange={setOpen}>
               <CollapsibleContent>
                 <div className="space-y-1">
-                  {hidden.map((opt) => {
-                    const checked = value.includes(opt.id);
-                    return (
-                      <label key={opt.id} className="flex items-center gap-2">
-                        <input
-                          type="checkbox"
-                          checked={checked}
-                          aria-label={opt.name}
-                          onChange={() =>
-                            void navigate({ from: '/', search: toggleFilterValue(param, opt.id) })
-                          }
-                        />
-                        <span>{opt.name}</span>
-                      </label>
-                    );
-                  })}
+                  {hidden.map((opt) => (
+                    <FacetOption
+                      key={opt.id}
+                      opt={opt}
+                      checked={value.includes(opt.id)}
+                      onChange={() =>
+                        void navigate({ from: '/', search: toggleFilterValue(param, opt.id) })
+                      }
+                    />
+                  ))}
                 </div>
               </CollapsibleContent>
 

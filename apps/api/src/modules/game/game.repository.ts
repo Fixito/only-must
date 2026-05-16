@@ -44,6 +44,14 @@ interface FindGamesParams extends GameFilters {
   sort: GamesQuery['sort'];
 }
 
+// Internal-only columns — never exposed in API responses.
+// Also used as the `columns` exclusion map in findGameBySlug (keep in sync).
+const HIDDEN_GAME_COLUMNS = {
+  scrapedAt: false,
+  updatedAt: false,
+  isDetailsScraped: false,
+} as const;
+
 const gameColumns = (({ scrapedAt, updatedAt, isDetailsScraped, ...cols }) => cols)(
   getTableColumns(gamesTable),
 );
@@ -114,11 +122,7 @@ export async function findDurationRangeHours(): Promise<{
 export async function findGameBySlug(slug: string) {
   const game = await db.query.gamesTable.findFirst({
     where: eq(gamesTable.slug, slug),
-    columns: {
-      scrapedAt: false,
-      updatedAt: false,
-      isDetailsScraped: false,
-    },
+    columns: HIDDEN_GAME_COLUMNS,
     with: {
       gamePlatforms: {
         columns: {},

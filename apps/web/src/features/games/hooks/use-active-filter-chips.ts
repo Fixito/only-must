@@ -4,6 +4,8 @@ import { useNavigate, useSearch } from '@tanstack/react-router';
 
 import { usePlaytimeBounds } from '@/features/games/hooks/use-playtime-bounds.ts';
 import {
+  formatPlaytimeRangeLabel,
+  formatYearRangeLabel,
   removePlaytimeRange,
   removeYearRange,
   toggleFilterValue,
@@ -48,15 +50,9 @@ export function useActiveFilterChips(): Array<FilterChipItem> {
   }
 
   if (search.releaseYearMin || search.releaseYearMax) {
-    const label =
-      search.releaseYearMin && search.releaseYearMax
-        ? `${search.releaseYearMin}-${search.releaseYearMax}`
-        : search.releaseYearMin
-          ? `${search.releaseYearMin}-`
-          : `-${search.releaseYearMax}`;
     chips.push({
       key: 'year-range',
-      label,
+      label: formatYearRangeLabel(search.releaseYearMin, search.releaseYearMax),
       onRemove: () => void navigate({ search: removeYearRange }),
     });
   }
@@ -64,7 +60,10 @@ export function useActiveFilterChips(): Array<FilterChipItem> {
   if (search.playtimeMin !== undefined || search.playtimeMax !== undefined) {
     chips.push({
       key: 'playtime-range',
-      label: `${search.playtimeMin ?? minPlaytime}h–${search.playtimeMax ?? maxPlaytime}h`,
+      label: formatPlaytimeRangeLabel(search.playtimeMin, search.playtimeMax, {
+        min: minPlaytime,
+        max: maxPlaytime,
+      }),
       onRemove: () => void navigate({ search: removePlaytimeRange }),
     });
   }
