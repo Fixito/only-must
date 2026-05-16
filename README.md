@@ -34,7 +34,7 @@ only-must/
 ### Prerequisites
 
 - [Node.js](https://nodejs.org/) ≥ 22
-- [pnpm](https://pnpm.io/) ≥ 10 (`npm i -g pnpm`)
+- [pnpm](https://pnpm.io/) ≥ 11 (`npm i -g pnpm`)
 - A [Neon](https://neon.tech/) PostgreSQL database
 
 ### Install
@@ -86,7 +86,7 @@ pnpm dev:web   # Web only
 
 ## Populating the database
 
-The scraper uses Playwright to collect Must Play games from Metacritic.
+The scraper uses Playwright to collect Must Play games from Metacritic. A GitHub Actions workflow runs the full pipeline automatically every day at 03:00 UTC, and can also be triggered manually from the Actions tab.
 
 **Step 1 — Scrape the game list:**
 
@@ -100,7 +100,13 @@ pnpm -F api scrape
 pnpm -F api scrape-details
 ```
 
-Both scripts read `apps/api/.env` for the database connection.
+**Step 3 — Sync HowLongToBeat durations:**
+
+```bash
+pnpm -F api sync:hltb
+```
+
+All scripts read `apps/api/.env` for the database connection.
 
 ## API reference
 
@@ -110,15 +116,20 @@ Base URL: `http://localhost:5000/api/v1`
 
 Returns a paginated list of games.
 
-| Query param      | Type                 | Description                     |
-| ---------------- | -------------------- | ------------------------------- |
-| `page`           | `number`             | Page number (default: `1`)      |
-| `search`         | `string`             | Title search (case-insensitive) |
-| `platforms`      | `string \| string[]` | Filter by platform ID(s)        |
-| `genres`         | `string \| string[]` | Filter by genre ID(s)           |
-| `releaseYear`    | `number`             | Exact release year              |
-| `releaseYearMin` | `number`             | Release year lower bound        |
-| `releaseYearMax` | `number`             | Release year upper bound        |
+| Query param      | Type                                                                                                      | Description                            |
+| ---------------- | --------------------------------------------------------------------------------------------------------- | -------------------------------------- |
+| `page`           | `number`                                                                                                  | Page number (default: `1`)             |
+| `search`         | `string`                                                                                                  | Title search (case-insensitive)        |
+| `platforms`      | `string \| string[]`                                                                                      | Filter by platform ID(s)               |
+| `genres`         | `string \| string[]`                                                                                      | Filter by genre ID(s)                  |
+| `releaseYear`    | `number`                                                                                                  | Exact release year                     |
+| `releaseYearMin` | `number`                                                                                                  | Release year lower bound               |
+| `releaseYearMax` | `number`                                                                                                  | Release year upper bound               |
+| `playtimeMin`    | `number`                                                                                                  | Min main-story playtime in **hours**   |
+| `playtimeMax`    | `number`                                                                                                  | Max main-story playtime in **hours**   |
+| `sort`           | `metascore-desc` \| `release-asc` \| `release-desc` \| `shortest-duration-asc` \| `longest-duration-desc` | Sort order (default: `metascore-desc`) |
+
+Each game in `data` includes a `durations` object with `mainStorySeconds`, `mainExtraSeconds`, and `completionistSeconds` sourced from HowLongToBeat (null when unavailable).
 
 **Response:**
 
@@ -135,9 +146,17 @@ Returns a paginated list of games.
 }
 ```
 
+### `GET /games/duration-range`
+
+Returns the min/max main-story duration (in hours) across all games that have HowLongToBeat data.
+
+```json
+{ "minMainStoryHours": 1, "maxMainStoryHours": 200 }
+```
+
 ### `GET /games/:slug`
 
-Returns a single game with its relations (platforms, genres, developers).
+Returns a single game with its relations (platforms, genres, developers, and `durations`).
 
 ### `GET /platforms`
 
@@ -149,14 +168,21 @@ Returns all available genres.
 
 ## Development scripts
 
-| Command                      | Description                         |
-| ---------------------------- | ----------------------------------- |
-| `pnpm dev`                   | Start API + web + TypeScript watch  |
-| `pnpm build`                 | Build all packages                  |
-| `pnpm typecheck`             | Run TypeScript checks               |
-| `pnpm lint`                  | Lint with Oxlint                    |
-| `pnpm format`                | Format with Oxfmt                   |
-| `pnpm -F api db:generate`    | Generate Drizzle migration files    |
-| `pnpm -F api db:migrate`     | Apply pending migrations            |
-| `pnpm -F api scrape`         | Scrape game list from Metacritic    |
-| `pnpm -F api scrape-details` | Scrape game details from Metacritic |
+| Command                      | Description                                |
+| ---------------------------- | ------------------------------------------ |
+| `pnpm dev`                   | Start API + web + TypeScript watch         |
+| `pnpm dev:api`               | API only                                   |
+| `pnpm dev:web`               | Web only                                   |
+| `pnpm build`                 | Build all packages                         |
+| `pnpm build:api`             | Build shared + API only                    |
+| `pnpm build:web`             | Build shared + web only                    |
+| `pnpm typecheck`             | Run TypeScript checks                      |
+| `pnpm lint`                  | Lint with Oxlint                           |
+| `pnpm lint:fix`              | Auto-fix lint issues                       |
+| `pnpm format`                | Format with Oxfmt                          |
+| `pnpm format:check`          | Check formatting without writing           |
+| `pnpm -F api db:generate`    | Generate Drizzle migration files           |
+| `pnpm -F api db:migrate`     | Apply pending migrations                   |
+| `pnpm -F api scrape`         | Scrape game list from Metacritic           |
+| `pnpm -F api scrape-details` | Scrape game details from Metacritic        |
+| `pnpm -F api sync:hltb`      | Sync HowLongToBeat durations for all games |
