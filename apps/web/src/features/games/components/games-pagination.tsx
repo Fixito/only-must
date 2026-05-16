@@ -1,5 +1,3 @@
-import { useIsFetching } from '@tanstack/react-query';
-
 import {
   Pagination,
   PaginationContent,
@@ -9,7 +7,7 @@ import {
   PaginationNext,
   PaginationPrevious,
 } from '@/components/ui/pagination';
-import { gamesQueryOptions } from '@/features/games/queries/games.query.ts';
+import { useIsGamesFetching } from '@/features/games/hooks/use-is-games-fetching.ts';
 import { getPaginationItems } from '@/lib/pagination';
 
 interface Props {
@@ -20,7 +18,7 @@ interface Props {
 }
 
 export default function GamesPagination({ page, totalPages, hasNext, hasPrev }: Props) {
-  const isFetching = useIsFetching({ queryKey: gamesQueryOptions().queryKey.slice(0, 1) }) > 0;
+  const isFetching = useIsGamesFetching();
 
   if (totalPages <= 1) return null;
 
