@@ -1,7 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { useSearch } from '@tanstack/react-router';
 
-import { FilterMulti } from '@/features/games/components/filter-multi.tsx';
+import { FacetMultiSelect } from '@/features/games/components/facet-multi-select.tsx';
 import { platformsQueryOptions } from '@/features/platforms/queries/platforms.query';
 
 export function PlatformsFilter() {
@@ -9,7 +9,7 @@ export function PlatformsFilter() {
   const search = useSearch({ from: '/' });
 
   return (
-    <FilterMulti
+    <FacetMultiSelect
       label="Platforms"
       param="platforms"
       options={data?.data ?? []}

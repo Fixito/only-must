@@ -12,14 +12,14 @@ import { toggleFilterValue } from '@/features/games/utils/games-filter.utils.ts'
 
 const VISIBLE_COUNT = 5;
 
-interface FilterMultiProps {
+interface FacetMultiSelectProps {
   label: string;
   options: Array<{ id: string; name: string }>;
   value?: Array<string>;
   param: 'platforms' | 'genres';
 }
 
-export function FilterMulti({ label, options, value = [], param }: FilterMultiProps) {
+export function FacetMultiSelect({ label, options, value = [], param }: FacetMultiSelectProps) {
   const [open, setOpen] = useState(false);
   const visible = options.slice(0, VISIBLE_COUNT);
   const hidden = options.slice(VISIBLE_COUNT);

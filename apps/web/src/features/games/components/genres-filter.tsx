@@ -1,7 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { useSearch } from '@tanstack/react-router';
 
-import { FilterMulti } from '@/features/games/components/filter-multi.tsx';
+import { FacetMultiSelect } from '@/features/games/components/facet-multi-select.tsx';
 import { genresQueryOptions } from '@/features/genres/queries/genres.query.ts';
 
 export function GenresFilter() {
@@ -9,6 +9,11 @@ export function GenresFilter() {
   const search = useSearch({ from: '/' });
 
   return (
-    <FilterMulti label="Genres" param="genres" options={data?.data ?? []} value={search.genres} />
+    <FacetMultiSelect
+      label="Genres"
+      param="genres"
+      options={data?.data ?? []}
+      value={search.genres}
+    />
   );
 }
