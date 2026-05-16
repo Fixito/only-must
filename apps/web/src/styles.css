@@ -77,6 +77,10 @@
   --text-sm--line-height: 1.5rem;
 }
 
+html {
+  overflow-y: scroll;
+}
+
 :root {
   color-scheme: light;
 
@@ -113,7 +117,7 @@
   --navbar-primary-foreground: var(--zinc-950);
   --navbar-accent: oklch(from var(--white) l c h / 0.1);
   --navbar-accent-foreground: var(--white);
-  --navbar-border: oklch(from var(--zinc-50) l c h / 0.1);
+  --navbar-border: oklch(from var(--zinc-50) l c h / 0.2);
 
   --sidebar: var(--zinc-950);
   --sidebar-foreground: var(--zinc-50);

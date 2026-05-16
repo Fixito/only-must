@@ -13,7 +13,7 @@ import {
 
 export default function MobileFiltersSheet({ children }: { children: React.ReactNode }) {
   return (
-    <div className="container lg:hidden">
+    <div className="lg:hidden">
       <Sheet>
         <SheetTrigger
           render={
@@ -26,10 +26,10 @@ export default function MobileFiltersSheet({ children }: { children: React.React
 
         <SheetContent>
           <SheetHeader>
-            <SheetTitle>Filters</SheetTitle>
+            <SheetTitle className="sr-only">Filters</SheetTitle>
           </SheetHeader>
 
-          <div className="no-scrollbar overflow-y-auto border-t px-4">{children}</div>
+          <div className="no-scrollbar overflow-y-auto px-4">{children}</div>
 
           <SheetFooter>
             <SheetClose render={<Button variant="outline">Close</Button>} />

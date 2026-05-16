@@ -60,7 +60,7 @@ function RootDocument({ children }: { children: React.ReactNode }) {
         <script dangerouslySetInnerHTML={{ __html: THEME_INIT_SCRIPT }} />
         <HeadContent />
       </head>
-      <body className="text-foreground bg-background grid min-h-screen grid-rows-[auto_1fr_auto] antialiased">
+      <body className="text-foreground bg-background grid min-h-screen grid-cols-1 grid-rows-[auto_1fr_auto] antialiased">
         <Navbar />
         <main>{children}</main>
         <Footer />

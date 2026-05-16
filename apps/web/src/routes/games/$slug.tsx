@@ -6,6 +6,7 @@ import { NotFound } from '@/components/not-found.tsx';
 import { PlatformBadge } from '@/components/platform-badge.tsx';
 import { Badge } from '@/components/ui/badge.tsx';
 import GameDetailSkeleton from '@/features/games/components/game-detail-skeleton.tsx';
+import { ScoreBadge } from '@/features/games/components/score-badge.tsx';
 import { gameQueryOptions } from '@/features/games/queries/game.query';
 import { formatdate, formatDuration } from '@/lib/time';
 import { queryClient } from '@/router.tsx';
@@ -70,11 +71,10 @@ function RouteComponent() {
 
           <div className="w-max">
             <div className="space-y-4">
-              <div className="bg-card text-muted-foreground p-4 shadow-sm">
-                <div className="flex flex-wrap items-center gap-1">
-                  <span className="text-muted-foreground rounded-md">Platforms:</span>
-
-                  <div className="flex flex-wrap items-center gap-1">
+              <div className="bg-card space-y-3 p-4 shadow-sm">
+                <div>
+                  <span className="text-muted-foreground block text-xs">Platforms</span>
+                  <div className="mt-1 flex flex-wrap items-center gap-1">
                     {platforms
                       .toSorted((a, b) => a.name.localeCompare(b.name))
                       .map((p) => (
@@ -83,76 +83,75 @@ function RouteComponent() {
                   </div>
                 </div>
 
-                <p className="text-foreground">
-                  <span className="text-muted-foreground rounded-md">Initial release date:</span>{' '}
-                  {releaseDate ? formatdate(releaseDate) : 'Unknown'}
-                </p>
+                <div>
+                  <span className="text-muted-foreground block text-xs">Initial release date</span>
+                  <span className="font-semibold">
+                    {releaseDate ? formatdate(releaseDate) : 'Unknown'}
+                  </span>
+                </div>
               </div>
 
               <div className="bg-card p-4 shadow-sm">
-                <p>
-                  <span className="text-muted-foreground rounded-md">
-                    {developers.length > 1 ? 'Developers:' : 'Developer:'}
-                  </span>{' '}
+                <span className="text-muted-foreground block text-xs">
+                  {developers.length > 1 ? 'Developers' : 'Developer'}
+                </span>
+                <span className="font-semibold">
                   {developers.length > 0
                     ? formatter.format(developers.map((d) => d.name))
                     : 'Unknown'}
-                </p>
+                </span>
               </div>
 
-              <div className="bg-card flex flex-wrap items-center gap-2 p-4 shadow-sm">
-                <span className="text-muted-foreground rounded-md">Genres:</span>
-                {genres.map((g) => (
-                  <Badge key={g.id} className="text-xs">
-                    {g.name}
-                  </Badge>
-                ))}
+              <div className="bg-card p-4 shadow-sm">
+                <span className="text-muted-foreground block text-xs">Genres</span>
+                <div className="mt-1 flex flex-wrap items-center gap-2">
+                  {genres.map((g) => (
+                    <Badge key={g.id} className="text-xs">
+                      {g.name}
+                    </Badge>
+                  ))}
+                </div>
               </div>
 
               {/* Durations */}
 
-              <div className="flex flex-wrap">
+              <div className="grid w-full grid-cols-1 divide-y sm:grid-cols-3 sm:divide-x sm:divide-y-0">
                 {/* Main story */}
-                <div className="bg-card border-l p-4 shadow-sm">
-                  <span className="text-muted-foreground rounded-md">Main Story:</span>{' '}
+                <div className="bg-card p-4 shadow-sm">
+                  <span className="text-muted-foreground block text-xs">Main Story</span>
                   <span className="text-foreground font-semibold">
-                    {formatDuration(durations?.mainStorySeconds ?? null) || '-'}
+                    {formatDuration(durations?.mainStorySeconds ?? null) || '—'}
                   </span>
                 </div>
 
                 {/* Main story + Sides */}
-                <div className="bg-card border-l p-4 shadow-sm">
-                  <span className="text-muted-foreground rounded-md">Main Story + Sides:</span>{' '}
+                <div className="bg-card p-4 shadow-sm">
+                  <span className="text-muted-foreground block text-xs">Main + Sides</span>
                   <span className="text-foreground font-semibold">
-                    {formatDuration(durations?.mainExtraSeconds ?? null) || '-'}
+                    {formatDuration(durations?.mainExtraSeconds ?? null) || '—'}
                   </span>
                 </div>
 
                 {/* Completionist */}
-                <div className="bg-card border-l p-4 shadow-sm">
-                  <span className="text-muted-foreground rounded-md">Completionist:</span>{' '}
+                <div className="bg-card p-4 shadow-sm">
+                  <span className="text-muted-foreground block text-xs">Completionist</span>
                   <span className="text-foreground font-semibold">
-                    {formatDuration(durations?.completionistSeconds ?? null) || '-'}
+                    {formatDuration(durations?.completionistSeconds ?? null) || '—'}
                   </span>
                 </div>
               </div>
             </div>
           </div>
 
-          <div className="flex flex-col items-start gap-2 p-4">
+          <div className="flex flex-col items-start gap-2">
             <span className="font-semibold tracking-widest uppercase">Metascore</span>
-
-            <div className="flex gap-4">
-              <img
-                src="/must-play.svg"
-                alt="Must Play"
-                loading="lazy"
-                className="aspect-square w-16 object-cover"
-              />
-
-              <span className="bg-success inline-flex aspect-square w-16 items-center justify-center rounded-md px-1 text-3xl font-semibold text-white">
-                {metaScore}
-              </span>
+            <div className="flex flex-row items-center gap-3 sm:flex-col sm:items-start">
+              {metaScore != null ? (
+                <ScoreBadge score={metaScore} size="lg" />
+              ) : (
+                <span className="text-muted-foreground text-sm">N/A</span>
+              )}
+              <img src="/must-play.svg" alt="Must Play" className="w-20" />
             </div>
           </div>
         </div>

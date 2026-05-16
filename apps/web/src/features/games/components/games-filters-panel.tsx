@@ -20,22 +20,24 @@ export default function GamesFilterPanel() {
 
   return (
     <>
+      <div className="flex items-center justify-between border-b py-3">
+        <span className="text-foreground text-sm font-medium">Filters</span>
+        <Button
+          variant="ghost"
+          size="sm"
+          disabled={!isFiltersActive(search)}
+          className="disabled:cursor-not-allowed"
+          onClick={() => void navigate({ search: resetFilters })}
+        >
+          Reset
+        </Button>
+      </div>
+
       <div className="pbs-4">
         <fieldset>
           <legend className="text-foreground text-xs font-medium tracking-widest uppercase">
             Release Year
           </legend>
-
-          <div className="flex items-center justify-between">
-            <Button
-              variant="ghost"
-              disabled={!isFiltersActive(search)}
-              className="disabled:cursor-not-allowed"
-              onClick={() => void navigate({ search: resetFilters })}
-            >
-              Reset filters
-            </Button>
-          </div>
 
           <RangeFilterField
             id={releaseYearRangeId}
@@ -83,7 +85,7 @@ export default function GamesFilterPanel() {
                 }),
               });
             }}
-            formatValue={(v) => `${v}h`}
+            formatValue={(v) => `${v} h`}
           />
         </fieldset>
       </div>

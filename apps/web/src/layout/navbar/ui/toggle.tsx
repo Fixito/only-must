@@ -10,7 +10,7 @@ export function NavbarToggle({ isMobileMenuOpen, onClick, ref }: NavbarTogglePro
   return (
     <button
       type="button"
-      className="focus:outline-ring text-muted-foreground hover:text-navbar-accent-foreground hover:bg-navbar-accent relative inline-flex items-center justify-center rounded-md p-2 focus:outline-2 focus:-outline-offset-1 sm:hidden"
+      className="focus:outline-ring text-navbar-foreground hover:text-navbar-accent-foreground hover:bg-navbar-accent relative inline-flex items-center justify-center rounded-md p-2 focus:outline-2 focus:-outline-offset-1 sm:hidden"
       aria-controls="mobile-menu"
       aria-expanded={isMobileMenuOpen}
       ref={ref}
