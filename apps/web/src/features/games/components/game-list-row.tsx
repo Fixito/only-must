@@ -44,7 +44,7 @@ export function GameListRow({ game, index, showDuration = false }: GameListRowPr
         <Link
           to="/games/$slug"
           params={{ slug }}
-          className="line-clamp-1 focus-visible:outline-none"
+          className="line-clamp-1 focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-primary"
           preload="intent"
         >
           {title}

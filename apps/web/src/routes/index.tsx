@@ -75,7 +75,7 @@ function App() {
     }
   }, [page, search, hasNext]);
 
-  const pageOffset = (page - 1) * data.length;
+  const pageOffset = (page - 1) * 24;
 
   return (
     <div className="container py-8">
