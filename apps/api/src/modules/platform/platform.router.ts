@@ -1,13 +1,14 @@
+import { PlatformSchema } from '@only-must/shared';
 import { Router } from 'express';
 import { StatusCodes } from 'http-status-codes';
 
-import * as platformService from './platform.service.js';
+import * as platformRepository from './platform.repository.js';
 
 const router = Router();
 
 function createPlatformRouter() {
   router.get('/', async (_req, res) => {
-    const platforms = await platformService.getPlatforms();
+    const platforms = PlatformSchema.array().parse(await platformRepository.findPlatforms());
     return res.status(StatusCodes.OK).json({ data: platforms });
   });
 

@@ -8,45 +8,22 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from '@/components/ui/collapsible.tsx';
+import { toggleFilterValue } from '@/features/games/utils/games-filter.utils.ts';
 
 const VISIBLE_COUNT = 5;
 
-interface FilterMultiProps {
+interface FacetMultiSelectProps {
   label: string;
   options: Array<{ id: string; name: string }>;
   value?: Array<string>;
   param: 'platforms' | 'genres';
 }
 
-export function FilterMulti({ label, options, value = [], param }: FilterMultiProps) {
+export function FacetMultiSelect({ label, options, value = [], param }: FacetMultiSelectProps) {
   const [open, setOpen] = useState(false);
   const visible = options.slice(0, VISIBLE_COUNT);
   const hidden = options.slice(VISIBLE_COUNT);
   const navigate = useNavigate();
-
-  const toggle = (id: string) => {
-    void navigate({
-      from: '/',
-      search: (prev) => {
-        const current = prev[param];
-
-        const currentSet = new Set(current);
-
-        if (currentSet.has(id)) {
-          currentSet.delete(id);
-        } else {
-          currentSet.add(id);
-        }
-        const next = Array.from(currentSet).toSorted();
-
-        return {
-          ...prev,
-          [param]: next.length ? next : undefined,
-          page: 1,
-        };
-      },
-    });
-  };
 
   return (
     <div className="mbs-4 border-t pbs-4">
@@ -61,7 +38,13 @@ export function FilterMulti({ label, options, value = [], param }: FilterMultiPr
 
             return (
               <label key={opt.id} className="flex items-center gap-2">
-                <input type="checkbox" checked={checked} onChange={() => toggle(opt.id)} />
+                <input
+                  type="checkbox"
+                  checked={checked}
+                  onChange={() =>
+                    void navigate({ from: '/', search: toggleFilterValue(param, opt.id) })
+                  }
+                />
                 <span>{opt.name}</span>
               </label>
             );
@@ -75,7 +58,13 @@ export function FilterMulti({ label, options, value = [], param }: FilterMultiPr
                     const checked = value.includes(opt.id);
                     return (
                       <label key={opt.id} className="flex items-center gap-2">
-                        <input type="checkbox" checked={checked} onChange={() => toggle(opt.id)} />
+                        <input
+                          type="checkbox"
+                          checked={checked}
+                          onChange={() =>
+                            void navigate({ from: '/', search: toggleFilterValue(param, opt.id) })
+                          }
+                        />
                         <span>{opt.name}</span>
                       </label>
                     );

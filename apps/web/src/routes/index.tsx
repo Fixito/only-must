@@ -1,23 +1,12 @@
-import type { Genre, Platform } from '@only-must/shared';
 import { GamesQuerySchema } from '@only-must/shared';
-import { useIsFetching, useQuery } from '@tanstack/react-query';
 import { createFileRoute } from '@tanstack/react-router';
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 
 import DesktopFiltersSidebar from '@/components/desktop-filters-sidebar';
 import Error from '@/components/error.tsx';
 import GameCard from '@/components/game-card.tsx';
 import { default as CardsGridSkeleton } from '@/components/grid-page-skeleton';
 import MobileFiltersSheet from '@/components/mobile-filters-sheet.tsx';
-import {
-  Pagination,
-  PaginationContent,
-  PaginationEllipsis,
-  PaginationItem,
-  PaginationLink,
-  PaginationNext,
-  PaginationPrevious,
-} from '@/components/ui/pagination';
 import {
   Select,
   SelectContent,
@@ -27,56 +16,23 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select.tsx';
+import ActiveFilterChips from '@/features/games/components/active-filter-chips.tsx';
 import EmptyState from '@/features/games/components/empty-state.tsx';
-import FilterChip from '@/features/games/components/filter-chip.tsx';
 import GamesFilterPanel from '@/features/games/components/games-filters-panel.tsx';
+import GamesPagination from '@/features/games/components/games-pagination.tsx';
 import {
   gamesDurationRangeQueryOptions,
   gamesQueryOptions,
 } from '@/features/games/queries/games.query.ts';
+import {
+  DEFAULT_SORT,
+  isDurationSort,
+  isFiltersActive,
+  SORT_OPTIONS,
+} from '@/features/games/utils/games-filter.utils.ts';
 import { genresQueryOptions } from '@/features/genres/queries/genres.query.ts';
 import { platformsQueryOptions } from '@/features/platforms/queries/platforms.query';
-import { getPaginationItems } from '@/lib/pagination';
 import { queryClient } from '@/router.tsx';
-
-const currentYear = new Date().getFullYear();
-const minYear = 1995;
-const minPlaytimeFallback = 0;
-const playtimeFallback = 250;
-
-const items = [
-  {
-    label: 'Best rated',
-    value: 'metascore-desc',
-  },
-  {
-    label: 'Newest',
-    value: 'release-desc',
-  },
-  {
-    label: 'Oldest',
-    value: 'release-asc',
-  },
-  {
-    label: 'Shortest Duration',
-    value: 'shortest-duration-asc',
-  },
-  {
-    label: 'Longest Duration',
-    value: 'longest-duration-desc',
-  },
-];
-
-function clampRange(
-  [min, max]: [number, number],
-  minLimit: number,
-  maxLimit: number,
-): [number, number] {
-  const clampedMin = Math.max(minLimit, Math.min(min, maxLimit));
-  const clampedMax = Math.max(minLimit, Math.min(max, maxLimit));
-
-  return [Math.min(clampedMin, clampedMax), Math.max(clampedMin, clampedMax)];
-}
 
 export const Route = createFileRoute('/')({
   head: () => ({
@@ -92,10 +48,13 @@ export const Route = createFileRoute('/')({
   validateSearch: GamesQuerySchema,
   loaderDeps: ({ search }) => search,
   loader: async ({ deps }) => {
-    await queryClient.prefetchQuery(platformsQueryOptions());
-    await queryClient.prefetchQuery(genresQueryOptions());
-    await queryClient.prefetchQuery(gamesDurationRangeQueryOptions());
-    return await queryClient.ensureQueryData(gamesQueryOptions(deps));
+    const [gamesData] = await Promise.all([
+      queryClient.ensureQueryData(gamesQueryOptions(deps)),
+      queryClient.prefetchQuery(platformsQueryOptions()),
+      queryClient.prefetchQuery(genresQueryOptions()),
+      queryClient.prefetchQuery(gamesDurationRangeQueryOptions()),
+    ]);
+    return gamesData;
   },
   pendingComponent: () => <CardsGridSkeleton />,
   component: App,
@@ -107,108 +66,8 @@ function App() {
     data,
     meta: { page, total, totalPages, hasNext, hasPrev },
   } = Route.useLoaderData();
-  const { data: platforms } = useQuery(platformsQueryOptions());
-  const { data: genres } = useQuery(genresQueryOptions());
-  const { data: durationRange } = useQuery(gamesDurationRangeQueryOptions());
-  const maxPlaytime = durationRange?.maxMainStoryHours ?? playtimeFallback;
-  const minPlaytime = durationRange?.minMainStoryHours ?? minPlaytimeFallback;
   const search = Route.useSearch();
-  const [yearValue, setYearValue] = useState<[number, number]>(
-    clampRange(
-      [search.releaseYearMin ?? minYear, search.releaseYearMax ?? currentYear],
-      minYear,
-      currentYear,
-    ),
-  );
-  const [playtimeValue, setPlaytimeValue] = useState<[number, number]>(
-    clampRange(
-      [search.playtimeMin ?? minPlaytime, search.playtimeMax ?? maxPlaytime],
-      minPlaytime,
-      maxPlaytime,
-    ),
-  );
   const navigate = Route.useNavigate();
-  const isFetching = useIsFetching({ queryKey: gamesQueryOptions().queryKey.slice(0, 1) }) > 0;
-  const platformMap = Object.fromEntries(
-    (platforms?.data ?? []).map((p: Platform) => [p.id, p.name]),
-  );
-  const genreMap = Object.fromEntries((genres?.data ?? []).map((g: Genre) => [g.id, g.name]));
-
-  const commit = (next: [number, number]) => {
-    const safe = clampRange(next, minYear, currentYear);
-
-    void navigate({
-      search: (prev) => ({
-        ...prev,
-        releaseYearMin: safe[0],
-        releaseYearMax: safe[1],
-        page: 1,
-      }),
-    });
-  };
-
-  const commitPlaytime = (next: [number, number]) => {
-    const safe = clampRange(next, minPlaytime, maxPlaytime);
-    const isFullRange = safe[0] === minPlaytime && safe[1] === maxPlaytime;
-
-    void navigate({
-      search: (prev) => ({
-        ...prev,
-        playtimeMin: isFullRange ? undefined : safe[0],
-        playtimeMax: isFullRange ? undefined : safe[1],
-        page: 1,
-      }),
-    });
-  };
-
-  const handleRemovePlatform = (platform: string) => {
-    void navigate({
-      search: (prev) => ({
-        ...prev,
-        platforms: prev.platforms.filter((p) => p !== platform),
-        page: 1,
-      }),
-    });
-  };
-
-  const handleRemoveGenre = (genre: string) => {
-    void navigate({
-      search: (prev) => ({
-        ...prev,
-        genres: prev.genres.filter((g) => g !== genre),
-        page: 1,
-      }),
-    });
-  };
-
-  const gamesFilterPanelProps = {
-    search: {
-      platforms: search.platforms,
-      genres: search.genres,
-      ...(search.releaseYearMin !== undefined && {
-        releaseYearMin: search.releaseYearMin,
-      }),
-      ...(search.releaseYearMax !== undefined && {
-        releaseYearMax: search.releaseYearMax,
-      }),
-      ...(search.playtimeMin !== undefined && { playtimeMin: search.playtimeMin }),
-      ...(search.playtimeMax !== undefined && { playtimeMax: search.playtimeMax }),
-      ...(search.search !== undefined && { search: search.search }),
-    },
-    platforms: platforms ?? [],
-    genres: genres ?? [],
-    minYear,
-    currentYear,
-    value: yearValue,
-    minPlaytime,
-    maxPlaytime,
-    playtimeValue,
-    setValue: setYearValue,
-    commit,
-    setPlaytimeValue,
-    commitPlaytime,
-    clampRange,
-  };
 
   useEffect(() => {
     if (hasNext) {
@@ -220,26 +79,6 @@ function App() {
       );
     }
   }, [page, search, hasNext]);
-
-  useEffect(() => {
-    setYearValue(
-      clampRange(
-        [search.releaseYearMin ?? minYear, search.releaseYearMax ?? currentYear],
-        minYear,
-        currentYear,
-      ),
-    );
-  }, [search.releaseYearMin, search.releaseYearMax]);
-
-  useEffect(() => {
-    setPlaytimeValue(
-      clampRange(
-        [search.playtimeMin ?? minPlaytime, search.playtimeMax ?? maxPlaytime],
-        minPlaytime,
-        maxPlaytime,
-      ),
-    );
-  }, [search.playtimeMin, search.playtimeMax, minPlaytime, maxPlaytime]);
 
   return (
     <>
@@ -254,12 +93,12 @@ function App() {
       </div>
 
       <MobileFiltersSheet>
-        <GamesFilterPanel {...gamesFilterPanelProps} />
+        <GamesFilterPanel />
       </MobileFiltersSheet>
 
       <div className="container gap-6 lg:grid lg:grid-cols-[16rem_1fr]">
         <DesktopFiltersSidebar>
-          <GamesFilterPanel {...gamesFilterPanelProps} />
+          <GamesFilterPanel />
         </DesktopFiltersSidebar>
 
         <section className="pbs-4">
@@ -268,72 +107,18 @@ function App() {
               {total} results {search.search && `for "${search.search}"`}
             </p>
 
-            <div className="flex flex-wrap items-center gap-2">
-              {search.platforms.map((p) => (
-                <FilterChip
-                  key={p}
-                  label={platformMap[p] ?? p}
-                  onRemove={() => handleRemovePlatform(p)}
-                />
-              ))}
-
-              {search.genres.map((g) => (
-                <FilterChip
-                  key={g}
-                  label={genreMap[g] ?? g}
-                  onRemove={() => handleRemoveGenre(g)}
-                />
-              ))}
-
-              {search.releaseYearMin && search.releaseYearMax && (
-                <FilterChip
-                  label={`${search.releaseYearMin}-${search.releaseYearMax}`}
-                  onRemove={() =>
-                    navigate({
-                      search: (prev) => ({
-                        ...prev,
-                        page: 1,
-                        releaseYearMin: undefined,
-                        releaseYearMax: undefined,
-                      }),
-                    })
-                  }
-                />
-              )}
-
-              {(search.playtimeMin !== undefined || search.playtimeMax !== undefined) && (
-                <FilterChip
-                  label={`${search.playtimeMin ?? minPlaytime}h–${search.playtimeMax ?? maxPlaytime}h`}
-                  onRemove={() =>
-                    navigate({
-                      search: (prev) => ({
-                        ...prev,
-                        page: 1,
-                        playtimeMin: undefined,
-                        playtimeMax: undefined,
-                      }),
-                    })
-                  }
-                />
-              )}
-            </div>
+            <ActiveFilterChips />
 
             <div>
               <Select
-                items={items}
-                value={search.sort ?? 'metascore-desc'}
+                items={SORT_OPTIONS}
+                value={search.sort ?? DEFAULT_SORT}
                 onValueChange={(v) => {
                   void navigate({
                     search: (prev) => ({
                       ...prev,
                       page: 1,
-                      sort: v as
-                        | 'metascore-desc'
-                        | 'release-asc'
-                        | 'release-desc'
-                        | 'shortest-duration-asc'
-                        | 'longest-duration-desc'
-                        | undefined,
+                      sort: v || undefined,
                     }),
                   });
                 }}
@@ -345,7 +130,7 @@ function App() {
                 <SelectContent alignItemWithTrigger={false}>
                   <SelectGroup>
                     <SelectLabel>Sort by</SelectLabel>
-                    {items.map((item) => (
+                    {SORT_OPTIONS.map((item) => (
                       <SelectItem key={item.value} value={item.value}>
                         {item.label}
                       </SelectItem>
@@ -357,80 +142,26 @@ function App() {
           </div>
 
           {data.length === 0 ? (
-            <EmptyState
-              hasFilters={Boolean(
-                search.search ||
-                search.platforms.length ||
-                search.genres.length ||
-                search.releaseYearMin ||
-                search.releaseYearMax ||
-                search.playtimeMin !== undefined ||
-                search.playtimeMax !== undefined,
-              )}
-            />
+            <EmptyState hasFilters={isFiltersActive(search)} />
           ) : (
             <div className="mbs-6 grid gap-4 md:grid-cols-2 lg:grid-cols-3">
               {data.map((game, index) => (
-                <GameCard key={game.id} game={game} index={index} />
+                <GameCard
+                  key={game.id}
+                  game={game}
+                  index={index}
+                  showDuration={isDurationSort(search.sort)}
+                />
               ))}
             </div>
           )}
 
-          {totalPages > 1 && (
-            <div className="mbs-8">
-              <Pagination>
-                <PaginationContent>
-                  {hasPrev && (
-                    <PaginationItem>
-                      <PaginationPrevious
-                        to="."
-                        search={(prev) => ({
-                          ...prev,
-                          page: (prev.page ?? 1) - 1,
-                        })}
-                        preload="intent"
-                        disabled={isFetching}
-                      />
-                    </PaginationItem>
-                  )}
-
-                  {getPaginationItems(page, totalPages).map((item, i) =>
-                    item === 'ellipsis' ? (
-                      <PaginationItem key={`ellipsis-${i}`}>
-                        <PaginationEllipsis />
-                      </PaginationItem>
-                    ) : (
-                      <PaginationItem key={item}>
-                        <PaginationLink
-                          to="."
-                          search={(prev) => ({ ...prev, page: item })}
-                          isActive={page === item}
-                          preload="intent"
-                          disabled={isFetching}
-                        >
-                          {item}
-                        </PaginationLink>
-                      </PaginationItem>
-                    ),
-                  )}
-
-                  {hasNext && (
-                    <PaginationItem>
-                      <PaginationNext
-                        to="."
-                        search={(prev) => ({
-                          ...prev,
-                          page: (prev.page ?? 1) + 1,
-                        })}
-                        preload="intent"
-                        disabled={isFetching}
-                      />
-                    </PaginationItem>
-                  )}
-                </PaginationContent>
-              </Pagination>
-            </div>
-          )}
+          <GamesPagination
+            page={page}
+            totalPages={totalPages}
+            hasNext={hasNext}
+            hasPrev={hasPrev}
+          />
         </section>
       </div>
     </>
