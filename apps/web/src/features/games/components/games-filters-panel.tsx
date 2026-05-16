@@ -1,3 +1,4 @@
+import { EARLIEST_RELEASE_YEAR, LATEST_RELEASE_YEAR } from '@only-must/shared';
 import { useNavigate, useSearch } from '@tanstack/react-router';
 import { useId } from 'react';
 
@@ -6,10 +7,12 @@ import { GenresFilter } from '@/features/games/components/genres-filter.tsx';
 import { PlatformsFilter } from '@/features/games/components/platforms-filter.tsx';
 import { RangeFilterField } from '@/features/games/components/range-filter-field.tsx';
 import { usePlaytimeBounds } from '@/features/games/hooks/use-playtime-bounds.ts';
-import { isFiltersActive, resetFilters } from '@/features/games/utils/games-filter.utils.ts';
-
-const MIN_YEAR = 1995;
-const CURRENT_YEAR = new Date().getFullYear();
+import {
+  commitPlaytimeRange,
+  commitYearRange,
+  isFiltersActive,
+  resetFilters,
+} from '@/features/games/utils/games-filter.utils.ts';
 
 export default function GamesFilterPanel() {
   const releaseYearRangeId = useId();
@@ -42,21 +45,11 @@ export default function GamesFilterPanel() {
           <RangeFilterField
             id={releaseYearRangeId}
             label="Release year range"
-            min={MIN_YEAR}
-            max={CURRENT_YEAR}
+            min={EARLIEST_RELEASE_YEAR}
+            max={LATEST_RELEASE_YEAR}
             urlMin={search.releaseYearMin}
             urlMax={search.releaseYearMax}
-            onCommit={([min, max]) => {
-              const isFullRange = min === MIN_YEAR && max === CURRENT_YEAR;
-              void navigate({
-                search: (prev) => ({
-                  ...prev,
-                  releaseYearMin: isFullRange ? undefined : min,
-                  releaseYearMax: isFullRange ? undefined : max,
-                  page: 1,
-                }),
-              });
-            }}
+            onCommit={([min, max]) => void navigate({ search: commitYearRange([min, max]) })}
           />
         </fieldset>
       </div>
@@ -74,17 +67,11 @@ export default function GamesFilterPanel() {
             max={maxPlaytime}
             urlMin={search.playtimeMin}
             urlMax={search.playtimeMax}
-            onCommit={([min, max]) => {
-              const isFullRange = min === minPlaytime && max === maxPlaytime;
+            onCommit={([min, max]) =>
               void navigate({
-                search: (prev) => ({
-                  ...prev,
-                  playtimeMin: isFullRange ? undefined : min,
-                  playtimeMax: isFullRange ? undefined : max,
-                  page: 1,
-                }),
-              });
-            }}
+                search: commitPlaytimeRange([min, max], { min: minPlaytime, max: maxPlaytime }),
+              })
+            }
             formatValue={(v) => `${v} h`}
           />
         </fieldset>

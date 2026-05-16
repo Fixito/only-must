@@ -1,4 +1,4 @@
-import { GamesQuerySchema, isDurationSort } from '@only-must/shared';
+import { GamesQuerySchema, PAGE_SIZE, isDurationSort } from '@only-must/shared';
 import { createFileRoute } from '@tanstack/react-router';
 import { useEffect } from 'react';
 
@@ -75,7 +75,7 @@ function App() {
     }
   }, [page, search, hasNext]);
 
-  const pageOffset = (page - 1) * 24;
+  const pageOffset = (page - 1) * PAGE_SIZE;
 
   return (
     <div className="container py-8">

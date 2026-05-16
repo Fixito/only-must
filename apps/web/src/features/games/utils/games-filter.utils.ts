@@ -1,7 +1,5 @@
+import { EARLIEST_RELEASE_YEAR, LATEST_RELEASE_YEAR } from '@only-must/shared';
 import type { GamesQuery } from '@only-must/shared';
-
-export const MIN_PLAYTIME_FALLBACK = 0;
-export const PLAYTIME_FALLBACK = 250;
 
 export const DEFAULT_SORT = 'metascore-desc' satisfies NonNullable<GamesQuery['sort']>;
 
@@ -50,6 +48,30 @@ export const removePlaytimeRange = (prev: GamesQuery) => ({
   playtimeMax: undefined,
   page: 1,
 });
+
+export const commitYearRange =
+  ([min, max]: [number, number]) =>
+  (prev: GamesQuery): GamesQuery => {
+    const isFullRange = min === EARLIEST_RELEASE_YEAR && max === LATEST_RELEASE_YEAR;
+    return {
+      ...prev,
+      releaseYearMin: isFullRange ? undefined : min,
+      releaseYearMax: isFullRange ? undefined : max,
+      page: 1,
+    };
+  };
+
+export const commitPlaytimeRange =
+  ([min, max]: [number, number], bounds: { min: number; max: number }) =>
+  (prev: GamesQuery): GamesQuery => {
+    const isFullRange = min === bounds.min && max === bounds.max;
+    return {
+      ...prev,
+      playtimeMin: isFullRange ? undefined : min,
+      playtimeMax: isFullRange ? undefined : max,
+      page: 1,
+    };
+  };
 
 export function isFiltersActive(search: GamesQuery): boolean {
   return Boolean(

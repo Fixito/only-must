@@ -2,14 +2,13 @@ import {
   GameSchema,
   GamesDurationRangeSchema,
   GameWithRelationsSchema,
+  PAGE_SIZE,
   type GamesQuery,
 } from '@only-must/shared';
 
 import { NotFoundError } from '@/errors/index.js';
 
 import * as gameRepository from './game.repository.js';
-
-const PAGE_SIZE = 24;
 
 export async function getGames({ page, sort, ...filters }: GamesQuery) {
   const pageSize = PAGE_SIZE;

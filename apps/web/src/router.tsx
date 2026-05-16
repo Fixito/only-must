@@ -6,6 +6,7 @@ import queryString from 'query-string';
 
 import Error from './components/error.tsx';
 import { NotFound } from './components/not-found.tsx';
+import { NetworkError } from './lib/api/errors.ts';
 import { routeTree } from './routeTree.gen';
 
 export const queryClient = new QueryClient({
@@ -14,12 +15,14 @@ export const queryClient = new QueryClient({
       refetchOnWindowFocus: false,
       staleTime: 1000 * 60 * 5, // 5 minutes
       retry: (failureCount, error) => {
+        if (error instanceof NetworkError) return failureCount < 2;
         if (error instanceof ApiError && error.statusCode === 404) return false;
         if (error instanceof ApiError && error.statusCode >= 400 && error.statusCode < 500)
           return false;
         return failureCount < 2;
       },
       throwOnError: (error) => {
+        if (error instanceof NetworkError) return true;
         return error instanceof ApiError && error.statusCode !== 404;
       },
     },
