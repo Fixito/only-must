@@ -9,6 +9,7 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card.tsx';
+import { ScoreBadge } from '@/features/games/components/score-badge.tsx';
 import { formatdate, formatDuration } from '@/lib/time';
 
 interface GameCardProps {
@@ -31,25 +32,26 @@ interface GameCardProps {
 export default function GameCard({ game, index, showDuration }: GameCardProps) {
   const { id, slug, title, heroImage, description, releaseDate, metaScore, durations } = game;
   const { mainStorySeconds } = durations ?? {};
+  const playtime = formatDuration(mainStorySeconds ?? null);
 
   return (
     <Card
       key={id}
-      className="bg-card text-card-foreground group has-focus-visible:border-ring has-focus-visible:ring-ring relative isolate grid cursor-pointer grid-cols-[7rem_auto] gap-4 p-0 shadow-sm transition-shadow outline-none hover:shadow-lg has-focus-visible:ring-3"
+      className="bg-card text-card-foreground group has-focus-visible:border-ring has-focus-visible:ring-ring hover:border-primary/30 relative isolate grid cursor-pointer grid-cols-[7rem_auto] gap-4 p-0 shadow-sm transition-all outline-none hover:-translate-y-0.5 hover:shadow-md has-focus-visible:ring-3"
     >
       <div className="relative shrink-0">
         <img src={heroImage} alt={title} className="h-full w-full object-cover" />
         <img
           src="/must-play.svg"
-          alt="must-play"
-          loading="lazy"
-          className="absolute inset-be-0 left-1/2 z-10 aspect-square w-12 -translate-x-1/2 object-cover"
+          alt="Must Play"
+          aria-hidden="true"
+          className="absolute bottom-2 left-1/2 w-14 -translate-x-1/2"
         />
       </div>
 
       <CardContent className="py-4 ps-0">
         <CardHeader className="px-0">
-          <CardTitle className="group-hover:text-muted-foreground text-foreground flex gap-1 text-base font-semibold transition-colors">
+          <CardTitle className="text-foreground flex gap-1 text-base font-semibold">
             <span>{index + 1}.</span>
             <h3 className="line-clamp-1">
               <Link
@@ -75,20 +77,13 @@ export default function GameCard({ game, index, showDuration }: GameCardProps) {
           {description}
         </CardDescription>
 
-        <CardFooter className="mbs-3 flex-col items-start justify-start gap-2 px-0">
-          <div className="flex items-center gap-2">
-            <span className="inline-flex aspect-square place-items-center bg-green-900 px-1 text-sm font-semibold text-white">
-              {metaScore}
-            </span>
-            <span className="text-muted-foreground text-sm">Metascore</span>
-          </div>
+        <CardFooter className="mbs-3 flex-wrap items-center gap-x-3 gap-y-1 px-0">
+          <ScoreBadge score={metaScore} size="sm" />
 
-          {showDuration ? (
-            <div className="flex items-center gap-2">
-              <span className="inline-flex place-items-center bg-blue-900 px-1 text-sm font-semibold text-white">
-                {formatDuration(mainStorySeconds ?? null) ?? 'N/A'}
-              </span>
-              <Clock aria-label="estimate duration" className="size-4" />
+          {showDuration && playtime ? (
+            <div className="text-muted-foreground flex items-center gap-1 text-xs">
+              <Clock className="size-3" aria-hidden="true" />
+              <span>{playtime}</span>
             </div>
           ) : null}
         </CardFooter>

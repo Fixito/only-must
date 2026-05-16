@@ -32,6 +32,9 @@ export const GamesQuerySchema = z
     playtimeMin: z.coerce.number().int().min(0).optional(),
     playtimeMax: z.coerce.number().int().min(0).optional(),
 
+    metaScoreMin: z.coerce.number().int().min(0).max(100).optional(),
+    metaScoreMax: z.coerce.number().int().min(0).max(100).optional(),
+
     sort: z
       .enum([
         'metascore-desc',
@@ -67,6 +70,18 @@ export const GamesQuerySchema = z
     {
       message: 'Invalid playtime range',
       path: ['playtimeMin'],
+    },
+  )
+  .refine(
+    (data) => {
+      if (data.metaScoreMin !== undefined && data.metaScoreMax !== undefined) {
+        return data.metaScoreMin <= data.metaScoreMax;
+      }
+      return true;
+    },
+    {
+      message: 'Invalid metascore range',
+      path: ['metaScoreMin'],
     },
   )
   .transform((data) => ({

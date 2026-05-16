@@ -9,12 +9,24 @@ import {
   gamePlatformsTable,
 } from '../../../db/schemas/index.js';
 
-const defaultOrder = [sql`${gamesTable.metaScore} DESC NULLS LAST`, asc(gamesTable.releaseDate), asc(gamesTable.id)];
+const defaultOrder = [
+  sql`${gamesTable.metaScore} DESC NULLS LAST`,
+  asc(gamesTable.releaseDate),
+  asc(gamesTable.id),
+];
 
 export const sortMap = {
   'metascore-desc': defaultOrder,
-  'release-asc': [asc(gamesTable.releaseDate), sql`${gamesTable.metaScore} DESC NULLS LAST`, asc(gamesTable.id)],
-  'release-desc': [desc(gamesTable.releaseDate), sql`${gamesTable.metaScore} DESC NULLS LAST`, asc(gamesTable.id)],
+  'release-asc': [
+    asc(gamesTable.releaseDate),
+    sql`${gamesTable.metaScore} DESC NULLS LAST`,
+    asc(gamesTable.id),
+  ],
+  'release-desc': [
+    desc(gamesTable.releaseDate),
+    sql`${gamesTable.metaScore} DESC NULLS LAST`,
+    asc(gamesTable.id),
+  ],
   'shortest-duration-asc': [
     sql`${gameDurationsTable.mainStorySeconds} ASC NULLS LAST`,
     asc(gamesTable.releaseDate),
@@ -36,6 +48,8 @@ export interface GameFilters {
   releaseYearMax?: number | undefined;
   playtimeMin?: number | undefined;
   playtimeMax?: number | undefined;
+  metaScoreMin?: number | undefined;
+  metaScoreMax?: number | undefined;
 }
 
 interface FindGamesParams extends GameFilters {
@@ -120,6 +134,14 @@ function buildWhere(filters: GameFilters): SQLType | undefined {
         AND ${gameDurationsTable.mainStorySeconds} <= ${maxSeconds}
       )
     `);
+  }
+
+  if (filters.metaScoreMin !== undefined) {
+    conditions.push(sql`${gamesTable.metaScore} >= ${filters.metaScoreMin}`);
+  }
+
+  if (filters.metaScoreMax !== undefined) {
+    conditions.push(sql`${gamesTable.metaScore} <= ${filters.metaScoreMax}`);
   }
 
   return conditions.length ? and(...conditions) : undefined;
