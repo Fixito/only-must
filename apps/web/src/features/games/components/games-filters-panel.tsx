@@ -22,11 +22,11 @@ export default function GamesFilterPanel() {
     <>
       <div className="pbs-4">
         <fieldset>
-          <div className="flex items-center justify-between">
-            <legend className="text-foreground text-xs font-medium tracking-widest uppercase">
-              Release Year
-            </legend>
+          <legend className="text-foreground text-xs font-medium tracking-widest uppercase">
+            Release Year
+          </legend>
 
+          <div className="flex items-center justify-between">
             <Button
               variant="ghost"
               disabled={!isFiltersActive(search)}
@@ -61,11 +61,9 @@ export default function GamesFilterPanel() {
 
       <div className="mbs-4 border-t pbs-4">
         <fieldset>
-          <div className="flex items-center justify-between">
-            <legend className="text-foreground text-xs font-medium tracking-widest uppercase">
-              Playtime
-            </legend>
-          </div>
+          <legend className="text-foreground text-xs font-medium tracking-widest uppercase">
+            Playtime
+          </legend>
 
           <RangeFilterField
             id={playtimeRangeId}
