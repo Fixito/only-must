@@ -12,7 +12,7 @@ export default function FilterChip({ label, onRemove }: { label: string; onRemov
 
   return (
     <Badge
-      render={<button />}
+      render={<button aria-label={`Remove filter ${label}`} />}
       onClick={onRemove}
       onKeyDown={handleKeyDown}
       tabIndex={0}

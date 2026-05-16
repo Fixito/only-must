@@ -41,6 +41,7 @@ export function FacetMultiSelect({ label, options, value = [], param }: FacetMul
                 <input
                   type="checkbox"
                   checked={checked}
+                  aria-label={opt.name}
                   onChange={() =>
                     void navigate({ from: '/', search: toggleFilterValue(param, opt.id) })
                   }
@@ -61,6 +62,7 @@ export function FacetMultiSelect({ label, options, value = [], param }: FacetMul
                         <input
                           type="checkbox"
                           checked={checked}
+                          aria-label={opt.name}
                           onChange={() =>
                             void navigate({ from: '/', search: toggleFilterValue(param, opt.id) })
                           }

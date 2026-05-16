@@ -1,3 +1,4 @@
+import { type GamesQuery, isDurationSort } from '@only-must/shared';
 import { asc, count, desc, eq, getTableColumns, sql } from 'drizzle-orm';
 
 import { db } from '../../../db/client.js';
@@ -33,20 +34,15 @@ export const sortMap = {
     desc(gamesTable.releaseDate),
     asc(gamesTable.id),
   ],
-};
+} satisfies Record<NonNullable<GamesQuery['sort']>, Array<unknown>>;
 
 export type { GameFilters } from './game-filter.utils.js';
 
 interface FindGamesParams extends GameFilters {
   page: number;
   pageSize: number;
-  sort?: keyof typeof sortMap | undefined;
+  sort: GamesQuery['sort'];
 }
-
-const durationSorts = new Set<keyof typeof sortMap>([
-  'shortest-duration-asc',
-  'longest-duration-desc',
-]);
 
 const gameColumns = (({ scrapedAt, updatedAt, isDetailsScraped, ...cols }) => cols)(
   getTableColumns(gamesTable),
@@ -62,7 +58,7 @@ export async function findGames({ page, pageSize, sort, ...filters }: FindGamesP
   const where = buildWhere(filters);
   const orderBy = sort ? sortMap[sort] : defaultOrder;
   const offset = (page - 1) * pageSize;
-  const needsDurationSort = sort !== undefined && durationSorts.has(sort);
+  const needsDurationSort = isDurationSort(sort);
 
   const baseSubquery = db
     .select({ id: gamesTable.id })

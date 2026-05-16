@@ -91,3 +91,12 @@ export const GamesQuerySchema = z
   }));
 
 export type GamesQuery = z.infer<typeof GamesQuerySchema>;
+
+const durationSortKeys = new Set<NonNullable<GamesQuery['sort']>>([
+  'shortest-duration-asc',
+  'longest-duration-desc',
+]);
+
+export function isDurationSort(sort: GamesQuery['sort']): boolean {
+  return sort !== undefined && durationSortKeys.has(sort);
+}

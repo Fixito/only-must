@@ -1,4 +1,4 @@
-import { GamesQuerySchema } from '@only-must/shared';
+import { GamesQuerySchema, isDurationSort } from '@only-must/shared';
 import { createFileRoute } from '@tanstack/react-router';
 import { useEffect } from 'react';
 
@@ -19,7 +19,7 @@ import {
   gamesDurationRangeQueryOptions,
   gamesQueryOptions,
 } from '@/features/games/queries/games.query.ts';
-import { isDurationSort, isFiltersActive } from '@/features/games/utils/games-filter.utils.ts';
+import { isFiltersActive } from '@/features/games/utils/games-filter.utils.ts';
 import { genresQueryOptions } from '@/features/genres/queries/genres.query.ts';
 import { platformsQueryOptions } from '@/features/platforms/queries/platforms.query';
 import { getViewModeServFn } from '@/lib/view-mode.ts';
