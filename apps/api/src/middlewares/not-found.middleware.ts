@@ -1,13 +1,15 @@
 import type { Request, Response } from 'express';
-import { StatusCodes, getReasonPhrase } from 'http-status-codes';
+import { StatusCodes } from 'http-status-codes';
+
+import { sendProblemDetails } from '@/lib/problem-details.js';
 
 export function notFoundHandler(req: Request, res: Response) {
-  res
-    .setHeader('Content-Type', 'application/problem+json')
-    .status(StatusCodes.NOT_FOUND)
-    .json({
-      title: getReasonPhrase(StatusCodes.NOT_FOUND),
-      status: StatusCodes.NOT_FOUND,
-      detail: `Route ${req.method} ${req.originalUrl} not found`,
-    });
+  sendProblemDetails(
+    res,
+    StatusCodes.NOT_FOUND,
+    `Route ${req.method} ${req.originalUrl} not found`,
+    {
+      instance: req.originalUrl,
+    },
+  );
 }
