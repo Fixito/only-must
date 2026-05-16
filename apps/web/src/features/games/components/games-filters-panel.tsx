@@ -1,14 +1,12 @@
-import { useId } from 'react';
-import { useQuery } from '@tanstack/react-query';
 import { useNavigate, useSearch } from '@tanstack/react-router';
+import { useId } from 'react';
 
 import { Button } from '@/components/ui/button.tsx';
-import { FilterMulti } from '@/features/games/components/filter-multi.tsx';
+import { GenresFilter } from '@/features/games/components/genres-filter.tsx';
+import { PlatformsFilter } from '@/features/games/components/platforms-filter.tsx';
 import { RangeFilterField } from '@/features/games/components/range-filter-field.tsx';
 import { usePlaytimeBounds } from '@/features/games/hooks/use-playtime-bounds.ts';
 import { isFiltersActive, resetFilters } from '@/features/games/utils/games-filter.utils.ts';
-import { genresQueryOptions } from '@/features/genres/queries/genres.query.ts';
-import { platformsQueryOptions } from '@/features/platforms/queries/platforms.query';
 
 const MIN_YEAR = 1995;
 const CURRENT_YEAR = new Date().getFullYear();
@@ -18,11 +16,7 @@ export default function GamesFilterPanel() {
   const playtimeRangeId = useId();
   const search = useSearch({ from: '/' });
   const navigate = useNavigate({ from: '/' });
-  const { data: platformsResponse } = useQuery(platformsQueryOptions());
-  const { data: genresResponse } = useQuery(genresQueryOptions());
   const { min: minPlaytime, max: maxPlaytime } = usePlaytimeBounds();
-  const platforms = platformsResponse?.data ?? [];
-  const genres = genresResponse?.data ?? [];
 
   return (
     <>
@@ -96,14 +90,9 @@ export default function GamesFilterPanel() {
         </fieldset>
       </div>
 
-      <FilterMulti
-        label="Platforms"
-        param="platforms"
-        options={platforms}
-        value={search.platforms}
-      />
+      <PlatformsFilter />
 
-      <FilterMulti label="Genres" param="genres" options={genres} value={search.genres} />
+      <GenresFilter />
     </>
   );
 }
