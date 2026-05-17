@@ -1,4 +1,3 @@
-import { useNavigate } from '@tanstack/react-router';
 import { ChevronDownIcon } from 'lucide-react';
 import { useState } from 'react';
 
@@ -8,6 +7,7 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from '@/components/ui/collapsible.tsx';
+import { useGamesNavigate } from '@/features/games/hooks/use-games-search.ts';
 import { toggleFilterValue } from '@/features/games/utils/games-filter.utils.ts';
 
 const VISIBLE_COUNT = 5;
@@ -38,7 +38,11 @@ export function FacetMultiSelect({ label, options, value = [], param }: FacetMul
   const [open, setOpen] = useState(false);
   const visible = options.slice(0, VISIBLE_COUNT);
   const hidden = options.slice(VISIBLE_COUNT);
-  const navigate = useNavigate();
+  const navigate = useGamesNavigate();
+
+  function handleToggle(id: string) {
+    void navigate({ search: toggleFilterValue(param, id) });
+  }
 
   return (
     <div className="mbs-4 border-t pbs-4">
@@ -53,9 +57,7 @@ export function FacetMultiSelect({ label, options, value = [], param }: FacetMul
               key={opt.id}
               opt={opt}
               checked={value.includes(opt.id)}
-              onChange={() =>
-                void navigate({ from: '/', search: toggleFilterValue(param, opt.id) })
-              }
+              onChange={() => handleToggle(opt.id)}
             />
           ))}
 
@@ -68,9 +70,7 @@ export function FacetMultiSelect({ label, options, value = [], param }: FacetMul
                       key={opt.id}
                       opt={opt}
                       checked={value.includes(opt.id)}
-                      onChange={() =>
-                        void navigate({ from: '/', search: toggleFilterValue(param, opt.id) })
-                      }
+                      onChange={() => handleToggle(opt.id)}
                     />
                   ))}
                 </div>

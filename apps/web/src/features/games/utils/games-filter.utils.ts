@@ -1,6 +1,16 @@
 import { EARLIEST_RELEASE_YEAR, LATEST_RELEASE_YEAR } from '@only-must/shared';
 import type { GamesQuery } from '@only-must/shared';
 
+export function clampRange(
+  [min, max]: [number, number],
+  minLimit: number,
+  maxLimit: number,
+): [number, number] {
+  const clampedMin = Math.max(minLimit, Math.min(min, maxLimit));
+  const clampedMax = Math.max(minLimit, Math.min(max, maxLimit));
+  return [Math.min(clampedMin, clampedMax), Math.max(clampedMin, clampedMax)];
+}
+
 export const DEFAULT_SORT = 'metascore-desc' satisfies NonNullable<GamesQuery['sort']>;
 
 export const SORT_OPTIONS: Array<{ label: string; value: NonNullable<GamesQuery['sort']> }> = [
