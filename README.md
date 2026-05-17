@@ -6,6 +6,10 @@
 
 Too many games, not enough time. **Only Must** solves that by surfacing only the titles that earned Metacritic's highest distinction — then letting you slice through them by platform, genre, or release year until you find exactly what you want to play next.
 
+## Screenshot
+
+![only must](screenshot.png)
+
 ## Stack
 
 | Layer        | Tech                                                                                       |
