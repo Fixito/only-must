@@ -1,10 +1,14 @@
-import { GameSchema, GameWithRelationsSchema, type GamesQuery } from '@only-must/shared';
+import {
+  GameSchema,
+  GamesDurationRangeSchema,
+  GameWithRelationsSchema,
+  PAGE_SIZE,
+  type GamesQuery,
+} from '@only-must/shared';
 
 import { NotFoundError } from '@/errors/index.js';
 
 import * as gameRepository from './game.repository.js';
-
-const PAGE_SIZE = 24;
 
 export async function getGames({ page, sort, ...filters }: GamesQuery) {
   const pageSize = PAGE_SIZE;
@@ -34,6 +38,7 @@ export async function getGameBySlug(slug: string) {
   return GameWithRelationsSchema.parse(game);
 }
 
-export function getGamesDurationRange() {
-  return gameRepository.findDurationRangeHours();
+export async function getGamesDurationRange() {
+  const range = await gameRepository.findDurationRangeHours();
+  return GamesDurationRangeSchema.parse(range);
 }

@@ -1,5 +1,4 @@
-import { ApiError } from '@only-must/shared';
-import { createFileRoute, notFound } from '@tanstack/react-router';
+import { createFileRoute } from '@tanstack/react-router';
 
 import Error from '@/components/error.tsx';
 import { NotFound } from '@/components/not-found.tsx';
@@ -8,18 +7,13 @@ import { Badge } from '@/components/ui/badge.tsx';
 import GameDetailSkeleton from '@/features/games/components/game-detail-skeleton.tsx';
 import { ScoreBadge } from '@/features/games/components/score-badge.tsx';
 import { gameQueryOptions } from '@/features/games/queries/game.query';
+import { ensureQueryDataOrNotFound } from '@/lib/query.ts';
 import { formatdate, formatDuration } from '@/lib/time';
 import { queryClient } from '@/router.tsx';
 
 export const Route = createFileRoute('/games/$slug')({
-  loader: async ({ params }) => {
-    try {
-      return await queryClient.ensureQueryData(gameQueryOptions(params.slug));
-    } catch (error) {
-      if (error instanceof ApiError && error.statusCode === 404) throw notFound();
-      throw error;
-    }
-  },
+  loader: async ({ params }) =>
+    ensureQueryDataOrNotFound(() => queryClient.ensureQueryData(gameQueryOptions(params.slug))),
   head: ({ loaderData }) => ({
     meta: [
       { title: `${loaderData?.data.title ?? 'Not Found'} | OnlyMust` },

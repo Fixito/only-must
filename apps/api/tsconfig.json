@@ -20,7 +20,15 @@
       "@only-must/shared": ["../../packages/shared/src/index.ts"]
     }
   },
-  "include": ["src", "scripts/**/*", "playwright.config.ts", "drizzle.config.ts", "db"],
+  "include": [
+    "src",
+    "scripts/**/*",
+    "playwright.config.ts",
+    "drizzle.config.ts",
+    "vitest.config.ts",
+    "db",
+    "tests/**/*"
+  ],
   "exclude": ["node_modules", "dist"],
   "references": [{ "path": "../../packages/shared" }]
 }

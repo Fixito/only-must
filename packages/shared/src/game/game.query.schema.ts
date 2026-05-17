@@ -1,7 +1,7 @@
 import { z } from 'zod';
 
-const currentYear = new Date().getFullYear();
-const earliestYear = 1995;
+export const LATEST_RELEASE_YEAR = new Date().getUTCFullYear();
+export const EARLIEST_RELEASE_YEAR = 1995;
 
 const arrayParam = z
   .union([z.string(), z.array(z.string())])
@@ -22,9 +22,24 @@ export const GamesQuerySchema = z
       .optional()
       .transform((val) => (val?.trim() ? val.trim() : undefined)),
 
-    releaseYear: z.coerce.number().int().min(earliestYear).max(currentYear).optional(),
-    releaseYearMin: z.coerce.number().int().min(earliestYear).max(currentYear).optional(),
-    releaseYearMax: z.coerce.number().int().min(earliestYear).max(currentYear).optional(),
+    releaseYear: z.coerce
+      .number()
+      .int()
+      .min(EARLIEST_RELEASE_YEAR)
+      .max(LATEST_RELEASE_YEAR)
+      .optional(),
+    releaseYearMin: z.coerce
+      .number()
+      .int()
+      .min(EARLIEST_RELEASE_YEAR)
+      .max(LATEST_RELEASE_YEAR)
+      .optional(),
+    releaseYearMax: z.coerce
+      .number()
+      .int()
+      .min(EARLIEST_RELEASE_YEAR)
+      .max(LATEST_RELEASE_YEAR)
+      .optional(),
 
     platforms: arrayParam,
     genres: arrayParam,
@@ -91,3 +106,14 @@ export const GamesQuerySchema = z
   }));
 
 export type GamesQuery = z.infer<typeof GamesQuerySchema>;
+
+export const PAGE_SIZE = 24;
+
+const durationSortKeys = new Set<NonNullable<GamesQuery['sort']>>([
+  'shortest-duration-asc',
+  'longest-duration-desc',
+]);
+
+export function isDurationSort(sort: GamesQuery['sort']): boolean {
+  return sort !== undefined && durationSortKeys.has(sort);
+}

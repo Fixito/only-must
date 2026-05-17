@@ -1,7 +1,15 @@
+import { EARLIEST_RELEASE_YEAR, LATEST_RELEASE_YEAR } from '@only-must/shared';
 import type { GamesQuery } from '@only-must/shared';
 
-export const MIN_PLAYTIME_FALLBACK = 0;
-export const PLAYTIME_FALLBACK = 250;
+export function clampRange(
+  [min, max]: [number, number],
+  minLimit: number,
+  maxLimit: number,
+): [number, number] {
+  const clampedMin = Math.max(minLimit, Math.min(min, maxLimit));
+  const clampedMax = Math.max(minLimit, Math.min(max, maxLimit));
+  return [Math.min(clampedMin, clampedMax), Math.max(clampedMin, clampedMax)];
+}
 
 export const DEFAULT_SORT = 'metascore-desc' satisfies NonNullable<GamesQuery['sort']>;
 
@@ -24,14 +32,6 @@ export const toggleFilterValue =
     const next = Array.from(currentSet).toSorted();
     return { ...prev, [param]: next.length ? next : undefined, page: 1 };
   };
-
-export const DURATION_SORTS = new Set<NonNullable<GamesQuery['sort']>>([
-  'shortest-duration-asc',
-  'longest-duration-desc',
-]);
-
-export const isDurationSort = (sort: GamesQuery['sort']): boolean =>
-  sort !== undefined && DURATION_SORTS.has(sort);
 
 export const resetFilters = (prev: GamesQuery) => ({
   ...prev,
@@ -59,6 +59,30 @@ export const removePlaytimeRange = (prev: GamesQuery) => ({
   page: 1,
 });
 
+export const commitYearRange =
+  ([min, max]: [number, number]) =>
+  (prev: GamesQuery): GamesQuery => {
+    const isFullRange = min === EARLIEST_RELEASE_YEAR && max === LATEST_RELEASE_YEAR;
+    return {
+      ...prev,
+      releaseYearMin: isFullRange ? undefined : min,
+      releaseYearMax: isFullRange ? undefined : max,
+      page: 1,
+    };
+  };
+
+export const commitPlaytimeRange =
+  ([min, max]: [number, number], bounds: { min: number; max: number }) =>
+  (prev: GamesQuery): GamesQuery => {
+    const isFullRange = min === bounds.min && max === bounds.max;
+    return {
+      ...prev,
+      playtimeMin: isFullRange ? undefined : min,
+      playtimeMax: isFullRange ? undefined : max,
+      page: 1,
+    };
+  };
+
 export function isFiltersActive(search: GamesQuery): boolean {
   return Boolean(
     search.search ||
@@ -69,4 +93,71 @@ export function isFiltersActive(search: GamesQuery): boolean {
     search.playtimeMin !== undefined ||
     search.playtimeMax !== undefined,
   );
+}
+
+export function formatYearRangeLabel(min: number | undefined, max: number | undefined): string {
+  if (min !== undefined && max !== undefined) return `${min}–${max}`;
+  if (min !== undefined) return `${min}–`;
+  if (max !== undefined) return `–${max}`;
+  return '';
+}
+
+export function formatPlaytimeRangeLabel(
+  min: number | undefined,
+  max: number | undefined,
+  fallbacks: { min: number; max: number },
+): string {
+  return `${min ?? fallbacks.min}h–${max ?? fallbacks.max}h`;
+}
+
+export interface FilterChipItem {
+  key: string;
+  label: string;
+  onRemove: () => void;
+}
+
+type SearchUpdater = (prev: GamesQuery) => GamesQuery;
+
+export function buildFilterChips(
+  search: GamesQuery,
+  platformMap: Record<string, string>,
+  genreMap: Record<string, string>,
+  playtimeBounds: { min: number; max: number },
+  onNavigate: (updater: SearchUpdater) => void,
+): Array<FilterChipItem> {
+  const chips: Array<FilterChipItem> = [];
+
+  for (const p of search.platforms) {
+    chips.push({
+      key: `platform-${p}`,
+      label: platformMap[p] ?? p,
+      onRemove: () => onNavigate(toggleFilterValue('platforms', p)),
+    });
+  }
+
+  for (const g of search.genres) {
+    chips.push({
+      key: `genre-${g}`,
+      label: genreMap[g] ?? g,
+      onRemove: () => onNavigate(toggleFilterValue('genres', g)),
+    });
+  }
+
+  if (search.releaseYearMin || search.releaseYearMax) {
+    chips.push({
+      key: 'year-range',
+      label: formatYearRangeLabel(search.releaseYearMin, search.releaseYearMax),
+      onRemove: () => onNavigate(removeYearRange),
+    });
+  }
+
+  if (search.playtimeMin !== undefined || search.playtimeMax !== undefined) {
+    chips.push({
+      key: 'playtime-range',
+      label: formatPlaytimeRangeLabel(search.playtimeMin, search.playtimeMax, playtimeBounds),
+      onRemove: () => onNavigate(removePlaytimeRange),
+    });
+  }
+
+  return chips;
 }

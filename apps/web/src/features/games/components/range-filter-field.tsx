@@ -3,17 +3,7 @@ import { useEffect, useState } from 'react';
 import { Input } from '@/components/ui/input.tsx';
 import { Label } from '@/components/ui/label.tsx';
 import { Slider } from '@/components/ui/slider.tsx';
-
-function clampRange(
-  [min, max]: [number, number],
-  minLimit: number,
-  maxLimit: number,
-): [number, number] {
-  const clampedMin = Math.max(minLimit, Math.min(min, maxLimit));
-  const clampedMax = Math.max(minLimit, Math.min(max, maxLimit));
-  return [Math.min(clampedMin, clampedMax), Math.max(clampedMin, clampedMax)];
-}
-
+import { clampRange } from '@/features/games/utils/games-filter.utils.ts';
 interface RangeFilterFieldProps {
   id: string;
   label: string;

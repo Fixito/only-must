@@ -12,11 +12,10 @@ export default function FilterChip({ label, onRemove }: { label: string; onRemov
 
   return (
     <Badge
-      render={<button />}
+      render={<button aria-label={`Remove filter ${label}`} />}
       onClick={onRemove}
       onKeyDown={handleKeyDown}
       tabIndex={0}
-      aria-label={`Remove filter ${label}`}
       className="hover:bg-primary/80 cursor-pointer uppercase"
     >
       {label} <X aria-hidden="true" />

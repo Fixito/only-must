@@ -1,4 +1,3 @@
-import { useNavigate, useSearch } from '@tanstack/react-router';
 import { LayoutGrid, List } from 'lucide-react';
 
 import { Button } from '@/components/ui/button.tsx';
@@ -11,6 +10,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select.tsx';
+import { useGamesNavigate, useGamesSearch } from '@/features/games/hooks/use-games-search.ts';
 import type { ViewMode } from '@/features/games/hooks/use-view-mode.ts';
 import { DEFAULT_SORT, SORT_OPTIONS } from '@/features/games/utils/games-filter.utils.ts';
 
@@ -27,8 +27,8 @@ export function GamesToolbar({
   onViewModeChange,
   mobileFiltersSlot,
 }: GamesToolbarProps) {
-  const search = useSearch({ from: '/' });
-  const navigate = useNavigate({ from: '/' });
+  const search = useGamesSearch();
+  const navigate = useGamesNavigate();
 
   return (
     <div className="flex flex-wrap items-center justify-between gap-3 py-4">

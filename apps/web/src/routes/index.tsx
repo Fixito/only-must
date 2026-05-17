@@ -1,4 +1,4 @@
-import { GamesQuerySchema } from '@only-must/shared';
+import { GamesQuerySchema, PAGE_SIZE, isDurationSort } from '@only-must/shared';
 import { createFileRoute } from '@tanstack/react-router';
 import { useEffect } from 'react';
 
@@ -19,7 +19,7 @@ import {
   gamesDurationRangeQueryOptions,
   gamesQueryOptions,
 } from '@/features/games/queries/games.query.ts';
-import { isDurationSort } from '@/features/games/utils/games-filter.utils.ts';
+import { isFiltersActive } from '@/features/games/utils/games-filter.utils.ts';
 import { genresQueryOptions } from '@/features/genres/queries/genres.query.ts';
 import { platformsQueryOptions } from '@/features/platforms/queries/platforms.query';
 import { getViewModeServFn } from '@/lib/view-mode.ts';
@@ -75,21 +75,7 @@ function App() {
     }
   }, [page, search, hasNext]);
 
-  const pageOffset = (page - 1) * 24;
-
-  const hasFilters = Boolean(
-    search.search ||
-      search.releaseYear ||
-      search.releaseYearMin ||
-      search.releaseYearMax ||
-      search.platforms.length > 0 ||
-      search.genres.length > 0 ||
-      search.playtimeMin ||
-      search.playtimeMax ||
-      search.metaScoreMin ||
-      search.metaScoreMax ||
-      search.sort,
-  );
+  const pageOffset = (page - 1) * PAGE_SIZE;
 
   return (
     <div className="container py-8">
@@ -123,7 +109,7 @@ function App() {
         <ActiveFilterChips />
 
         {data.length === 0 ? (
-          <EmptyState hasFilters={hasFilters} />
+          <EmptyState hasFilters={isFiltersActive(search)} />
         ) : viewMode === 'list' ? (
           <div className="mbs-4">
             <GameList

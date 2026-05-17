@@ -1,13 +1,10 @@
-import type { SQL as SQLType } from 'drizzle-orm';
-import { and, asc, count, desc, eq, getTableColumns, inArray, sql } from 'drizzle-orm';
+import { type GamesQuery, isDurationSort } from '@only-must/shared';
+import { asc, count, desc, eq, getTableColumns, sql } from 'drizzle-orm';
 
 import { db } from '../../../db/client.js';
 import { gamesTable } from '../../../db/schemas/game/game.schema.js';
-import {
-  gameDurationsTable,
-  gameGenresTable,
-  gamePlatformsTable,
-} from '../../../db/schemas/index.js';
+import { gameDurationsTable } from '../../../db/schemas/index.js';
+import { buildWhere, type GameFilters } from './game-filter.utils.js';
 
 const defaultOrder = [
   sql`${gamesTable.metaScore} DESC NULLS LAST`,
@@ -37,31 +34,23 @@ export const sortMap = {
     desc(gamesTable.releaseDate),
     asc(gamesTable.id),
   ],
-};
+} satisfies Record<NonNullable<GamesQuery['sort']>, Array<unknown>>;
 
-export interface GameFilters {
-  platforms?: string[] | undefined;
-  genres?: string[] | undefined;
-  search?: string | undefined;
-  releaseYear?: number | undefined;
-  releaseYearMin?: number | undefined;
-  releaseYearMax?: number | undefined;
-  playtimeMin?: number | undefined;
-  playtimeMax?: number | undefined;
-  metaScoreMin?: number | undefined;
-  metaScoreMax?: number | undefined;
-}
+export type { GameFilters } from './game-filter.utils.js';
 
 interface FindGamesParams extends GameFilters {
   page: number;
   pageSize: number;
-  sort?: keyof typeof sortMap | undefined;
+  sort: GamesQuery['sort'];
 }
 
-const durationSorts = new Set<keyof typeof sortMap>([
-  'shortest-duration-asc',
-  'longest-duration-desc',
-]);
+// Internal-only columns — never exposed in API responses.
+// Also used as the `columns` exclusion map in findGameBySlug (keep in sync).
+const HIDDEN_GAME_COLUMNS = {
+  scrapedAt: false,
+  updatedAt: false,
+  isDetailsScraped: false,
+} as const;
 
 const gameColumns = (({ scrapedAt, updatedAt, isDetailsScraped, ...cols }) => cols)(
   getTableColumns(gamesTable),
@@ -73,85 +62,11 @@ const durationColumns = {
   completionistSeconds: gameDurationsTable.completionistSeconds,
 };
 
-function buildWhere(filters: GameFilters): SQLType | undefined {
-  const conditions: SQLType[] = [];
-
-  if (filters.search) {
-    conditions.push(sql`${gamesTable.title} ILIKE ${`%${filters.search}%`}`);
-  }
-
-  if (filters.releaseYear != null) {
-    conditions.push(sql`
-      ${gamesTable.releaseDate} IS NOT NULL
-      AND EXTRACT(YEAR FROM ${gamesTable.releaseDate}) = ${filters.releaseYear}
-    `);
-  } else {
-    if (filters.releaseYearMin) {
-      conditions.push(sql`
-      ${gamesTable.releaseDate} IS NOT NULL
-      AND EXTRACT(YEAR FROM ${gamesTable.releaseDate}) >= ${filters.releaseYearMin}`);
-    }
-
-    if (filters.releaseYearMax) {
-      conditions.push(sql`
-      ${gamesTable.releaseDate} IS NOT NULL
-      AND EXTRACT(YEAR FROM ${gamesTable.releaseDate}) <= ${filters.releaseYearMax}`);
-    }
-  }
-
-  if (filters.platforms?.length) {
-    conditions.push(sql`
-      EXISTS (
-        SELECT 1
-        FROM ${gamePlatformsTable}
-        WHERE ${gamePlatformsTable.gameId} = ${gamesTable.id}
-        AND ${inArray(gamePlatformsTable.platformId, filters.platforms)}
-      )
-    `);
-  }
-
-  if (filters.genres?.length) {
-    conditions.push(sql`
-      EXISTS (
-        SELECT 1
-        FROM ${gameGenresTable}
-        WHERE ${gameGenresTable.gameId} = ${gamesTable.id}
-        AND ${inArray(gameGenresTable.genreId, filters.genres)}
-      )
-    `);
-  }
-
-  if (filters.playtimeMin !== undefined || filters.playtimeMax !== undefined) {
-    const minSeconds = (filters.playtimeMin ?? 0) * 3600;
-    const maxSeconds = (filters.playtimeMax ?? Number.MAX_SAFE_INTEGER) * 3600;
-    conditions.push(sql`
-      EXISTS (
-        SELECT 1
-        FROM ${gameDurationsTable}
-        WHERE ${gameDurationsTable.gameId} = ${gamesTable.id}
-        AND ${gameDurationsTable.mainStorySeconds} IS NOT NULL
-        AND ${gameDurationsTable.mainStorySeconds} >= ${minSeconds}
-        AND ${gameDurationsTable.mainStorySeconds} <= ${maxSeconds}
-      )
-    `);
-  }
-
-  if (filters.metaScoreMin !== undefined) {
-    conditions.push(sql`${gamesTable.metaScore} >= ${filters.metaScoreMin}`);
-  }
-
-  if (filters.metaScoreMax !== undefined) {
-    conditions.push(sql`${gamesTable.metaScore} <= ${filters.metaScoreMax}`);
-  }
-
-  return conditions.length ? and(...conditions) : undefined;
-}
-
 export async function findGames({ page, pageSize, sort, ...filters }: FindGamesParams) {
   const where = buildWhere(filters);
   const orderBy = sort ? sortMap[sort] : defaultOrder;
   const offset = (page - 1) * pageSize;
-  const needsDurationSort = sort !== undefined && durationSorts.has(sort);
+  const needsDurationSort = isDurationSort(sort);
 
   const baseSubquery = db
     .select({ id: gamesTable.id })
@@ -207,11 +122,7 @@ export async function findDurationRangeHours(): Promise<{
 export async function findGameBySlug(slug: string) {
   const game = await db.query.gamesTable.findFirst({
     where: eq(gamesTable.slug, slug),
-    columns: {
-      scrapedAt: false,
-      updatedAt: false,
-      isDetailsScraped: false,
-    },
+    columns: HIDDEN_GAME_COLUMNS,
     with: {
       gamePlatforms: {
         columns: {},
