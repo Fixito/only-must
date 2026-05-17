@@ -1,11 +1,11 @@
 import { EARLIEST_RELEASE_YEAR, LATEST_RELEASE_YEAR } from '@only-must/shared';
-import { useNavigate, useSearch } from '@tanstack/react-router';
 import { useId } from 'react';
 
 import { Button } from '@/components/ui/button.tsx';
 import { GenresFilter } from '@/features/games/components/genres-filter.tsx';
 import { PlatformsFilter } from '@/features/games/components/platforms-filter.tsx';
 import { RangeFilterField } from '@/features/games/components/range-filter-field.tsx';
+import { useGamesNavigate, useGamesSearch } from '@/features/games/hooks/use-games-search.ts';
 import { usePlaytimeBounds } from '@/features/games/hooks/use-playtime-bounds.ts';
 import {
   commitPlaytimeRange,
@@ -17,8 +17,8 @@ import {
 export default function GamesFilterPanel() {
   const releaseYearRangeId = useId();
   const playtimeRangeId = useId();
-  const search = useSearch({ from: '/' });
-  const navigate = useNavigate({ from: '/' });
+  const search = useGamesSearch();
+  const navigate = useGamesNavigate();
   const { min: minPlaytime, max: maxPlaytime } = usePlaytimeBounds();
 
   return (

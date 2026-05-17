@@ -98,3 +98,55 @@ export function formatPlaytimeRangeLabel(
 ): string {
   return `${min ?? fallbacks.min}h–${max ?? fallbacks.max}h`;
 }
+
+export interface FilterChipItem {
+  key: string;
+  label: string;
+  onRemove: () => void;
+}
+
+type SearchUpdater = (prev: GamesQuery) => GamesQuery;
+
+export function buildFilterChips(
+  search: GamesQuery,
+  platformMap: Record<string, string>,
+  genreMap: Record<string, string>,
+  playtimeBounds: { min: number; max: number },
+  onNavigate: (updater: SearchUpdater) => void,
+): Array<FilterChipItem> {
+  const chips: Array<FilterChipItem> = [];
+
+  for (const p of search.platforms) {
+    chips.push({
+      key: `platform-${p}`,
+      label: platformMap[p] ?? p,
+      onRemove: () => onNavigate(toggleFilterValue('platforms', p)),
+    });
+  }
+
+  for (const g of search.genres) {
+    chips.push({
+      key: `genre-${g}`,
+      label: genreMap[g] ?? g,
+      onRemove: () => onNavigate(toggleFilterValue('genres', g)),
+    });
+  }
+
+  if (search.releaseYearMin || search.releaseYearMax) {
+    chips.push({
+      key: 'year-range',
+      label: formatYearRangeLabel(search.releaseYearMin, search.releaseYearMax),
+      onRemove: () => onNavigate(removeYearRange),
+    });
+  }
+
+  if (search.playtimeMin !== undefined || search.playtimeMax !== undefined) {
+    chips.push({
+      key: 'playtime-range',
+      label: formatPlaytimeRangeLabel(search.playtimeMin, search.playtimeMax, playtimeBounds),
+      onRemove: () => onNavigate(removePlaytimeRange),
+    });
+  }
+
+  return chips;
+}

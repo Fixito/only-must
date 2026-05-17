@@ -1,9 +1,8 @@
-import { useNavigate } from '@tanstack/react-router';
-
 import { Button } from '@/components/ui/button.tsx';
+import { useGamesNavigate } from '@/features/games/hooks/use-games-search.ts';
 
 export default function EmptyState({ hasFilters }: { hasFilters: boolean }) {
-  const navigate = useNavigate({ from: '/' });
+  const navigate = useGamesNavigate();
 
   return (
     <div className="my-6">
