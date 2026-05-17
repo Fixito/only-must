@@ -1,7 +1,5 @@
-import { TanStackDevtools } from '@tanstack/react-devtools';
-import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 import { HeadContent, Scripts, createRootRoute } from '@tanstack/react-router';
-import { TanStackRouterDevtoolsPanel } from '@tanstack/react-router-devtools';
+import { lazy, Suspense } from 'react';
 
 import Error from '@/components/error.tsx';
 import { NotFound } from '@/components/not-found.tsx';
@@ -10,6 +8,8 @@ import Navbar from '@/layout/navbar/';
 import { getThemeServFn } from '@/lib/theme.ts';
 
 import appCss from '../styles.css?url';
+
+const DevTools = import.meta.env.PROD ? () => null : lazy(() => import('@/components/dev-tools'));
 
 const THEME_INIT_SCRIPT = `(function () {
   try {
@@ -64,18 +64,9 @@ function RootDocument({ children }: { children: React.ReactNode }) {
         <Navbar />
         <main>{children}</main>
         <Footer />
-        <ReactQueryDevtools initialIsOpen={false} buttonPosition="bottom-left" />
-        <TanStackDevtools
-          config={{
-            position: 'bottom-right',
-          }}
-          plugins={[
-            {
-              name: 'Tanstack Router',
-              render: <TanStackRouterDevtoolsPanel />,
-            },
-          ]}
-        />
+        <Suspense>
+          <DevTools />
+        </Suspense>
         <Scripts />
       </body>
     </html>
