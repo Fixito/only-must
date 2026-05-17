@@ -86,9 +86,10 @@ export function isFiltersActive(search: GamesQuery): boolean {
 }
 
 export function formatYearRangeLabel(min: number | undefined, max: number | undefined): string {
-  if (min && max) return `${min}–${max}`;
-  if (min) return `${min}–`;
-  return `–${max}`;
+  if (min !== undefined && max !== undefined) return `${min}–${max}`;
+  if (min !== undefined) return `${min}–`;
+  if (max !== undefined) return `–${max}`;
+  return '';
 }
 
 export function formatPlaytimeRangeLabel(
